@@ -1,12 +1,9 @@
 import pubsub, { EventType } from '../pubsub'
-import { Building } from './building'
+import { Building, BuildingType } from './building'
 import { Entity } from './entity'
 
-export interface BuildingMap {
-  [index: string]: Building
-
-  villageHall: Building,
-  goldMine: Building
+export type BuildingMap = {
+  [index in BuildingType]: Building
 }
 
 export interface TroopMap {
@@ -24,8 +21,8 @@ export interface ResourceMap {
 export class Village extends Entity {
   hasLeader: boolean = false
   buildings: BuildingMap = {
-    villageHall: new Building('Village Hall', 1),
-    goldMine: new Building('Gold Mine', 1),
+    [BuildingType.VillageHall]: new Building(BuildingType.VillageHall, 1, this),
+    [BuildingType.GoldMine]: new Building(BuildingType.GoldMine, 1, this),
   }
   troops: TroopMap = {
     leaders: 0
@@ -39,7 +36,30 @@ export class Village extends Entity {
   }
 
   tick() {
-    this.resources.gold++
+    this.buildings[BuildingType.VillageHall].tick()
+    this.buildings[BuildingType.GoldMine].tick()
+  }
+
+  increaseGold(amount: number) {
+    this.resources.gold += amount
     pubsub.publish(this.event)
+  }
+
+  upgradeBuilding(buildingType: BuildingType) {
+    const building = this.buildings[buildingType]
+
+    if (this.resources.gold < building.upgradeCost) return
+
+    this.resources.gold -= building.upgradeCost
+    building.upgrade()
+  }
+
+  cancelBuildingUpgrade(buildingType: BuildingType) {
+    const building = this.buildings[buildingType]
+  
+    if (building.upgradeTimeLeft === 0) return
+
+    this.resources.gold += building.upgradeCost
+    building.cancelUpgrade()
   }
 }

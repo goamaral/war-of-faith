@@ -4,7 +4,7 @@ import pubsub, { Event } from './pubsub'
 import { Entity } from './entities/entity'
 import { Player } from './entities/player'
 import { Village } from './entities/village'
-import { Building } from './entities/building'
+import { Building, BuildingType } from './entities/building'
 
 function useRefresh() {
   const [_, setState] = useState({})
@@ -31,8 +31,8 @@ export function usePlayer(player: Player): Player {
 export function useVillage(village: Village): Village {
   return useEntity(
     village,
-    village.buildings.villageHall.event,
-    village.buildings.goldMine.event,
+    village.buildings[BuildingType.VillageHall].event,
+    village.buildings[BuildingType.GoldMine].event,
   ) as Village
 }
 

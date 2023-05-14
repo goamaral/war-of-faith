@@ -1,30 +1,47 @@
-import { BuildingMap, TroopMap } from './entities/village'
+import { TroopMap, Village } from './entities/village'
 import { useVillage } from './hooks'
 import engine from './engine'
 
-export default function Village() {
+export default function VillagePage() {
   const village = useVillage(engine.player.village)
 
   return (
     <div>
-      <h1>Gold {village.resources.gold}</h1>
+      <h1>Resources</h1>
+      <ul>
+        <li>{village.resources.gold} Gold</li>
+      </ul>
       <h1>Village</h1>
-      <Buildings buildings={village.buildings} />
+      <VillageBuildings village={village} />
       <Troops troops={village.troops} />
     </div>
   )
 }
 
-interface BuildingsProps {
-  buildings: BuildingMap
+interface VillageBuildingsProps {
+  village: Village
 }
-function Buildings({ buildings }: BuildingsProps) {
+function VillageBuildings({ village }: VillageBuildingsProps) {
   return (
     <div>
       <h2>Buildings</h2>
       <ul>
-        {(Object.values(buildings)).map(building => {
-          return (<li>{building.name} - level {building.level} <button onClick={building.levelUp.bind(building)}>+</button></li>)
+        {(Object.values(village.buildings)).map(building => {
+          return (<li>
+            {building.name} - level {building.level} - 
+            {
+              building.upgradeTimeLeft === 0 ?
+                <>
+                  <button onClick={() => village.upgradeBuilding(building.type)}>+</button>
+                  {building.upgradeCost} gold
+                </>
+                :
+                <>
+                  <button onClick={() => village.cancelBuildingUpgrade(building.type)}>cancel</button>
+                  {building.upgradeTimeLeft}s left
+                </>
+            }
+          </li>)
         })}
       </ul>
     </div>
@@ -40,7 +57,7 @@ function Troops({ troops }: TroopsProps) {
       <h2>Troops</h2>
       <ul>
         {(Object.keys(troops)).map(troopId => {
-          return (<li>{troopId} - {troops[troopId]}</li>)
+          return (<li>{troops[troopId]} {troopId}</li>)
         })}
       </ul>
     </div>

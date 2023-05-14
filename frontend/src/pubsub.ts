@@ -44,13 +44,11 @@ class PubSub {
       if (this.subscribers[event.type][event.toSku()] === undefined) this.subscribers[event.type][event.toSku()] = []
       this.subscribers[event.type][event.toSku()].push(onMessage)
     })
-    console.log("MOUNT", events, this.subscribers)
 
     return () => {
       events.forEach(event => {
         const eventSku = event.toSku()
         this.subscribers[event.type][eventSku] = this.subscribers[event.type][eventSku].filter(s => s === onMessage)
-        console.log("UNMOUNT", this.subscribers)
       })
     }
   }
