@@ -1,9 +1,14 @@
 import { TroopMap, Village } from './entities/village'
-import { useVillage } from './hooks'
+import { BuildingType } from './entities/building'
+import { useEntity } from './hooks'
 import engine from './engine'
 
 export default function VillagePage() {
-  const village = useVillage(engine.player.village)
+  const village = useEntity(
+    engine.player.village,
+    engine.player.village.buildings[BuildingType.VillageHall].getEvent(),
+    engine.player.village.buildings[BuildingType.GoldMine].getEvent(),
+  )
 
   return (
     <div>

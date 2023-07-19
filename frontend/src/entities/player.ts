@@ -1,4 +1,4 @@
-import { EventType } from '../pubsub'
+import { EventCategory } from '../pubsub'
 import { Entity } from './entity'
 import { Village } from './village'
 
@@ -6,7 +6,7 @@ export class Player extends Entity {
   village: Village = new Village()
 
   constructor() {
-    super(EventType.Player)
+    super(EventCategory.Player)
   }
 
   tick() {

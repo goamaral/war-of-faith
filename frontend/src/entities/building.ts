@@ -1,4 +1,4 @@
-import pubsub, { EventType } from '../pubsub'
+import pubsub, { EventCategory, EventAction } from '../pubsub'
 import { Entity } from './entity'
 import { Village } from './village'
 
@@ -22,7 +22,7 @@ export class Building extends Entity {
   upgradeTimeLeft: number = 0
 
   constructor(type: BuildingType, level: number, village: Village) {
-    super(EventType.Building)
+    super(EventCategory.Building)
     this.type = type
     this.level = level
     this.village = village
@@ -41,12 +41,12 @@ export class Building extends Entity {
     if (this.type !== BuildingType.VillageHall) {
       this.upgradeTimeLeft = Math.ceil(this.upgradeTimeLeft / this.village.buildings[BuildingType.VillageHall].level)
     }
-    pubsub.publish(this.event)
+    pubsub.publish(this.getEvent(EventAction.UpgradeStarted))
   }
 
   cancelUpgrade() {
     this.upgradeTimeLeft = 0
-    pubsub.publish(this.event)
+    pubsub.publish(this.getEvent(EventAction.UpgradeCanceled))
   }
 
   tick() {
@@ -61,7 +61,7 @@ export class Building extends Entity {
       if (this.upgradeTimeLeft === 0) {
         this.level++
       }
-      pubsub.publish(this.event)
+      pubsub.publish(this.getEvent(EventAction.UpgradeTicked))
     }
   }
 }

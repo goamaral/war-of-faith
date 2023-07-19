@@ -1,4 +1,4 @@
-import pubsub, { EventType } from '../pubsub'
+import pubsub, { EventCategory, EventAction } from '../pubsub'
 import { Building, BuildingType } from './building'
 import { Entity } from './entity'
 
@@ -32,7 +32,7 @@ export class Village extends Entity {
   }
 
   constructor() {
-    super(EventType.Village)
+    super(EventCategory.Village)
   }
 
   tick() {
@@ -42,7 +42,7 @@ export class Village extends Entity {
 
   increaseGold(amount: number) {
     this.resources.gold += amount
-    pubsub.publish(this.event)
+    pubsub.publish(this.getEvent(EventAction.GoldUpdated))
   }
 
   upgradeBuilding(buildingType: BuildingType) {

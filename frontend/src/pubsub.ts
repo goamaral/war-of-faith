@@ -1,24 +1,37 @@
-export enum EventType {
+export enum EventCategory {
   Player = 'player',
   Village = 'village',
   Building = 'building',
 }
 
-export class Event {
-  type: EventType
-  entityId: number
+export enum EventAction {
+  UpgradeStarted = 'upgrade-started',
+  UpgradeCanceled = 'upgrade-canceled',
+  UpgradeTicked = 'upgrade-ticked',
+  GoldUpdated = 'gold-updated',
+}
 
-  constructor(type: EventType, entityId: number) {
-    this.type = type
+export class Event {
+  category: EventCategory
+  entityId: number | undefined
+  action: EventAction | undefined
+
+  constructor(category: EventCategory, entityId?: number, action?: EventAction) {
+    this.category = category
     this.entityId = entityId
+    this.action = action
   }
 
   toSku(): string {
-    return Event.toSku(this.type, this.entityId)
+    return Event.toSku(this.category, this.entityId, this.action)
   }
 
-  static toSku(type: EventType, entityId: number) {
-    return `${type}-${entityId}`
+  static toSku(category: EventCategory, entityId?: number, action?: EventAction): string {
+    let sku = `${category}`
+    if (entityId === undefined) return sku
+    sku = `${sku}:${entityId}`
+    if (action === undefined) return sku
+    return `${sku}:${action}`
   }
 }
 
@@ -26,36 +39,32 @@ interface Subscriber {
   (event: Event): void
 }
 
-type SubscribersMap = {
-  [key in EventType]: {
-    [event: string]: Subscriber[]
-  }
-}
-
 class PubSub {
-  subscribers: SubscribersMap = {
-    [EventType.Player]: {},
-    [EventType.Village]: {},
-    [EventType.Building]: {},
-  }
+  subscribers: Map<string, Subscriber[]> = new Map<string, Subscriber[]>()
 
   subscribe(onMessage: Subscriber, ...events: Event[]) {
     events.forEach(event => {
-      if (this.subscribers[event.type][event.toSku()] === undefined) this.subscribers[event.type][event.toSku()] = []
-      this.subscribers[event.type][event.toSku()].push(onMessage)
+      const eventSku = event.toSku()
+      const subscribers = this.subscribers.get(eventSku) || []
+      subscribers.push(onMessage)
+      this.subscribers.set(eventSku, subscribers)
     })
 
     return () => {
       events.forEach(event => {
         const eventSku = event.toSku()
-        this.subscribers[event.type][eventSku] = this.subscribers[event.type][eventSku].filter(s => s === onMessage)
+        const subscribers = (this.subscribers.get(eventSku) || []).filter(s => s === onMessage)
+        this.subscribers.set(eventSku, subscribers)
       })
     }
   }
 
   publish(event: Event) {
-    const eventTypeSubscribers = this.subscribers[event.type]
-    eventTypeSubscribers[event.toSku()].forEach(onMessage => onMessage(event))
+    const subscribers = (this.subscribers.get(Event.toSku(event.category)) || [])
+    if (event.entityId) subscribers.push(...(this.subscribers.get(Event.toSku(event.category, event.entityId)) || []))
+    if (event.action) subscribers.push(...(this.subscribers.get(Event.toSku(event.category, event.entityId, event.action)) || []))
+
+    subscribers.forEach(onMessage => onMessage(event))
   }
 }
 
