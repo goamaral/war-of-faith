@@ -1,13 +1,13 @@
-import { TroopMap, Village } from './entities/village'
-import { BuildingType } from './entities/building'
+import { Village } from './entities/village'
 import { useEntity } from './hooks'
 import engine from './engine'
+import TroopTypeToString, { TroopType } from './entities/troop'
 
 export default function VillagePage() {
   const village = useEntity(
-    engine.player.village,
-    engine.player.village.buildings[BuildingType.VillageHall].getEvent(),
-    engine.player.village.buildings[BuildingType.GoldMine].getEvent(),
+    engine.player.villages[0],
+    engine.player.villages[0].buildings.villageHall.getEvent(),
+    engine.player.villages[0].buildings.goldMine.getEvent(),
   )
 
   return (
@@ -18,7 +18,7 @@ export default function VillagePage() {
       </ul>
       <h1>Village</h1>
       <VillageBuildings village={village} />
-      <Troops troops={village.troops} />
+      <Troops village={village} />
     </div>
   )
 }
@@ -35,16 +35,22 @@ function VillageBuildings({ village }: VillageBuildingsProps) {
           return (<li>
             {building.name} - level {building.level} - 
             {
-              building.upgradeTimeLeft === 0 ?
-                <>
-                  <button onClick={() => village.upgradeBuilding(building.type)}>+</button>
-                  {building.upgradeCost} gold
-                </>
+              building.isUpgradable ?
+                (
+                  building.upgradeTimeLeft === 0 ?
+                    <>
+                      <button onClick={() => building.upgrade()}>+</button>
+                      {building.upgradeCost.gold} gold
+                    </>
+                    :
+                    <>
+                      <button onClick={() => building.cancelUpgrade()}>cancel</button>
+                      {building.upgradeTimeLeft}s left
+                    </>
+                )
                 :
-                <>
-                  <button onClick={() => village.cancelBuildingUpgrade(building.type)}>cancel</button>
-                  {building.upgradeTimeLeft}s left
-                </>
+                null
+
             }
           </li>)
         })}
@@ -54,16 +60,35 @@ function VillageBuildings({ village }: VillageBuildingsProps) {
 }
 
 interface TroopsProps {
-  troops: TroopMap
+  village: Village,
 }
-function Troops({ troops }: TroopsProps) {
+function Troops({ village }: TroopsProps) {
+  const villageHall = village.buildings.villageHall
+
   return (
     <div>
       <h2>Troops</h2>
       <ul>
-        {(Object.keys(troops)).map(troopId => {
-          return (<li>{troops[troopId]} {troopId}</li>)
-        })}
+        <li>
+          {TroopTypeToString(TroopType.Leader)} - {villageHall.leaders}
+          {
+            villageHall.canTrainLeader ?
+              (
+                villageHall.leaderTrainTimeLeft === 0 ?
+                  <>
+                    <button onClick={() => villageHall.trainLeader()}>+</button>
+                    {villageHall.leaderTrainCost.gold} gold
+                  </>
+                :
+                  <>
+                    <button onClick={() => villageHall.cancelTrainLeader()}>cancel</button>
+                    {villageHall.leaderTrainTimeLeft}s left
+                  </>
+              )
+              :
+              null
+          }
+        </li>
       </ul>
     </div>
   )

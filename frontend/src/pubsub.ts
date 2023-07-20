@@ -9,6 +9,9 @@ export enum EventAction {
   UpgradeCanceled = 'upgrade-canceled',
   UpgradeTicked = 'upgrade-ticked',
   GoldUpdated = 'gold-updated',
+  LeaderTrainStarted = 'leader-train-started',
+  LeaderTrainCanceled = 'leader-train-canceled',
+  LeaderTrainTicked = 'leader-train-ticked',
 }
 
 export class Event {
