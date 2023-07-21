@@ -17,6 +17,8 @@ export interface ResourceMap {
 
 export class Village extends Entity {
   player: Player
+  x: number
+  y: number
   buildings: BuildingMap = {
     villageHall: new VillageHall(this),
     goldMine: new GoldMine(this),
@@ -25,9 +27,11 @@ export class Village extends Entity {
     gold: 0,
   }
 
-  constructor(player: Player) {
+  constructor(player: Player, x: number, y: number) {
     super(EventCategory.Village)
     this.player = player
+    this.x = x
+    this.y = y
   }
 
   tick() {

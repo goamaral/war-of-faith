@@ -1,12 +1,17 @@
 import { render } from 'preact'
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 
-import Village from './Village'
+import VillagePage from './VillagePage'
+import GridMapPage from './GridMapPage'
 
 const router = createBrowserRouter([
   {
     path: "/village",
-    element: <Village/>
+    element: <VillagePage />
+  },
+  {
+    path: "/grid-map",
+    element: <GridMapPage />
   },
 ])
 

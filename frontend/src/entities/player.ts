@@ -3,7 +3,7 @@ import { Entity } from './entity'
 import { Village } from './village'
 
 export class Player extends Entity {
-  villages: Village[] = [new Village(this)]
+  villages: Village[] = []
 
   constructor() {
     super(EventCategory.Player)

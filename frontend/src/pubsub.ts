@@ -1,4 +1,5 @@
 export enum EventCategory {
+  GridMap = 'grid-map',
   Player = 'player',
   Village = 'village',
   Building = 'building',
