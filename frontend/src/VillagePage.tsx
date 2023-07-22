@@ -2,12 +2,16 @@ import { Village } from './entities/village'
 import { useEntity } from './hooks'
 import engine from './engine'
 import TroopTypeToString, { TroopType } from './entities/troop'
+import { useParams } from 'react-router-dom'
 
 export default function VillagePage() {
+  const { coords } = useParams() as { coords: string }
+  const villageCell = engine.map.cells.get(coords) as Village
+
   const village = useEntity(
-    engine.player.villages[0],
-    engine.player.villages[0].buildings.villageHall.getEvent(),
-    engine.player.villages[0].buildings.goldMine.getEvent(),
+    villageCell,
+    villageCell.buildings.villageHall.getEvent(),
+    villageCell.buildings.goldMine.getEvent(),
   )
 
   return (

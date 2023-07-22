@@ -6,7 +6,7 @@ import GridMapPage from './GridMapPage'
 
 const router = createBrowserRouter([
   {
-    path: "/village",
+    path: "/villages/:coords",
     element: <VillagePage />
   },
   {

@@ -14,19 +14,19 @@ export class GridMap extends Entity {
     this.cells = new Map()
   }
 
-  static generateCoord(x: number, y: number): string {
-    return `${x},${y}`
+  static generateCoords(x: number, y: number): string {
+    return `${x}-${y}`
   }
 
   addVillage(village: Village): boolean {
     if (!this.cellIsAvailable(village.x, village.y)) return false
-    this.cells.set(GridMap.generateCoord(village.x, village.y), village)
+    this.cells.set(village.coords, village)
     return true
   }
   
   private cellIsAvailable(x: number, y: number): boolean {
     if (x < 0 || x >= this.width) return false
     if (y < 0 || y >= this.height) return false
-    return this.cells.get(GridMap.generateCoord(x, y)) === undefined
+    return this.cells.get(GridMap.generateCoords(x, y)) === undefined
   }
 }

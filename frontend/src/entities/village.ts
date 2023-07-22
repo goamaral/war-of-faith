@@ -1,6 +1,7 @@
 import pubsub, { EventCategory, EventAction } from '../pubsub'
 import { GoldMine, VillageHall } from './building'
 import { Entity } from './entity'
+import { GridMap } from './grid_map'
 import { Player } from './player'
 
 export interface BuildingMap {
@@ -32,6 +33,10 @@ export class Village extends Entity {
     this.player = player
     this.x = x
     this.y = y
+  }
+
+  get coords(): string {
+    return GridMap.generateCoords(this.x, this.y)
   }
 
   tick() {
