@@ -1,14 +1,14 @@
 import { Event, EventCategory, EventAction } from "../pubsub"
+import { newEntity } from '../engine'
 
-let nextId = 1
 
 export class Entity {
   id: number
   eventCategory: EventCategory
 
   constructor(eventCategory: EventCategory) {
-    this.id = nextId++
     this.eventCategory = eventCategory
+    this.id = newEntity(this)
   }
 
   getEvent(action?: EventAction): Event {

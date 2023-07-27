@@ -1,4 +1,5 @@
 import pubsub, { EventCategory, EventAction } from '../pubsub'
+import { getEntityById } from '../engine'
 import { Entity } from './entity'
 import { Village } from './village'
 
@@ -28,14 +29,14 @@ const BUILDING_UPGRADE_COSTS: { [key in BuildingType]: Cost[] } = {
 export class Building extends Entity {
   level: number = 0
   type: BuildingType
-  village: Village
+  villageId: number
 
   upgradeTimeLeft: number = 0
 
-  constructor(type: BuildingType, village: Village) {
+  constructor(type: BuildingType, villageId: number) {
     super(EventCategory.Building)
     this.type = type
-    this.village = village
+    this.villageId = villageId
   }
 
   get name(): string {
@@ -48,6 +49,10 @@ export class Building extends Entity {
 
   get isUpgradable(): boolean {
     return this.level < BUILDING_UPGRADE_COSTS[this.type].length
+  }
+
+  get village(): Village {
+    return getEntityById<Village>(this.villageId)
   }
 
   upgrade(): boolean {
@@ -88,8 +93,8 @@ export class VillageHall extends Building {
   leaders: number = 0
   leaderTrainTimeLeft: number = 0
 
-  constructor(village: Village) {
-    super(BuildingType.VillageHall, village)
+  constructor(villageId: number) {
+    super(BuildingType.VillageHall, villageId)
   }
 
   get leaderTrainCost(): Cost {
@@ -136,8 +141,8 @@ export class VillageHall extends Building {
 }
 
 export class GoldMine extends Building {
-  constructor(village: Village) {
-    super(BuildingType.GoldMine, village)
+  constructor(villageId: number) {
+    super(BuildingType.GoldMine, villageId)
   }
 
   tick(): void {

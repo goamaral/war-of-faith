@@ -1,16 +1,11 @@
+import { getPlayerVillages } from '../engine'
 import { EventCategory } from '../pubsub'
 import { Entity } from './entity'
 import { Village } from './village'
 
 export class Player extends Entity {
-  villages: Village[] = []
-
   constructor() {
     super(EventCategory.Player)
-  }
-
-  tick() {
-    for (const village of this.villages) village.tick()
   }
 
   get canTrainLeader(): boolean {
@@ -23,5 +18,13 @@ export class Player extends Entity {
 
   get maxTotalLeaders(): number {
     return this.villages.length
+  }
+
+  get villages(): Village[] {
+    return getPlayerVillages(this.id)
+  }
+
+  tick() {
+    for (const village of this.villages) village.tick()
   }
 }

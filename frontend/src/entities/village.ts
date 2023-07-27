@@ -1,3 +1,4 @@
+import { getEntityById } from '../engine'
 import pubsub, { EventCategory, EventAction } from '../pubsub'
 import { GoldMine, VillageHall } from './building'
 import { Entity } from './entity'
@@ -17,26 +18,30 @@ export interface ResourceMap {
 }
 
 export class Village extends Entity {
-  player: Player
+  playerId: number
   x: number
   y: number
   buildings: BuildingMap = {
-    villageHall: new VillageHall(this),
-    goldMine: new GoldMine(this),
+    villageHall: new VillageHall(this.id),
+    goldMine: new GoldMine(this.id),
   }
   resources: ResourceMap = {
     gold: 0,
   }
 
-  constructor(player: Player, x: number, y: number) {
+  constructor(playerId: number, x: number, y: number) {
     super(EventCategory.Village)
-    this.player = player
+    this.playerId = playerId
     this.x = x
     this.y = y
   }
 
   get coords(): string {
     return GridMap.generateCoords(this.x, this.y)
+  }
+
+  get player(): Player {
+    return getEntityById<Player>(this.playerId)
   }
 
   tick() {

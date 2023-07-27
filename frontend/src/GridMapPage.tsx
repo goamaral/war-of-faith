@@ -1,16 +1,19 @@
 import { useNavigate } from 'react-router-dom'
-import engine from './engine'
+import { getGridMap } from './engine'
 import { GridMap } from './entities/grid_map'
+import { useEntity } from './hooks'
 
 export default function GridPagePage() {
   const navigate = useNavigate()
 
+  const gridMap = useEntity(getGridMap())
+
   function generateGrid() {
     const rows = []
-    for (let y = 0; y < engine.map.height; y++) {
+    for (let y = 0; y < gridMap.height; y++) {
       const row = []
-      for (let x = 0; x < engine.map.width; x++) {
-        const village = engine.map.cells.get(GridMap.generateCoords(x, y))
+      for (let x = 0; x < gridMap.width; x++) {
+        const village = gridMap.cells.get(GridMap.generateCoords(x, y))
         const style = {
           border: '1px solid black',
           width: '20px',

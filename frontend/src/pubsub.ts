@@ -39,7 +39,7 @@ export class Event {
   }
 }
 
-interface Subscriber {
+interface Subscriber{
   (event: Event): void
 }
 
@@ -67,6 +67,7 @@ class PubSub {
     const subscribers = (this.subscribers.get(Event.toSku(event.category)) || [])
     if (event.entityId) subscribers.push(...(this.subscribers.get(Event.toSku(event.category, event.entityId)) || []))
     if (event.action) subscribers.push(...(this.subscribers.get(Event.toSku(event.category, event.entityId, event.action)) || []))
+
 
     subscribers.forEach(onMessage => onMessage(event))
   }

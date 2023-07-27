@@ -18,8 +18,9 @@ export class GridMap extends Entity {
     return `${x}-${y}`
   }
 
-  addVillage(village: Village): boolean {
-    if (!this.cellIsAvailable(village.x, village.y)) return false
+  addVillage(playerId: number, x: number, y: number): boolean {
+    if (!this.cellIsAvailable(x, y)) return false
+    const village = new Village(playerId, 3, 3)
     this.cells.set(village.coords, village)
     return true
   }
