@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message Entity {
+  int32 id = 1;
+}
+
+// GetEntity
+message GetEntityRequest {
+  int32 id = 1;
+}
+message GetEntityResponse {
+  Entity entity = 1;
+}
+
+service Service {
+  rpc GetEntity (GetEntityRequest) returns (GetEntityResponse);
+}
