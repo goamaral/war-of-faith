@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: server/server.proto
+// source: server/v1/server.proto
 
-package server
+package serverv1
 
 import (
 	context "context"
@@ -35,7 +35,7 @@ func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 
 func (c *serviceClient) GetEntity(ctx context.Context, in *GetEntityRequest, opts ...grpc.CallOption) (*GetEntityResponse, error) {
 	out := new(GetEntityResponse)
-	err := c.cc.Invoke(ctx, "/Service/GetEntity", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetEntity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func _Service_GetEntity_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Service/GetEntity",
+		FullMethod: "/server.v1.Service/GetEntity",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ServiceServer).GetEntity(ctx, req.(*GetEntityRequest))
@@ -90,7 +90,7 @@ func _Service_GetEntity_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Service_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Service",
+	ServiceName: "server.v1.Service",
 	HandlerType: (*ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -99,5 +99,5 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "server/server.proto",
+	Metadata: "server/v1/server.proto",
 }

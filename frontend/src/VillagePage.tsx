@@ -4,11 +4,11 @@
 // import { useEntity } from './hooks'
 // import { getVillageByCoords } from './engine'
 // import TroopTypeToString, { TroopType } from './entities/troop'
-import { getEntity } from '../lib/protobuf/server/server-Service_connectquery'
+import { getEntity } from '../lib/protobuf/server/v1/server-Service_connectquery'
 import { useQuery } from '@tanstack/react-query'
 
 export default function VillagePage() {
-  const { data, isLoading } = useQuery(getEntity.useQuery({}))
+  const { data, isLoading } = useQuery(getEntity.useQuery({ id: 1 }))
 
   // const { coords } = useParams() as { coords: string }
   // const villageInstance = getVillageByCoords(coords)
@@ -22,7 +22,7 @@ export default function VillagePage() {
   return (
     <div>
       { isLoading }
-      { data }
+      {JSON.stringify(data) }
 
       <h1>Resources</h1>
       <ul>

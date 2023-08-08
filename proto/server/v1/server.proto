@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+package server.v1;
+
+option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
+
 message Entity {
   int32 id = 1;
 }
