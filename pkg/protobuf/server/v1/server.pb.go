@@ -9,6 +9,7 @@ package serverv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -20,16 +21,69 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Entity struct {
+type Building_Kind int32
+
+const (
+	Building_KIND_UNSPECIFIED Building_Kind = 0
+	Building_KIND_HALL        Building_Kind = 1
+	Building_KIND_GOLD_MINE   Building_Kind = 2
+)
+
+// Enum value maps for Building_Kind.
+var (
+	Building_Kind_name = map[int32]string{
+		0: "KIND_UNSPECIFIED",
+		1: "KIND_HALL",
+		2: "KIND_GOLD_MINE",
+	}
+	Building_Kind_value = map[string]int32{
+		"KIND_UNSPECIFIED": 0,
+		"KIND_HALL":        1,
+		"KIND_GOLD_MINE":   2,
+	}
+)
+
+func (x Building_Kind) Enum() *Building_Kind {
+	p := new(Building_Kind)
+	*p = x
+	return p
+}
+
+func (x Building_Kind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Building_Kind) Descriptor() protoreflect.EnumDescriptor {
+	return file_server_v1_server_proto_enumTypes[0].Descriptor()
+}
+
+func (Building_Kind) Type() protoreflect.EnumType {
+	return &file_server_v1_server_proto_enumTypes[0]
+}
+
+func (x Building_Kind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Building_Kind.Descriptor instead.
+func (Building_Kind) EnumDescriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{0, 0}
+}
+
+type Building struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind            Building_Kind         `protobuf:"varint,1,opt,name=kind,proto3,enum=server.v1.Building_Kind" json:"kind,omitempty"`
+	Level           uint32                `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`
+	IsUpgradable    bool                  `protobuf:"varint,3,opt,name=is_upgradable,json=isUpgradable,proto3" json:"is_upgradable,omitempty"`
+	UpgradeTimeLeft uint32                `protobuf:"varint,4,opt,name=upgrade_time_left,json=upgradeTimeLeft,proto3" json:"upgrade_time_left,omitempty"`
+	UpgradeCost     *Building_UpgradeCost `protobuf:"bytes,5,opt,name=upgrade_cost,json=upgradeCost,proto3" json:"upgrade_cost,omitempty"`
 }
 
-func (x *Entity) Reset() {
-	*x = Entity{}
+func (x *Building) Reset() {
+	*x = Building{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_server_v1_server_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -37,13 +91,13 @@ func (x *Entity) Reset() {
 	}
 }
 
-func (x *Entity) String() string {
+func (x *Building) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Entity) ProtoMessage() {}
+func (*Building) ProtoMessage() {}
 
-func (x *Entity) ProtoReflect() protoreflect.Message {
+func (x *Building) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,29 +109,58 @@ func (x *Entity) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Entity.ProtoReflect.Descriptor instead.
-func (*Entity) Descriptor() ([]byte, []int) {
+// Deprecated: Use Building.ProtoReflect.Descriptor instead.
+func (*Building) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Entity) GetId() int32 {
+func (x *Building) GetKind() Building_Kind {
 	if x != nil {
-		return x.Id
+		return x.Kind
+	}
+	return Building_KIND_UNSPECIFIED
+}
+
+func (x *Building) GetLevel() uint32 {
+	if x != nil {
+		return x.Level
 	}
 	return 0
 }
 
-// GetEntity
-type GetEntityRequest struct {
+func (x *Building) GetIsUpgradable() bool {
+	if x != nil {
+		return x.IsUpgradable
+	}
+	return false
+}
+
+func (x *Building) GetUpgradeTimeLeft() uint32 {
+	if x != nil {
+		return x.UpgradeTimeLeft
+	}
+	return 0
+}
+
+func (x *Building) GetUpgradeCost() *Building_UpgradeCost {
+	if x != nil {
+		return x.UpgradeCost
+	}
+	return nil
+}
+
+type Village struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id        uint32             `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Resources *Village_Resources `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
+	Buildings *Village_Buildings `protobuf:"bytes,3,opt,name=buildings,proto3" json:"buildings,omitempty"`
 }
 
-func (x *GetEntityRequest) Reset() {
-	*x = GetEntityRequest{}
+func (x *Village) Reset() {
+	*x = Village{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_server_v1_server_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -85,13 +168,13 @@ func (x *GetEntityRequest) Reset() {
 	}
 }
 
-func (x *GetEntityRequest) String() string {
+func (x *Village) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetEntityRequest) ProtoMessage() {}
+func (*Village) ProtoMessage() {}
 
-func (x *GetEntityRequest) ProtoReflect() protoreflect.Message {
+func (x *Village) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -103,28 +186,43 @@ func (x *GetEntityRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetEntityRequest.ProtoReflect.Descriptor instead.
-func (*GetEntityRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Village.ProtoReflect.Descriptor instead.
+func (*Village) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetEntityRequest) GetId() int32 {
+func (x *Village) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type GetEntityResponse struct {
+func (x *Village) GetResources() *Village_Resources {
+	if x != nil {
+		return x.Resources
+	}
+	return nil
+}
+
+func (x *Village) GetBuildings() *Village_Buildings {
+	if x != nil {
+		return x.Buildings
+	}
+	return nil
+}
+
+// GetVillage
+type GetVillageRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Entity *Entity `protobuf:"bytes,1,opt,name=entity,proto3" json:"entity,omitempty"`
+	Coords *wrapperspb.StringValue `protobuf:"bytes,1,opt,name=coords,proto3" json:"coords,omitempty"` // x-y
 }
 
-func (x *GetEntityResponse) Reset() {
-	*x = GetEntityResponse{}
+func (x *GetVillageRequest) Reset() {
+	*x = GetVillageRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_server_v1_server_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -132,13 +230,13 @@ func (x *GetEntityResponse) Reset() {
 	}
 }
 
-func (x *GetEntityResponse) String() string {
+func (x *GetVillageRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetEntityResponse) ProtoMessage() {}
+func (*GetVillageRequest) ProtoMessage() {}
 
-func (x *GetEntityResponse) ProtoReflect() protoreflect.Message {
+func (x *GetVillageRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -150,14 +248,210 @@ func (x *GetEntityResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetEntityResponse.ProtoReflect.Descriptor instead.
-func (*GetEntityResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetVillageRequest.ProtoReflect.Descriptor instead.
+func (*GetVillageRequest) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetEntityResponse) GetEntity() *Entity {
+func (x *GetVillageRequest) GetCoords() *wrapperspb.StringValue {
 	if x != nil {
-		return x.Entity
+		return x.Coords
+	}
+	return nil
+}
+
+type GetVillageResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Village *Village `protobuf:"bytes,1,opt,name=Village,proto3" json:"Village,omitempty"`
+}
+
+func (x *GetVillageResponse) Reset() {
+	*x = GetVillageResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetVillageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetVillageResponse) ProtoMessage() {}
+
+func (x *GetVillageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetVillageResponse.ProtoReflect.Descriptor instead.
+func (*GetVillageResponse) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetVillageResponse) GetVillage() *Village {
+	if x != nil {
+		return x.Village
+	}
+	return nil
+}
+
+type Building_UpgradeCost struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Gold uint32 `protobuf:"varint,1,opt,name=gold,proto3" json:"gold,omitempty"`
+}
+
+func (x *Building_UpgradeCost) Reset() {
+	*x = Building_UpgradeCost{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Building_UpgradeCost) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Building_UpgradeCost) ProtoMessage() {}
+
+func (x *Building_UpgradeCost) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Building_UpgradeCost.ProtoReflect.Descriptor instead.
+func (*Building_UpgradeCost) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{0, 0}
+}
+
+func (x *Building_UpgradeCost) GetGold() uint32 {
+	if x != nil {
+		return x.Gold
+	}
+	return 0
+}
+
+type Village_Resources struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Gold uint32 `protobuf:"varint,1,opt,name=gold,proto3" json:"gold,omitempty"`
+}
+
+func (x *Village_Resources) Reset() {
+	*x = Village_Resources{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Village_Resources) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Village_Resources) ProtoMessage() {}
+
+func (x *Village_Resources) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Village_Resources.ProtoReflect.Descriptor instead.
+func (*Village_Resources) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{1, 0}
+}
+
+func (x *Village_Resources) GetGold() uint32 {
+	if x != nil {
+		return x.Gold
+	}
+	return 0
+}
+
+type Village_Buildings struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Hall     *Building `protobuf:"bytes,1,opt,name=hall,proto3" json:"hall,omitempty"`
+	GoldMine *Building `protobuf:"bytes,2,opt,name=gold_mine,json=goldMine,proto3" json:"gold_mine,omitempty"`
+}
+
+func (x *Village_Buildings) Reset() {
+	*x = Village_Buildings{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Village_Buildings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Village_Buildings) ProtoMessage() {}
+
+func (x *Village_Buildings) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Village_Buildings.ProtoReflect.Descriptor instead.
+func (*Village_Buildings) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{1, 1}
+}
+
+func (x *Village_Buildings) GetHall() *Building {
+	if x != nil {
+		return x.Hall
+	}
+	return nil
+}
+
+func (x *Village_Buildings) GetGoldMine() *Building {
+	if x != nil {
+		return x.GoldMine
 	}
 	return nil
 }
@@ -167,23 +461,65 @@ var File_server_v1_server_proto protoreflect.FileDescriptor
 var file_server_v1_server_proto_rawDesc = []byte{
 	0x0a, 0x16, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x2f, 0x73, 0x65, 0x72, 0x76,
 	0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x09, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x2e, 0x76, 0x31, 0x22, 0x18, 0x0a, 0x06, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x22, 0x0a,
-	0x10, 0x47, 0x65, 0x74, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69,
-	0x64, 0x22, 0x3e, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x29, 0x0a, 0x06, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52, 0x06, 0x65, 0x6e, 0x74, 0x69, 0x74,
-	0x79, 0x32, 0x51, 0x0a, 0x07, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x46, 0x0a, 0x09,
-	0x47, 0x65, 0x74, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x12, 0x1b, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x45, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x42, 0x2e, 0x5a, 0x2c, 0x77, 0x61, 0x72, 0x2d, 0x6f, 0x66, 0x2d, 0x66,
-	0x61, 0x69, 0x74, 0x68, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
-	0x66, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x2e, 0x76, 0x31, 0x1a, 0x1e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2f, 0x77, 0x72, 0x61, 0x70, 0x70, 0x65, 0x72, 0x73, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x22, 0xc7, 0x02, 0x0a, 0x08, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
+	0x12, 0x2c, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x18,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64,
+	0x69, 0x6e, 0x67, 0x2e, 0x4b, 0x69, 0x6e, 0x64, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x14,
+	0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x6c,
+	0x65, 0x76, 0x65, 0x6c, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x73, 0x5f, 0x75, 0x70, 0x67, 0x72, 0x61,
+	0x64, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0c, 0x69, 0x73, 0x55,
+	0x70, 0x67, 0x72, 0x61, 0x64, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x2a, 0x0a, 0x11, 0x75, 0x70, 0x67,
+	0x72, 0x61, 0x64, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x6c, 0x65, 0x66, 0x74, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x0d, 0x52, 0x0f, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x54, 0x69, 0x6d,
+	0x65, 0x4c, 0x65, 0x66, 0x74, 0x12, 0x42, 0x0a, 0x0c, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65,
+	0x5f, 0x63, 0x6f, 0x73, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x73, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
+	0x2e, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x43, 0x6f, 0x73, 0x74, 0x52, 0x0b, 0x75, 0x70,
+	0x67, 0x72, 0x61, 0x64, 0x65, 0x43, 0x6f, 0x73, 0x74, 0x1a, 0x21, 0x0a, 0x0b, 0x55, 0x70, 0x67,
+	0x72, 0x61, 0x64, 0x65, 0x43, 0x6f, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x67, 0x6f, 0x6c, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x67, 0x6f, 0x6c, 0x64, 0x22, 0x3f, 0x0a, 0x04,
+	0x4b, 0x69, 0x6e, 0x64, 0x12, 0x14, 0x0a, 0x10, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x55, 0x4e, 0x53,
+	0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4b, 0x49,
+	0x4e, 0x44, 0x5f, 0x48, 0x41, 0x4c, 0x4c, 0x10, 0x01, 0x12, 0x12, 0x0a, 0x0e, 0x4b, 0x49, 0x4e,
+	0x44, 0x5f, 0x47, 0x4f, 0x4c, 0x44, 0x5f, 0x4d, 0x49, 0x4e, 0x45, 0x10, 0x02, 0x22, 0x9a, 0x02,
+	0x0a, 0x07, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x02, 0x69, 0x64, 0x12, 0x3a, 0x0a, 0x09, 0x72, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65,
+	0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x09, 0x72, 0x65, 0x73, 0x6f,
+	0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x3a, 0x0a, 0x09, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e,
+	0x67, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x42, 0x75, 0x69,
+	0x6c, 0x64, 0x69, 0x6e, 0x67, 0x73, 0x52, 0x09, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
+	0x73, 0x1a, 0x1f, 0x0a, 0x09, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x12,
+	0x0a, 0x04, 0x67, 0x6f, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x67, 0x6f,
+	0x6c, 0x64, 0x1a, 0x66, 0x0a, 0x09, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x73, 0x12,
+	0x27, 0x0a, 0x04, 0x68, 0x61, 0x6c, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69,
+	0x6e, 0x67, 0x52, 0x04, 0x68, 0x61, 0x6c, 0x6c, 0x12, 0x30, 0x0a, 0x09, 0x67, 0x6f, 0x6c, 0x64,
+	0x5f, 0x6d, 0x69, 0x6e, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x73, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
+	0x52, 0x08, 0x67, 0x6f, 0x6c, 0x64, 0x4d, 0x69, 0x6e, 0x65, 0x22, 0x49, 0x0a, 0x11, 0x47, 0x65,
+	0x74, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x34, 0x0a, 0x06, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x1c, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x06, 0x63,
+	0x6f, 0x6f, 0x72, 0x64, 0x73, 0x22, 0x42, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x56, 0x69, 0x6c, 0x6c,
+	0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x07, 0x56,
+	0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65,
+	0x52, 0x07, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x32, 0x54, 0x0a, 0x07, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x49, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x56, 0x69, 0x6c, 0x6c, 0x61,
+	0x67, 0x65, 0x12, 0x1c, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x47,
+	0x65, 0x74, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74,
+	0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42,
+	0x2e, 0x5a, 0x2c, 0x77, 0x61, 0x72, 0x2d, 0x6f, 0x66, 0x2d, 0x66, 0x61, 0x69, 0x74, 0x68, 0x2f,
+	0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x76, 0x31, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -198,21 +534,35 @@ func file_server_v1_server_proto_rawDescGZIP() []byte {
 	return file_server_v1_server_proto_rawDescData
 }
 
-var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_server_v1_server_proto_goTypes = []interface{}{
-	(*Entity)(nil),            // 0: server.v1.Entity
-	(*GetEntityRequest)(nil),  // 1: server.v1.GetEntityRequest
-	(*GetEntityResponse)(nil), // 2: server.v1.GetEntityResponse
+	(Building_Kind)(0),             // 0: server.v1.Building.Kind
+	(*Building)(nil),               // 1: server.v1.Building
+	(*Village)(nil),                // 2: server.v1.Village
+	(*GetVillageRequest)(nil),      // 3: server.v1.GetVillageRequest
+	(*GetVillageResponse)(nil),     // 4: server.v1.GetVillageResponse
+	(*Building_UpgradeCost)(nil),   // 5: server.v1.Building.UpgradeCost
+	(*Village_Resources)(nil),      // 6: server.v1.Village.Resources
+	(*Village_Buildings)(nil),      // 7: server.v1.Village.Buildings
+	(*wrapperspb.StringValue)(nil), // 8: google.protobuf.StringValue
 }
 var file_server_v1_server_proto_depIdxs = []int32{
-	0, // 0: server.v1.GetEntityResponse.entity:type_name -> server.v1.Entity
-	1, // 1: server.v1.Service.GetEntity:input_type -> server.v1.GetEntityRequest
-	2, // 2: server.v1.Service.GetEntity:output_type -> server.v1.GetEntityResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: server.v1.Building.kind:type_name -> server.v1.Building.Kind
+	5, // 1: server.v1.Building.upgrade_cost:type_name -> server.v1.Building.UpgradeCost
+	6, // 2: server.v1.Village.resources:type_name -> server.v1.Village.Resources
+	7, // 3: server.v1.Village.buildings:type_name -> server.v1.Village.Buildings
+	8, // 4: server.v1.GetVillageRequest.coords:type_name -> google.protobuf.StringValue
+	2, // 5: server.v1.GetVillageResponse.Village:type_name -> server.v1.Village
+	1, // 6: server.v1.Village.Buildings.hall:type_name -> server.v1.Building
+	1, // 7: server.v1.Village.Buildings.gold_mine:type_name -> server.v1.Building
+	3, // 8: server.v1.Service.GetVillage:input_type -> server.v1.GetVillageRequest
+	4, // 9: server.v1.Service.GetVillage:output_type -> server.v1.GetVillageResponse
+	9, // [9:10] is the sub-list for method output_type
+	8, // [8:9] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_server_v1_server_proto_init() }
@@ -222,7 +572,7 @@ func file_server_v1_server_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_server_v1_server_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Entity); i {
+			switch v := v.(*Building); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -234,7 +584,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetEntityRequest); i {
+			switch v := v.(*Village); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -246,7 +596,55 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetEntityResponse); i {
+			switch v := v.(*GetVillageRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetVillageResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Building_UpgradeCost); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Village_Resources); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Village_Buildings); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -263,13 +661,14 @@ func file_server_v1_server_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_server_v1_server_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   3,
+			NumEnums:      1,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_server_v1_server_proto_goTypes,
 		DependencyIndexes: file_server_v1_server_proto_depIdxs,
+		EnumInfos:         file_server_v1_server_proto_enumTypes,
 		MessageInfos:      file_server_v1_server_proto_msgTypes,
 	}.Build()
 	File_server_v1_server_proto = out.File

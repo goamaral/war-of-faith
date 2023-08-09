@@ -33,13 +33,13 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ServiceGetEntityProcedure is the fully-qualified name of the Service's GetEntity RPC.
-	ServiceGetEntityProcedure = "/server.v1.Service/GetEntity"
+	// ServiceGetVillageProcedure is the fully-qualified name of the Service's GetVillage RPC.
+	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
 type ServiceClient interface {
-	GetEntity(context.Context, *connect_go.Request[v1.GetEntityRequest]) (*connect_go.Response[v1.GetEntityResponse], error)
+	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -52,9 +52,9 @@ type ServiceClient interface {
 func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &serviceClient{
-		getEntity: connect_go.NewClient[v1.GetEntityRequest, v1.GetEntityResponse](
+		getVillage: connect_go.NewClient[v1.GetVillageRequest, v1.GetVillageResponse](
 			httpClient,
-			baseURL+ServiceGetEntityProcedure,
+			baseURL+ServiceGetVillageProcedure,
 			opts...,
 		),
 	}
@@ -62,17 +62,17 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	getEntity *connect_go.Client[v1.GetEntityRequest, v1.GetEntityResponse]
+	getVillage *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
 }
 
-// GetEntity calls server.v1.Service.GetEntity.
-func (c *serviceClient) GetEntity(ctx context.Context, req *connect_go.Request[v1.GetEntityRequest]) (*connect_go.Response[v1.GetEntityResponse], error) {
-	return c.getEntity.CallUnary(ctx, req)
+// GetVillage calls server.v1.Service.GetVillage.
+func (c *serviceClient) GetVillage(ctx context.Context, req *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
+	return c.getVillage.CallUnary(ctx, req)
 }
 
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
-	GetEntity(context.Context, *connect_go.Request[v1.GetEntityRequest]) (*connect_go.Response[v1.GetEntityResponse], error)
+	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -81,15 +81,15 @@ type ServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	serviceGetEntityHandler := connect_go.NewUnaryHandler(
-		ServiceGetEntityProcedure,
-		svc.GetEntity,
+	serviceGetVillageHandler := connect_go.NewUnaryHandler(
+		ServiceGetVillageProcedure,
+		svc.GetVillage,
 		opts...,
 	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ServiceGetEntityProcedure:
-			serviceGetEntityHandler.ServeHTTP(w, r)
+		case ServiceGetVillageProcedure:
+			serviceGetVillageHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -99,6 +99,6 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 // UnimplementedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedServiceHandler struct{}
 
-func (UnimplementedServiceHandler) GetEntity(context.Context, *connect_go.Request[v1.GetEntityRequest]) (*connect_go.Response[v1.GetEntityResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetEntity is not implemented"))
+func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillage is not implemented"))
 }

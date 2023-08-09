@@ -1,3 +1,32 @@
+import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
+
+export class Building {
+  kind: serverV1Types.Building_Kind
+  level: number
+  isUpgradable: boolean
+  upgradeTimeLeft: number
+  upgradeCost: serverV1Types.Building_UpgradeCost
+
+  constructor(serverBuilding: serverV1Types.Building) {
+    this.kind = serverBuilding.kind
+    this.level = serverBuilding.level
+    this.isUpgradable = serverBuilding.isUpgradable
+    this.upgradeTimeLeft = serverBuilding.upgradeTimeLeft
+    this.upgradeCost = serverBuilding.upgradeCost!
+  }
+
+  get name(): string {
+    switch (this.kind) {
+      case serverV1Types.Building_Kind.HALL:
+        return 'Village Hall'
+      case serverV1Types.Building_Kind.GOLD_MINE:
+        return 'Gold Mine'
+      default:
+        return 'Unknown'
+    } 
+  }
+}
+
 // import pubsub, { EventCategory, EventAction } from '../pubsub'
 // import { getEntityById } from '../engine'
 // import { Entity } from './entity'

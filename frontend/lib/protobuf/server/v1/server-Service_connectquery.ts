@@ -5,23 +5,23 @@
 
 import { createQueryService } from "@bufbuild/connect-query";
 import { MethodKind } from "@bufbuild/protobuf";
-import { GetEntityRequest, GetEntityResponse } from "./server_pb.js";
+import { GetVillageRequest, GetVillageResponse } from "./server_pb.js";
 
 export const typeName = "server.v1.Service";
 
 /**
- * @generated from rpc server.v1.Service.GetEntity
+ * @generated from rpc server.v1.Service.GetVillage
  */
-export const getEntity = createQueryService({
+export const getVillage = createQueryService({
   service: {
     methods: {
-      getEntity: {
-        name: "GetEntity",
+      getVillage: {
+        name: "GetVillage",
         kind: MethodKind.Unary,
-        I: GetEntityRequest,
-        O: GetEntityResponse,
+        I: GetVillageRequest,
+        O: GetVillageResponse,
       },
     },
     typeName: "server.v1.Service",
   },
-}).getEntity;
+}).getVillage;

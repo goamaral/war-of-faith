@@ -4,118 +4,336 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import { Message, proto3, StringValue } from "@bufbuild/protobuf";
 
 /**
- * @generated from message server.v1.Entity
+ * @generated from message server.v1.Building
  */
-export class Entity extends Message<Entity> {
+export class Building extends Message<Building> {
   /**
-   * @generated from field: int32 id = 1;
+   * @generated from field: server.v1.Building.Kind kind = 1;
    */
-  id = 0;
+  kind = Building_Kind.UNSPECIFIED;
 
-  constructor(data?: PartialMessage<Entity>) {
+  /**
+   * @generated from field: uint32 level = 2;
+   */
+  level = 0;
+
+  /**
+   * @generated from field: bool is_upgradable = 3;
+   */
+  isUpgradable = false;
+
+  /**
+   * @generated from field: uint32 upgrade_time_left = 4;
+   */
+  upgradeTimeLeft = 0;
+
+  /**
+   * @generated from field: server.v1.Building.UpgradeCost upgrade_cost = 5;
+   */
+  upgradeCost?: Building_UpgradeCost;
+
+  constructor(data?: PartialMessage<Building>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Entity";
+  static readonly typeName = "server.v1.Building";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 1, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
+    { no: 2, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "is_upgradable", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "upgrade_cost", kind: "message", T: Building_UpgradeCost },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Entity {
-    return new Entity().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
+    return new Building().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Entity {
-    return new Entity().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building {
+    return new Building().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Entity {
-    return new Entity().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building {
+    return new Building().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Entity | PlainMessage<Entity> | undefined, b: Entity | PlainMessage<Entity> | undefined): boolean {
-    return proto3.util.equals(Entity, a, b);
+  static equals(a: Building | PlainMessage<Building> | undefined, b: Building | PlainMessage<Building> | undefined): boolean {
+    return proto3.util.equals(Building, a, b);
   }
 }
 
 /**
- * GetEntity
+ * @generated from enum server.v1.Building.Kind
+ */
+export enum Building_Kind {
+  /**
+   * @generated from enum value: KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: KIND_HALL = 1;
+   */
+  HALL = 1,
+
+  /**
+   * @generated from enum value: KIND_GOLD_MINE = 2;
+   */
+  GOLD_MINE = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Building_Kind)
+proto3.util.setEnumType(Building_Kind, "server.v1.Building.Kind", [
+  { no: 0, name: "KIND_UNSPECIFIED" },
+  { no: 1, name: "KIND_HALL" },
+  { no: 2, name: "KIND_GOLD_MINE" },
+]);
+
+/**
+ * @generated from message server.v1.Building.UpgradeCost
+ */
+export class Building_UpgradeCost extends Message<Building_UpgradeCost> {
+  /**
+   * @generated from field: uint32 gold = 1;
+   */
+  gold = 0;
+
+  constructor(data?: PartialMessage<Building_UpgradeCost>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Building.UpgradeCost";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "gold", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building_UpgradeCost {
+    return new Building_UpgradeCost().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building_UpgradeCost {
+    return new Building_UpgradeCost().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building_UpgradeCost {
+    return new Building_UpgradeCost().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Building_UpgradeCost | PlainMessage<Building_UpgradeCost> | undefined, b: Building_UpgradeCost | PlainMessage<Building_UpgradeCost> | undefined): boolean {
+    return proto3.util.equals(Building_UpgradeCost, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Village
+ */
+export class Village extends Message<Village> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: server.v1.Village.Resources resources = 2;
+   */
+  resources?: Village_Resources;
+
+  /**
+   * @generated from field: server.v1.Village.Buildings buildings = 3;
+   */
+  buildings?: Village_Buildings;
+
+  constructor(data?: PartialMessage<Village>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Village";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "resources", kind: "message", T: Village_Resources },
+    { no: 3, name: "buildings", kind: "message", T: Village_Buildings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village {
+    return new Village().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village {
+    return new Village().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village {
+    return new Village().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Village | PlainMessage<Village> | undefined, b: Village | PlainMessage<Village> | undefined): boolean {
+    return proto3.util.equals(Village, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Village.Resources
+ */
+export class Village_Resources extends Message<Village_Resources> {
+  /**
+   * @generated from field: uint32 gold = 1;
+   */
+  gold = 0;
+
+  constructor(data?: PartialMessage<Village_Resources>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Village.Resources";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "gold", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village_Resources {
+    return new Village_Resources().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village_Resources {
+    return new Village_Resources().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village_Resources {
+    return new Village_Resources().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Village_Resources | PlainMessage<Village_Resources> | undefined, b: Village_Resources | PlainMessage<Village_Resources> | undefined): boolean {
+    return proto3.util.equals(Village_Resources, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Village.Buildings
+ */
+export class Village_Buildings extends Message<Village_Buildings> {
+  /**
+   * @generated from field: server.v1.Building hall = 1;
+   */
+  hall?: Building;
+
+  /**
+   * @generated from field: server.v1.Building gold_mine = 2;
+   */
+  goldMine?: Building;
+
+  constructor(data?: PartialMessage<Village_Buildings>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Village.Buildings";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "hall", kind: "message", T: Building },
+    { no: 2, name: "gold_mine", kind: "message", T: Building },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village_Buildings {
+    return new Village_Buildings().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village_Buildings {
+    return new Village_Buildings().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village_Buildings {
+    return new Village_Buildings().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Village_Buildings | PlainMessage<Village_Buildings> | undefined, b: Village_Buildings | PlainMessage<Village_Buildings> | undefined): boolean {
+    return proto3.util.equals(Village_Buildings, a, b);
+  }
+}
+
+/**
+ * GetVillage
  *
- * @generated from message server.v1.GetEntityRequest
+ * @generated from message server.v1.GetVillageRequest
  */
-export class GetEntityRequest extends Message<GetEntityRequest> {
+export class GetVillageRequest extends Message<GetVillageRequest> {
   /**
-   * @generated from field: int32 id = 1;
+   * x-y
+   *
+   * @generated from field: google.protobuf.StringValue coords = 1;
    */
-  id = 0;
+  coords?: string;
 
-  constructor(data?: PartialMessage<GetEntityRequest>) {
+  constructor(data?: PartialMessage<GetVillageRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.GetEntityRequest";
+  static readonly typeName = "server.v1.GetVillageRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 1, name: "coords", kind: "message", T: StringValue },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetEntityRequest {
-    return new GetEntityRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillageRequest {
+    return new GetVillageRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetEntityRequest {
-    return new GetEntityRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetVillageRequest {
+    return new GetVillageRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetEntityRequest {
-    return new GetEntityRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetVillageRequest {
+    return new GetVillageRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetEntityRequest | PlainMessage<GetEntityRequest> | undefined, b: GetEntityRequest | PlainMessage<GetEntityRequest> | undefined): boolean {
-    return proto3.util.equals(GetEntityRequest, a, b);
+  static equals(a: GetVillageRequest | PlainMessage<GetVillageRequest> | undefined, b: GetVillageRequest | PlainMessage<GetVillageRequest> | undefined): boolean {
+    return proto3.util.equals(GetVillageRequest, a, b);
   }
 }
 
 /**
- * @generated from message server.v1.GetEntityResponse
+ * @generated from message server.v1.GetVillageResponse
  */
-export class GetEntityResponse extends Message<GetEntityResponse> {
+export class GetVillageResponse extends Message<GetVillageResponse> {
   /**
-   * @generated from field: server.v1.Entity entity = 1;
+   * @generated from field: server.v1.Village Village = 1;
    */
-  entity?: Entity;
+  Village?: Village;
 
-  constructor(data?: PartialMessage<GetEntityResponse>) {
+  constructor(data?: PartialMessage<GetVillageResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.GetEntityResponse";
+  static readonly typeName = "server.v1.GetVillageResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "entity", kind: "message", T: Entity },
+    { no: 1, name: "Village", kind: "message", T: Village },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetEntityResponse {
-    return new GetEntityResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillageResponse {
+    return new GetVillageResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetEntityResponse {
-    return new GetEntityResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetVillageResponse {
+    return new GetVillageResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetEntityResponse {
-    return new GetEntityResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetVillageResponse {
+    return new GetVillageResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetEntityResponse | PlainMessage<GetEntityResponse> | undefined, b: GetEntityResponse | PlainMessage<GetEntityResponse> | undefined): boolean {
-    return proto3.util.equals(GetEntityResponse, a, b);
+  static equals(a: GetVillageResponse | PlainMessage<GetVillageResponse> | undefined, b: GetVillageResponse | PlainMessage<GetVillageResponse> | undefined): boolean {
+    return proto3.util.equals(GetVillageResponse, a, b);
   }
 }
 

@@ -1,3 +1,28 @@
+import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
+import { Building } from "./building"
+
+export class Village{
+  // Buildings
+  hall: Building
+  goldMine: Building
+
+  // Resources
+  gold: number
+
+  constructor(serverVillage: serverV1Types.Village) {
+    // Buildings
+    this.hall = new Building(serverVillage.buildings?.hall!)
+    this.goldMine = new Building(serverVillage.buildings?.goldMine!)
+
+    // Resources
+    this.gold = serverVillage.resources?.gold!
+  }
+
+  get buildings(): Building[] {
+    return [this.hall, this.goldMine]
+  }
+}
+
 // import { getEntityById } from '../engine'
 // import pubsub, { EventCategory, EventAction } from '../pubsub'
 // import { GoldMine, VillageHall } from './building'

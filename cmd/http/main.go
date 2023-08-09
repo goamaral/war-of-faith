@@ -16,8 +16,35 @@ type Server struct {
 	serverv1.UnimplementedServiceServer
 }
 
-func (s *Server) GetEntity(ctx context.Context, req *connectgo.Request[serverv1.GetEntityRequest]) (*connectgo.Response[serverv1.GetEntityResponse], error) {
-	return connectgo.NewResponse(&serverv1.GetEntityResponse{Entity: &serverv1.Entity{Id: 1}}), nil
+func (s *Server) GetVillage(ctx context.Context, req *connectgo.Request[serverv1.GetVillageRequest]) (*connectgo.Response[serverv1.GetVillageResponse], error) {
+	return connectgo.NewResponse(&serverv1.GetVillageResponse{
+		Village: &serverv1.Village{
+			Id: 1,
+			Resources: &serverv1.Village_Resources{
+				Gold: 0,
+			},
+			Buildings: &serverv1.Village_Buildings{
+				Hall: &serverv1.Building{
+					Kind:            serverv1.Building_KIND_HALL,
+					Level:           1,
+					IsUpgradable:    true,
+					UpgradeTimeLeft: 0,
+					UpgradeCost: &serverv1.Building_UpgradeCost{
+						Gold: 10,
+					},
+				},
+				GoldMine: &serverv1.Building{
+					Kind:            serverv1.Building_KIND_GOLD_MINE,
+					Level:           1,
+					IsUpgradable:    true,
+					UpgradeTimeLeft: 0,
+					UpgradeCost: &serverv1.Building_UpgradeCost{
+						Gold: 10,
+					},
+				},
+			},
+		},
+	}), nil
 }
 
 func main() {

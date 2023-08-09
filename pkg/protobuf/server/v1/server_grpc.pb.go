@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceClient interface {
-	GetEntity(ctx context.Context, in *GetEntityRequest, opts ...grpc.CallOption) (*GetEntityResponse, error)
+	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
 }
 
 type serviceClient struct {
@@ -33,9 +33,9 @@ func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 	return &serviceClient{cc}
 }
 
-func (c *serviceClient) GetEntity(ctx context.Context, in *GetEntityRequest, opts ...grpc.CallOption) (*GetEntityResponse, error) {
-	out := new(GetEntityResponse)
-	err := c.cc.Invoke(ctx, "/server.v1.Service/GetEntity", in, out, opts...)
+func (c *serviceClient) GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error) {
+	out := new(GetVillageResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetVillage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,15 +46,15 @@ func (c *serviceClient) GetEntity(ctx context.Context, in *GetEntityRequest, opt
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility
 type ServiceServer interface {
-	GetEntity(context.Context, *GetEntityRequest) (*GetEntityResponse, error)
+	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedServiceServer struct {
 }
 
-func (UnimplementedServiceServer) GetEntity(context.Context, *GetEntityRequest) (*GetEntityResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEntity not implemented")
+func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVillage not implemented")
 }
 
 // UnsafeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -68,20 +68,20 @@ func RegisterServiceServer(s grpc.ServiceRegistrar, srv ServiceServer) {
 	s.RegisterService(&Service_ServiceDesc, srv)
 }
 
-func _Service_GetEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetEntityRequest)
+func _Service_GetVillage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVillageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).GetEntity(ctx, in)
+		return srv.(ServiceServer).GetVillage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/server.v1.Service/GetEntity",
+		FullMethod: "/server.v1.Service/GetVillage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).GetEntity(ctx, req.(*GetEntityRequest))
+		return srv.(ServiceServer).GetVillage(ctx, req.(*GetVillageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -94,8 +94,8 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetEntity",
-			Handler:    _Service_GetEntity_Handler,
+			MethodName: "GetVillage",
+			Handler:    _Service_GetVillage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

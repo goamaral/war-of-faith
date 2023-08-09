@@ -14,7 +14,7 @@ function App() {
 
   const router = createBrowserRouter([
     {
-      path: "/villages",
+      path: "/villages/:coords",
       element: <VillagePage />
     },
     // {
