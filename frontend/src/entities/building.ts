@@ -3,16 +3,18 @@ import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 export class Building {
   kind: serverV1Types.Building_Kind
   level: number
+  villageId: number
   isUpgradable: boolean
   upgradeTimeLeft: number
-  upgradeCost: serverV1Types.Building_UpgradeCost
+  upgradeCost: serverV1Types.Resources
 
-  constructor(serverBuilding: serverV1Types.Building) {
-    this.kind = serverBuilding.kind
-    this.level = serverBuilding.level
-    this.isUpgradable = serverBuilding.isUpgradable
-    this.upgradeTimeLeft = serverBuilding.upgradeTimeLeft
-    this.upgradeCost = serverBuilding.upgradeCost!
+  constructor(building: serverV1Types.Building) {
+    this.kind = building.kind
+    this.level = building.level
+    this.villageId = building.villageId
+    this.isUpgradable = building.isUpgradable
+    this.upgradeTimeLeft = building.upgradeTimeLeft
+    this.upgradeCost = building.upgradeCost!
   }
 
   get name(): string {
@@ -24,6 +26,13 @@ export class Building {
       default:
         return 'Unknown'
     } 
+  }
+
+  onServerUpdate(building: serverV1Types.Building) {
+    this.level = building.level    
+    this.isUpgradable = building.isUpgradable
+    this.upgradeTimeLeft = building.upgradeTimeLeft
+    this.upgradeCost = building.upgradeCost!
   }
 }
 

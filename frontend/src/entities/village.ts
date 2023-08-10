@@ -9,13 +9,13 @@ export class Village{
   // Resources
   gold: number
 
-  constructor(serverVillage: serverV1Types.Village) {
+  constructor(village: serverV1Types.Village) {
     // Buildings
-    this.hall = new Building(serverVillage.buildings?.hall!)
-    this.goldMine = new Building(serverVillage.buildings?.goldMine!)
+    this.hall = new Building(village.buildings?.hall!)
+    this.goldMine = new Building(village.buildings?.goldMine!)
 
     // Resources
-    this.gold = serverVillage.resources?.gold!
+    this.gold = village.resources?.gold!
   }
 
   get buildings(): Building[] {

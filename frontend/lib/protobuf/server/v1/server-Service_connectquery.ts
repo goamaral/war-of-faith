@@ -5,7 +5,7 @@
 
 import { createQueryService } from "@bufbuild/connect-query";
 import { MethodKind } from "@bufbuild/protobuf";
-import { GetVillageRequest, GetVillageResponse } from "./server_pb.js";
+import { GetVillageRequest, GetVillageResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
 
 export const typeName = "server.v1.Service";
 
@@ -25,3 +25,20 @@ export const getVillage = createQueryService({
     typeName: "server.v1.Service",
   },
 }).getVillage;
+
+/**
+ * @generated from rpc server.v1.Service.UpgradeBuilding
+ */
+export const upgradeBuilding = createQueryService({
+  service: {
+    methods: {
+      upgradeBuilding: {
+        name: "UpgradeBuilding",
+        kind: MethodKind.Unary,
+        I: UpgradeBuildingRequest,
+        O: UpgradeBuildingResponse,
+      },
+    },
+    typeName: "server.v1.Service",
+  },
+}).upgradeBuilding;

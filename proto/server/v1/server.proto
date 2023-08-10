@@ -6,32 +6,29 @@ option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
 import "google/protobuf/wrappers.proto";
 
+message Resources {
+  uint32 gold = 1;
+}
+
 message Building {
   Building.Kind kind = 1;
   uint32 level = 2;
-  bool is_upgradable = 3;
-  uint32 upgrade_time_left = 4;
-  Building.UpgradeCost upgrade_cost = 5;
+  uint32 villageId = 3;
+  bool is_upgradable = 4;
+  uint32 upgrade_time_left = 5;
+  Resources upgrade_cost = 6;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
     KIND_HALL = 1;
     KIND_GOLD_MINE = 2;
   }
-
-  message UpgradeCost {
-    uint32 gold = 1;
-  }
 }
 
 message Village {
   uint32 id = 1;
-  Village.Resources resources = 2;
+  Resources resources = 2;
   Village.Buildings buildings = 3;
-
-  message Resources {
-    uint32 gold = 1;
-  }
 
   message Buildings {
     Building hall = 1;
@@ -41,12 +38,23 @@ message Village {
 
 // GetVillage
 message GetVillageRequest {
-  google.protobuf.StringValue coords = 1; // x-y
+  google.protobuf.UInt32Value id = 1;
 }
 message GetVillageResponse {
   Village Village = 1;
 }
 
+// UpgradeBuilding
+message UpgradeBuildingRequest {
+  uint32 village_id = 1;
+  Building.Kind kind = 2;
+}
+message UpgradeBuildingResponse {
+  Building building = 1;
+  bool upgraded = 2;
+}
+
 service Service {
-  rpc GetVillage (GetVillageRequest) returns (GetVillageResponse);
+  rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
+  rpc UpgradeBuilding(UpgradeBuildingRequest) returns (UpgradeBuildingResponse);
 }

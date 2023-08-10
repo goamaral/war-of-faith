@@ -3,11 +3,19 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getVillage } from '../lib/protobuf/server/v1/server-Service_connectquery'
 import { Village } from './entities/village'
+import { Building } from './entities/building'
+import server from './server'
+import { useState } from 'preact/hooks'
 // import TroopTypeToString, { TroopType } from './entities/troop'
 
+function useRefresh() {
+  const [_, setState] = useState({})
+  return () => setState({})
+}
+
 export default function VillagePage() {
-  const { coords } = useParams() as { coords: string }
-  const { data: getVillageResponse, isLoading } = useQuery(getVillage.useQuery({ coords }))
+  const { id } = useParams() as { id: string }
+  const { data: getVillageResponse, isLoading } = useQuery(getVillage.useQuery({ id: parseInt(id) }))
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -28,7 +36,16 @@ export default function VillagePage() {
   }
 }
 
-function VillageBuildings({ village }: { village: Village }) {
+function VillageBuildings({ village }: { village: Village }) {  
+  const refresh = useRefresh()
+
+  async function upgrade(b: Building) {
+      const { building, upgraded } = await server.upgradeBuilding({ villageId: b.villageId, kind: b.kind })
+      if (!upgraded) alert(`Failed to upgrade ${b.name}`)
+      b.onServerUpdate(building!)
+      refresh()
+  }
+
   return (
     <div>
       <h2>Buildings</h2>
@@ -41,7 +58,7 @@ function VillageBuildings({ village }: { village: Village }) {
                 (
                   building.upgradeTimeLeft === 0 ?
                     <>
-                      <button onClick={() => {}/*building.upgrade()*/}>+</button>
+                      <button onClick={() => upgrade(building)}>+</button>
                       {building.upgradeCost.gold} gold
                     </>
                     :

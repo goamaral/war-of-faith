@@ -8,13 +8,9 @@ import VillagePage from './VillagePage'
 // import GridMapPage from './GridMapPage'
 
 function App() {
-  const transport = createConnectTransport({ baseUrl: "http://localhost:3000" })
-
-  const queryClient = new QueryClient()
-
   const router = createBrowserRouter([
     {
-      path: "/villages/:coords",
+      path: "/villages/:id",
       element: <VillagePage />
     },
     // {
@@ -23,8 +19,8 @@ function App() {
     // },
   ])
 
-  return <TransportProvider transport={transport}>
-    <QueryClientProvider client={queryClient}>
+  return <TransportProvider transport={createConnectTransport({ baseUrl: "http://localhost:3000" })}>
+    <QueryClientProvider client={new QueryClient()}>
       <RouterProvider router={router} />
     </QueryClientProvider>
   </TransportProvider>
