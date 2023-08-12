@@ -1,6 +1,9 @@
+import { makeAutoObservable } from "mobx"
+
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 
 export class Building {
+  id: number
   kind: serverV1Types.Building_Kind
   level: number
   villageId: number
@@ -9,6 +12,8 @@ export class Building {
   upgradeCost: serverV1Types.Resources
 
   constructor(building: serverV1Types.Building) {
+    makeAutoObservable(this)
+    this.id = building.id
     this.kind = building.kind
     this.level = building.level
     this.villageId = building.villageId
@@ -26,13 +31,6 @@ export class Building {
       default:
         return 'Unknown'
     } 
-  }
-
-  onServerUpdate(building: serverV1Types.Building) {
-    this.level = building.level    
-    this.isUpgradable = building.isUpgradable
-    this.upgradeTimeLeft = building.upgradeTimeLeft
-    this.upgradeCost = building.upgradeCost!
   }
 }
 

@@ -1,25 +1,32 @@
+import { makeAutoObservable } from "mobx"
+
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 import { Building } from "./building"
 
 export class Village{
-  // Buildings
-  hall: Building
-  goldMine: Building
+  id: number
 
-  // Resources
   gold: number
 
-  constructor(village: serverV1Types.Village) {
-    // Buildings
-    this.hall = new Building(village.buildings?.hall!)
-    this.goldMine = new Building(village.buildings?.goldMine!)
+  buildings: Map<serverV1Types.Building_Kind, Building>
 
-    // Resources
+  constructor(village: serverV1Types.Village) {
+    makeAutoObservable(this)
+    this.id = village.id
     this.gold = village.resources?.gold!
+    this.buildings = new Map<serverV1Types.Building_Kind, Building>(village.buildings.map(b => [b.kind, new Building(b)]))
   }
 
-  get buildings(): Building[] {
-    return [this.hall, this.goldMine]
+  get hall(): Building | undefined {
+    return this.buildings.get(serverV1Types.Building_Kind.HALL)
+  }
+
+  get goldMine(): Building | undefined {
+    return this.buildings.get(serverV1Types.Building_Kind.GOLD_MINE)
+  }
+
+  updateBuilding(building: Building) {
+    this.buildings.set(building.kind, building)
   }
 }
 

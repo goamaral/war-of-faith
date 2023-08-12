@@ -1,56 +1,65 @@
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { observer } from 'mobx-react'
 
-import { getVillage } from '../lib/protobuf/server/v1/server-Service_connectquery'
 import { Village } from './entities/village'
 import { Building } from './entities/building'
 import server from './server'
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 // import TroopTypeToString, { TroopType } from './entities/troop'
-
-function useRefresh() {
-  const [_, setState] = useState({})
-  return () => setState({})
-}
 
 export default function VillagePage() {
   const { id } = useParams() as { id: string }
-  const { data: getVillageResponse, isLoading } = useQuery(getVillage.useQuery({ id: parseInt(id) }))
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [village, setVillage] = useState<Village>()
+
+  async function updateVillage() {
+    const res = await server.getVillage({ id: parseInt(id) })
+    setVillage(new Village(res.Village!))
+  }
+
+  useEffect(() => {
+    updateVillage().then(() => setIsLoading(false))
+  }, [])
+
+  // TODO: Replace with SSE
+  useEffect(() => {
+    const intervalId = isLoading ? 0 : setInterval(updateVillage, 1000)
+
+    return () => {
+      if (intervalId !== -1) clearInterval(intervalId)
+    }
+  }, [isLoading])
 
   if (isLoading) {
     return <div>Loading...</div>
   } else {
-    const village = new Village(getVillageResponse?.Village!)
-
     return (
       <div>
         <h1>Resources</h1>
         <ul>
-          <li>{village.gold} Gold</li>
+          <li>{village?.gold} Gold</li>
         </ul>
         <h1>Village</h1>
-        <VillageBuildings village={village} />
+        <VillageBuildings village={village!} />
         {/* <Troops village={village} /> */}
       </div>
     )
   }
 }
 
-function VillageBuildings({ village }: { village: Village }) {  
-  const refresh = useRefresh()
-
+const VillageBuildings = observer(({ village }: { village: Village }) => {  
   async function upgrade(b: Building) {
-      const { building, upgraded } = await server.upgradeBuilding({ villageId: b.villageId, kind: b.kind })
-      if (!upgraded) alert(`Failed to upgrade ${b.name}`)
-      b.onServerUpdate(building!)
-      refresh()
+    const { building, upgraded } = await server.upgradeBuilding({ villageId: b.villageId, kind: b.kind })
+    if (!upgraded) alert(`Failed to upgrade ${b.name}`)
+    village.updateBuilding(new Building(building!))
   }
 
   return (
     <div>
       <h2>Buildings</h2>
       <ul>
-        {village.buildings.map(building => {
+        {Array.from(village.buildings.values()).map(building => {
           return (<li>
             {building.name} - level {building.level} - 
             {
@@ -75,7 +84,7 @@ function VillageBuildings({ village }: { village: Village }) {
       </ul>
     </div>
   )
-}
+})
 
 // interface TroopsProps {
 //   village: Village,

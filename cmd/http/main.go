@@ -3,12 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
 
 	connectgo "github.com/bufbuild/connect-go"
+	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
-	"war-of-faith/cmd/http/local"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 	serverv1connect "war-of-faith/pkg/protobuf/server/v1/serverv1connect"
 )
@@ -18,20 +23,39 @@ type Server struct {
 }
 
 func (s *Server) GetVillage(ctx context.Context, req *connectgo.Request[serverv1.GetVillageRequest]) (*connectgo.Response[serverv1.GetVillageResponse], error) {
-	village, found := local.GetVillageById(req.Msg.Id.Value)
+	village, found, err := db.GetVillage(ctx, exp.Ex{"id": req.Msg.Id.Value})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
 	if !found {
-		return nil, fmt.Errorf("village not found")
+		return nil, status.Error(codes.NotFound, "village not found")
 	}
 
-	return connectgo.NewResponse(&serverv1.GetVillageResponse{
-		Village: village.ToProtobuf(),
-	}), nil
+	pVillage, err := village.ToProtobuf(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert village to protobuf: %w", err)
+	}
+
+	return connectgo.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
 func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.UpgradeBuildingRequest]) (*connectgo.Response[serverv1.UpgradeBuildingResponse], error) {
-	building, upgraded, err := local.UpgradeBuilding(req.Msg.VillageId, req.Msg.Kind)
+	building, found, err := db.GetBuilding(ctx, exp.Ex{"village_id": req.Msg.VillageId, "kind": req.Msg.Kind})
 	if err != nil {
-		return nil, fmt.Errorf("failed to upgrade building (village_id: %d, kind: %s)", req.Msg.VillageId, req.Msg.Kind)
+		return nil, fmt.Errorf("failed to get building: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "building not found")
+	}
+
+	upgraded := building.IsUpgradable()
+	if upgraded {
+		building.Level++
+		// TODO: Discount upgrade cost
+		err = db.UpdateBuilding(ctx, building.Id, building)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update building: %w", err)
+		}
 	}
 
 	return connectgo.NewResponse(&serverv1.UpgradeBuildingResponse{
@@ -41,6 +65,31 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 }
 
 func main() {
+	go runServer()
+
+	ticker := time.NewTicker(time.Second)
+	for range ticker.C {
+		ctx := context.Background()
+
+		villages, err := db.GetVillages(ctx)
+		if err != nil {
+			log.Printf("failed to get villages: %v", err)
+			goto LOOP_END
+		}
+		for _, village := range villages {
+			village.Gold++
+			err = db.UpdateVillage(ctx, village.Id, village)
+			if err != nil {
+				log.Printf("failed to get villages: %v", err)
+				goto LOOP_END
+			}
+		}
+
+	LOOP_END:
+	}
+}
+
+func runServer() {
 	server := gin.Default()
 	server.SetTrustedProxies(nil)
 	server.Use(cors.New(cors.Config{

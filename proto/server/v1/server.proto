@@ -11,12 +11,13 @@ message Resources {
 }
 
 message Building {
-  Building.Kind kind = 1;
-  uint32 level = 2;
-  uint32 villageId = 3;
-  bool is_upgradable = 4;
-  uint32 upgrade_time_left = 5;
-  Resources upgrade_cost = 6;
+  uint32 id = 1;
+  Building.Kind kind = 2;
+  uint32 level = 3;
+  uint32 village_id = 4;
+  bool is_upgradable = 5;
+  uint32 upgrade_time_left = 6;
+  Resources upgrade_cost = 7;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
@@ -28,12 +29,7 @@ message Building {
 message Village {
   uint32 id = 1;
   Resources resources = 2;
-  Village.Buildings buildings = 3;
-
-  message Buildings {
-    Building hall = 1;
-    Building gold_mine = 2;
-  }
+  repeated Building buildings = 3;
 }
 
 // GetVillage
