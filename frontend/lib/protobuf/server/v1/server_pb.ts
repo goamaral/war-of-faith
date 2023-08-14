@@ -68,9 +68,9 @@ export class Building extends Message<Building> {
   villageId = 0;
 
   /**
-   * @generated from field: bool is_upgradable = 5;
+   * @generated from field: server.v1.Building.UpgradeStatus upgrade_status = 5;
    */
-  isUpgradable = false;
+  upgradeStatus = Building_UpgradeStatus.UNSPECIFIED;
 
   /**
    * @generated from field: uint32 upgrade_time_left = 6;
@@ -94,7 +94,7 @@ export class Building extends Message<Building> {
     { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
     { no: 3, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 4, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "is_upgradable", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "upgrade_status", kind: "enum", T: proto3.getEnumType(Building_UpgradeStatus) },
     { no: 6, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 7, name: "upgrade_cost", kind: "message", T: Resources },
   ]);
@@ -140,6 +140,44 @@ proto3.util.setEnumType(Building_Kind, "server.v1.Building.Kind", [
   { no: 0, name: "KIND_UNSPECIFIED" },
   { no: 1, name: "KIND_HALL" },
   { no: 2, name: "KIND_GOLD_MINE" },
+]);
+
+/**
+ * @generated from enum server.v1.Building.UpgradeStatus
+ */
+export enum Building_UpgradeStatus {
+  /**
+   * @generated from enum value: UPGRADE_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: UPGRADE_STATUS_UPGRADABLE = 1;
+   */
+  UPGRADABLE = 1,
+
+  /**
+   * @generated from enum value: UPGRADE_STATUS_UPGRADING = 2;
+   */
+  UPGRADING = 2,
+
+  /**
+   * @generated from enum value: UPGRADE_STATUS_MAX_LEVEL = 3;
+   */
+  MAX_LEVEL = 3,
+
+  /**
+   * @generated from enum value: UPGRADE_STATUS_INSUFFICIENT_RESOURCES = 4;
+   */
+  INSUFFICIENT_RESOURCES = 4,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Building_UpgradeStatus)
+proto3.util.setEnumType(Building_UpgradeStatus, "server.v1.Building.UpgradeStatus", [
+  { no: 0, name: "UPGRADE_STATUS_UNSPECIFIED" },
+  { no: 1, name: "UPGRADE_STATUS_UPGRADABLE" },
+  { no: 2, name: "UPGRADE_STATUS_UPGRADING" },
+  { no: 3, name: "UPGRADE_STATUS_MAX_LEVEL" },
+  { no: 4, name: "UPGRADE_STATUS_INSUFFICIENT_RESOURCES" },
 ]);
 
 /**
@@ -321,11 +359,6 @@ export class UpgradeBuildingResponse extends Message<UpgradeBuildingResponse> {
    */
   building?: Building;
 
-  /**
-   * @generated from field: bool upgraded = 2;
-   */
-  upgraded = false;
-
   constructor(data?: PartialMessage<UpgradeBuildingResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -335,7 +368,6 @@ export class UpgradeBuildingResponse extends Message<UpgradeBuildingResponse> {
   static readonly typeName = "server.v1.UpgradeBuildingResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "building", kind: "message", T: Building },
-    { no: 2, name: "upgraded", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpgradeBuildingResponse {

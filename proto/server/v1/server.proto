@@ -15,7 +15,7 @@ message Building {
   Building.Kind kind = 2;
   uint32 level = 3;
   uint32 village_id = 4;
-  bool is_upgradable = 5;
+  Building.UpgradeStatus upgrade_status = 5;
   uint32 upgrade_time_left = 6;
   Resources upgrade_cost = 7;
 
@@ -23,6 +23,14 @@ message Building {
     KIND_UNSPECIFIED = 0;
     KIND_HALL = 1;
     KIND_GOLD_MINE = 2;
+  }
+
+  enum UpgradeStatus {
+    UPGRADE_STATUS_UNSPECIFIED = 0;
+    UPGRADE_STATUS_UPGRADABLE = 1;
+    UPGRADE_STATUS_UPGRADING = 2;
+    UPGRADE_STATUS_MAX_LEVEL = 3;
+    UPGRADE_STATUS_INSUFFICIENT_RESOURCES = 4;
   }
 }
 
@@ -47,7 +55,6 @@ message UpgradeBuildingRequest {
 }
 message UpgradeBuildingResponse {
   Building building = 1;
-  bool upgraded = 2;
 }
 
 service Service {

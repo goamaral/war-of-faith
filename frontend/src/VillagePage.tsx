@@ -1,21 +1,21 @@
 import { useParams } from 'react-router-dom'
 import { observer } from 'mobx-react'
-
-import { Village } from './entities/village'
-import { Building } from './entities/building'
-import server from './server'
 import { useEffect, useState } from 'preact/hooks'
+
+import * as serverV1Types from "../lib/protobuf/server/v1/server_pb"
+import * as entities from './entities'
+import server from './server'
 // import TroopTypeToString, { TroopType } from './entities/troop'
 
 export default function VillagePage() {
   const { id } = useParams() as { id: string }
 
   const [isLoading, setIsLoading] = useState(true)
-  const [village, setVillage] = useState<Village>()
+  const [village, setVillage] = useState<entities.Village>()
 
   async function updateVillage() {
     const res = await server.getVillage({ id: parseInt(id) })
-    setVillage(new Village(res.Village!))
+    setVillage(new entities.Village(res.Village!))
   }
 
   useEffect(() => {
@@ -34,25 +34,32 @@ export default function VillagePage() {
   if (isLoading) {
     return <div>Loading...</div>
   } else {
-    return (
-      <div>
-        <h1>Resources</h1>
-        <ul>
-          <li>{village?.gold} Gold</li>
-        </ul>
-        <h1>Village</h1>
-        <VillageBuildings village={village!} />
-        {/* <Troops village={village} /> */}
-      </div>
-    )
+    return <Village village={village!} />
   }
 }
 
-const VillageBuildings = observer(({ village }: { village: Village }) => {  
-  async function upgrade(b: Building) {
-    const { building, upgraded } = await server.upgradeBuilding({ villageId: b.villageId, kind: b.kind })
-    if (!upgraded) alert(`Failed to upgrade ${b.name}`)
-    village.updateBuilding(new Building(building!))
+const Village = observer(({ village }: { village: entities.Village }) => {
+  return (
+    <div>
+      <h1>Resources</h1>
+      <ul>
+        <li>{village?.gold} Gold</li>
+      </ul>
+      <h1>Village</h1>
+      <VillageBuildings village={village!} />
+      {/* <Troops village={village} /> */}
+    </div>
+  )
+})
+
+const VillageBuildings = observer(({ village }: { village: entities.Village }) => {  
+  async function upgrade(b: entities.Building) {
+    const { building } = await server.upgradeBuilding({ villageId: b.villageId, kind: b.kind })
+    if (building?.upgradeStatus != serverV1Types.Building_UpgradeStatus.UPGRADING) {
+      alert(`Failed to upgrade ${b.name} (status: ${building?.upgradeStatus})`)
+    }
+    village.updateBuilding(new entities.Building(building!))
+    village.gold -= b.upgradeCost.gold
   }
 
   return (
@@ -63,7 +70,7 @@ const VillageBuildings = observer(({ village }: { village: Village }) => {
           return (<li>
             {building.name} - level {building.level} - 
             {
-              building.isUpgradable ?
+              // building.isUpgradable ?
                 (
                   building.upgradeTimeLeft === 0 ?
                     <>
@@ -76,8 +83,8 @@ const VillageBuildings = observer(({ village }: { village: Village }) => {
                       {building.upgradeTimeLeft}s left
                     </>
                 )
-                :
-                null
+                // :
+                // null
             }
           </li>)
         })}

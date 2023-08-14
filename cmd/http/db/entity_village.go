@@ -6,7 +6,6 @@ import (
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/samber/lo"
 )
 
 type Village struct {
@@ -27,12 +26,20 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		return nil, fmt.Errorf("failed to get buildings: %w", err)
 	}
 
+	pBuildings := make([]*serverv1.Building, len(buildings))
+	for i, b := range buildings {
+		pBuildings[i], err = b.ToProtobuf(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert building to protobuf: %w", err)
+		}
+	}
+
 	return &serverv1.Village{
 		Id: v.Id,
 		Resources: &serverv1.Resources{
 			Gold: v.Gold,
 		},
-		Buildings: lo.Map(buildings, func(b Building, _ int) *serverv1.Building { return b.ToProtobuf() }),
+		Buildings: pBuildings,
 	}, nil
 }
 

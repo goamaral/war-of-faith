@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -55,15 +57,18 @@ func findQuery[T any](ctx context.Context, qry *goqu.SelectDataset) ([]T, error)
 
 func firstQuery[T any](ctx context.Context, qry *goqu.SelectDataset) (T, bool, error) {
 	var record T
-	// TODO: User db.GetContext()
-	records, err := findQuery[T](ctx, qry.Limit(1))
+	qrySql, params, err := qry.ToSQL()
 	if err != nil {
+		return record, false, fmt.Errorf("failed to build query: %w", err)
+	}
+	err = db.GetContext(ctx, &record, qrySql, params...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return record, false, nil
+		}
 		return record, false, err
 	}
-	if len(records) == 0 {
-		return record, false, nil
-	}
-	return records[0], true, nil
+	return record, true, nil
 }
 
 func updateQuery(ctx context.Context, qry *goqu.UpdateDataset) (int64, error) {

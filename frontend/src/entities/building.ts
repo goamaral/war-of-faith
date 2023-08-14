@@ -7,7 +7,7 @@ export class Building {
   kind: serverV1Types.Building_Kind
   level: number
   villageId: number
-  isUpgradable: boolean
+  upgradeStatus: serverV1Types.Building_UpgradeStatus
   upgradeTimeLeft: number
   upgradeCost: serverV1Types.Resources
 
@@ -17,7 +17,7 @@ export class Building {
     this.kind = building.kind
     this.level = building.level
     this.villageId = building.villageId
-    this.isUpgradable = building.isUpgradable
+    this.upgradeStatus = building.upgradeStatus
     this.upgradeTimeLeft = building.upgradeTimeLeft
     this.upgradeCost = building.upgradeCost!
   }
