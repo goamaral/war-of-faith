@@ -10,7 +10,7 @@ import (
 )
 
 func CreateBuilding(ctx context.Context, kind serverv1.Building_Kind, villageId uint32) (Building, error) {
-	building := Building{Id: rand.Uint32(), Kind: kind, Level: 1, UpgradeGoldCost: 10, VillageId: villageId}
+	building := Building{Id: rand.Uint32(), Kind: kind, Level: 1, VillageId: villageId} // TODO: Improve id generation
 	id, err := insertQuery(ctx, goqu.Insert("buildings").Rows(building))
 	if err != nil {
 		return Building{}, err

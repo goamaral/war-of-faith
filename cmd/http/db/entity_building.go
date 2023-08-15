@@ -9,7 +9,11 @@ import (
 )
 
 const BuildingMaxLevel = 10
-const BuildingUpgradeTime = 10
+
+var BuildingUpgradeCost = Resources{
+	Time: 10,
+	Gold: 10,
+}
 
 type Building struct {
 	Id    uint32                 `db:"id"`
@@ -17,7 +21,6 @@ type Building struct {
 	Level uint32                 `db:"level"`
 
 	UpgradeTimeLeft uint32 `db:"upgrade_time_left"`
-	UpgradeGoldCost uint32 `db:"upgrade_gold_cost"`
 
 	VillageId uint32 `db:"village_id"`
 
@@ -33,12 +36,11 @@ func (b *Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
 	return &serverv1.Building{
 		Id:              b.Id,
 		Kind:            b.Kind,
+		Name:            b.Name(),
 		Level:           b.Level,
 		UpgradeStatus:   upgradeStatus,
 		UpgradeTimeLeft: b.UpgradeTimeLeft,
-		UpgradeCost: &serverv1.Resources{
-			Gold: b.UpgradeGoldCost,
-		},
+		UpgradeCost:     BuildingUpgradeCost.ToProtobuf(),
 	}, nil
 }
 
@@ -70,9 +72,20 @@ func (b *Building) UpgradeStatus(ctx context.Context) (serverv1.Building_Upgrade
 		return serverv1.Building_UPGRADE_STATUS_UNSPECIFIED, fmt.Errorf("failed to get village: %w", err)
 	}
 
-	if b.UpgradeGoldCost > village.Gold {
+	if BuildingUpgradeCost.Gold > village.Gold {
 		return serverv1.Building_UPGRADE_STATUS_INSUFFICIENT_RESOURCES, nil
 	}
 
 	return serverv1.Building_UPGRADE_STATUS_UPGRADABLE, nil
+}
+
+func (b *Building) Name() string {
+	switch b.Kind {
+	case serverv1.Building_KIND_HALL:
+		return "Village Hall"
+	case serverv1.Building_KIND_GOLD_MINE:
+		return "Gold Mine"
+	default:
+		return "Unknown"
+	}
 }

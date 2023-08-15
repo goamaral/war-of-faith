@@ -39,7 +39,7 @@ func (s *Server) GetVillage(ctx context.Context, req *connectgo.Request[serverv1
 	return connectgo.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
-// TODO: Use transaction SELECT FOR UPDATE
+// TODO: Use mutexes
 func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.UpgradeBuildingRequest]) (*connectgo.Response[serverv1.UpgradeBuildingResponse], error) {
 	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
 	if err != nil {
@@ -58,13 +58,13 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 		if err != nil {
 			return nil, fmt.Errorf("failed to get village: %w", err)
 		}
-		village.Gold -= building.UpgradeGoldCost
+		village.Gold -= db.BuildingUpgradeCost.Gold
 		err = db.UpdateVillage(ctx, village.Id, village)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update village: %w", err)
 		}
 
-		building.UpgradeTimeLeft = db.BuildingUpgradeTime
+		building.UpgradeTimeLeft = db.BuildingUpgradeCost.Time
 		err = db.UpdateBuilding(ctx, building.Id, building)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update building: %w", err)
@@ -79,7 +79,7 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 	return connectgo.NewResponse(&serverv1.UpgradeBuildingResponse{Building: pBuilding}), nil
 }
 
-// TODO: Use transaction SELECT FOR UPDATE
+// TODO: Use mutexes
 func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.CancelUpgradeBuildingRequest]) (*connectgo.Response[serverv1.CancelUpgradeBuildingResponse], error) {
 	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connectgo.Reque
 		if err != nil {
 			return nil, fmt.Errorf("failed to get village: %w", err)
 		}
-		village.Gold += building.UpgradeGoldCost
+		village.Gold += db.BuildingUpgradeCost.Gold
 		err = db.UpdateVillage(ctx, village.Id, village)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update village: %w", err)
@@ -126,7 +126,7 @@ func main() {
 	for range ticker.C {
 		ctx := context.Background()
 
-		// TODO: Use transaction SELECT FOR UPDATE
+		// TODO: Use mutexes
 		villages, err := db.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)

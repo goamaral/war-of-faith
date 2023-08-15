@@ -5,7 +5,14 @@ import { useEffect, useState } from 'preact/hooks'
 import * as serverV1Types from "../lib/protobuf/server/v1/server_pb"
 import * as entities from './entities'
 import server from './server'
-// import TroopTypeToString, { TroopType } from './entities/troop'
+
+function parseNumber(n: any): number {
+  try {
+    return parseInt(n)
+  } catch {
+    return 0
+  }
+}
 
 export default function VillagePage() {
   const { id } = useParams() as { id: string }
@@ -19,7 +26,7 @@ export default function VillagePage() {
   }
 
   useEffect(() => {
-    updateVillage().then(() => setIsLoading(false))
+    updateVillage().then(() => setIsLoading(false)).catch(err => alert(err))
   }, [])
 
   // TODO: Replace with SSE
@@ -47,7 +54,7 @@ const Village = observer(({ village }: { village: entities.Village }) => {
       </ul>
       <h1>Village</h1>
       <VillageBuildings village={village!} />
-      {/* <Troops village={village} /> */}
+      <VillageTroops village={village} />
     </div>
   )
 })
@@ -60,10 +67,10 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
       village.updateBuilding(updatedBuilding)
 
       if (updatedBuilding.upgradeStatus != serverV1Types.Building_UpgradeStatus.UPGRADING) {
-        alert(`Failed to upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus})`)
+        alert(`Failed to upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus.toString()})`)
         return
       }
-      village.gold -= building.upgradeCost.gold
+      village.addGold(-building.upgradeCost.gold)
     }
 
     async function cancelUpgrade() {
@@ -72,18 +79,15 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
       village.updateBuilding(updatedBuilding)
     
       if (updatedBuilding.upgradeStatus != serverV1Types.Building_UpgradeStatus.UPGRADABLE) {
-        alert(`Failed to cancel upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus})`)
+        alert(`Failed to cancel upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus.toString()})`)
         return
       }
-      village.gold += building.upgradeCost.gold
+      village.addGold(building.upgradeCost.gold)
     }
 
     switch (building.upgradeStatus) {
       case serverV1Types.Building_UpgradeStatus.UPGRADABLE:
-        return <>
-          <button onClick={upgrade}>+</button>
-          {building.upgradeCost.gold} gold
-        </>
+        return <button onClick={upgrade}>upgrade ({building.upgradeCost.time}s, {building.upgradeCost.gold} gold)</button>
 
       case serverV1Types.Building_UpgradeStatus.UPGRADING:
         return <>
@@ -95,13 +99,11 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
         return <></>
 
       case serverV1Types.Building_UpgradeStatus.INSUFFICIENT_RESOURCES:
-        return <>
-          <button disabled={true}>+</button>
-          {building.upgradeCost.gold} gold
-        </>
+        return <button disabled={true}>upgrade ({building.upgradeCost.time}s, {building.upgradeCost.gold} gold)</button>
+
 
       default:
-        throw new Error(`Unknown upgrade status: ${building.upgradeStatus}`)
+        throw new Error(`Unknown building upgrade status: ${building.upgradeStatus.toString()}`)
     }
   }
 
@@ -119,37 +121,49 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
   )
 })
 
-// interface TroopsProps {
-//   village: Village,
-// }
-// function Troops({ village }: TroopsProps) {
-//   const villageHall = village.buildings.villageHall
 
-//   return (
-//     <div>
-//       <h2>Troops</h2>
-//       <ul>
-//         <li>
-//           {TroopTypeToString(TroopType.Leader)} - {villageHall.leaders}
-//           {
-//             villageHall.canTrainLeader ?
-//               (
-//                 villageHall.leaderTrainTimeLeft === 0 ?
-//                   <>
-//                     <button onClick={() => villageHall.trainLeader()}>+</button>
-//                     {villageHall.leaderTrainCost.gold} gold
-//                   </>
-//                 :
-//                   <>
-//                     <button onClick={() => villageHall.cancelTrainLeader()}>cancel</button>
-//                     {villageHall.leaderTrainTimeLeft}s left
-//                   </>
-//               )
-//               :
-//               null
-//           }
-//         </li>
-//       </ul>
-//     </div>
-//   )
-// }
+const VillageTroops = observer(({ village }: { village: entities.Village }) => {
+  const [quantity, setQuantity] = useState(1)
+
+  function TrainStatus({ troop }: { troop: entities.Troop }) {
+    const max = troop.kind == serverV1Types.Troop_Kind.LEADER ? village.trainableLeaders : undefined
+
+    function train() {}
+
+    switch (troop.trainStatus(quantity)) {
+      case entities.TroopTrainStatus.TRAINABLE:
+        return <>
+          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />
+          <button onClick={train}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
+        </>
+
+      case entities.TroopTrainStatus.NOT_ENOUGH_RESOURCES:
+        return <>
+          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />
+          <button disabled={true}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
+        </>
+
+      case entities.TroopTrainStatus.NO_MORE_LEADERS:
+        return <></>
+
+      default:
+        throw new Error(`Unknown village troop train status: ${troop.trainStatus(quantity).toString()}`)
+    }
+  }
+
+  return (
+    <div>
+      <h2>Troops</h2>
+      <ul>
+        <li>
+          {Array.from(village.troops.values()).map(troop => {
+            return (<li>
+              {troop.name} - {troop.quantity}
+              <TrainStatus troop={troop} />
+            </li>)
+          })}
+        </li>
+      </ul>
+    </div>
+  )
+})

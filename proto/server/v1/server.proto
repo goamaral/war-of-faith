@@ -6,17 +6,27 @@ option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
 import "google/protobuf/wrappers.proto";
 
+message Village {
+  uint32 id = 1;
+  Resources resources = 2;
+  repeated Building buildings = 3;
+  repeated Troop troops = 4;
+  repeated Troop.TrainOrder troop_train_orders = 5;
+}
+
 message Resources {
-  uint32 gold = 1;
+  uint32 time = 1;
+  uint32 gold = 2;
 }
 
 message Building {
   uint32 id = 1;
   Building.Kind kind = 2;
-  uint32 level = 3;
-  Building.UpgradeStatus upgrade_status = 4;
-  uint32 upgrade_time_left = 5;
-  Resources upgrade_cost = 6;
+  string name = 3;
+  uint32 level = 4;
+  Building.UpgradeStatus upgrade_status = 5;
+  uint32 upgrade_time_left = 6;
+  Resources upgrade_cost = 7;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
@@ -24,6 +34,7 @@ message Building {
     KIND_GOLD_MINE = 2;
   }
 
+  // TODO: Move this logic to the frontend
   enum UpgradeStatus {
     UPGRADE_STATUS_UNSPECIFIED = 0;
     UPGRADE_STATUS_UPGRADABLE = 1;
@@ -33,10 +44,23 @@ message Building {
   }
 }
 
-message Village {
+message Troop {
   uint32 id = 1;
-  Resources resources = 2;
-  repeated Building buildings = 3;
+  Troop.Kind kind = 2;
+  string name = 3;
+  Resources train_cost = 4;
+  uint32 quantity = 5;
+
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_LEADER = 1;
+  }
+
+  message TrainOrder {
+    Troop troop = 1;
+    uint32 quantity = 2;
+    Resources cost = 3;
+  }
 }
 
 // GetVillage

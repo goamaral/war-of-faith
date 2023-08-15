@@ -17,9 +17,8 @@ var db *sqlx.DB
 var dialect goqu.DialectWrapper
 
 func init() {
-	// db = sqlx.MustOpen("sqlite", ":memory:")
-	// db = sqlx.MustOpen("sqlite", ":memory:?_pragma=foreign_keys(1)")
-	db = sqlx.MustOpen("sqlite", "db.sqlite3")
+	db = sqlx.MustOpen("sqlite", ":memory:")
+	// db = sqlx.MustOpen("sqlite", "db.sqlite3")
 	dialect = goqu.Dialect("sqlite3")
 
 	db.MustExec("PRAGMA foreign_keys = ON;")
@@ -34,16 +33,29 @@ func init() {
 			kind INTERGER NOT NULL,
 			level INTERGER NOT NULL,
 			upgrade_time_left INTERGER NOT NULL,
-			upgrade_gold_cost INTERGER NOT NULL,
+
+			village_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS troops (
+			id INTEGER PRIMARY KEY,
+			kind INTERGER NOT NULL,
+			name TEXT NOT NULL,
+			quantity INTEGER NOT NULL,
+
 			village_id INTEGER NOT NULL,
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 	`)
 
-	_, err := CreateVillage(context.Background())
+	ctx := context.Background()
+
+	village, err := CreateVillage(ctx)
 	if err != nil {
 		log.Panic(err)
 	}
+	fmt.Println(village)
 }
 
 func findQuery[T any](ctx context.Context, qry *goqu.SelectDataset) ([]T, error) {

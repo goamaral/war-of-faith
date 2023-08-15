@@ -12,19 +12,14 @@ import (
 )
 
 func CreateVillage(ctx context.Context) (Village, error) {
-	village := Village{Id: rand.Uint32(), buildings: &[]Building{}}
+	village := Village{Id: rand.Uint32(), buildings: &[]Building{}, troops: &[]Troop{}} // TODO: Improve id generation
 	id, err := insertQuery(ctx, goqu.Insert("villages").Rows(village))
 	if err != nil {
 		return Village{}, err
 	}
 	village.Id = uint32(id)
 
-	v, found, err := GetVillage(ctx, exp.Ex{"id": village.Id})
-	if err != nil {
-		return Village{}, err
-	}
-	fmt.Println("V", found, v)
-
+	/* BUILDINGS */
 	// Hall
 	hall, err := CreateBuilding(ctx, serverv1.Building_KIND_HALL, village.Id)
 	if err != nil {
@@ -38,6 +33,14 @@ func CreateVillage(ctx context.Context) (Village, error) {
 		return Village{}, fmt.Errorf("failed to create gold mine building: %w", err)
 	}
 	*village.buildings = append(*village.buildings, goldMine)
+
+	/* TROOPS */
+	// Leaders
+	leaders, err := CreateTroop(ctx, &Troop{Kind: serverv1.Troop_KIND_LEADER, Name: "Leader", VillageId: village.Id})
+	if err != nil {
+		return Village{}, fmt.Errorf("failed to create leader troops: %w", err)
+	}
+	*village.troops = append(*village.troops, *leaders)
 
 	return village, nil
 }
