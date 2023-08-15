@@ -31,17 +31,14 @@ func (b *Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
 	}
 
 	return &serverv1.Building{
-		Id:            b.Id,
-		Kind:          b.Kind,
-		Level:         b.Level,
-		UpgradeStatus: upgradeStatus,
-
+		Id:              b.Id,
+		Kind:            b.Kind,
+		Level:           b.Level,
+		UpgradeStatus:   upgradeStatus,
 		UpgradeTimeLeft: b.UpgradeTimeLeft,
 		UpgradeCost: &serverv1.Resources{
 			Gold: b.UpgradeGoldCost,
 		},
-
-		VillageId: b.VillageId,
 	}, nil
 }
 
@@ -64,7 +61,7 @@ func (b *Building) UpgradeStatus(ctx context.Context) (serverv1.Building_Upgrade
 		return serverv1.Building_UPGRADE_STATUS_UPGRADING, nil
 	}
 
-	if b.Level == BuildingMaxLevel {
+	if b.Level >= BuildingMaxLevel {
 		return serverv1.Building_UPGRADE_STATUS_MAX_LEVEL, nil
 	}
 

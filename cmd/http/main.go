@@ -39,9 +39,9 @@ func (s *Server) GetVillage(ctx context.Context, req *connectgo.Request[serverv1
 	return connectgo.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
-// TODO: Use transaction
+// TODO: Use transaction SELECT FOR UPDATE
 func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.UpgradeBuildingRequest]) (*connectgo.Response[serverv1.UpgradeBuildingResponse], error) {
-	building, found, err := db.GetBuilding(ctx, exp.Ex{"village_id": req.Msg.VillageId, "kind": req.Msg.Kind})
+	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building: %w", err)
 	}
@@ -51,7 +51,7 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 
 	upgradeStatus, err := building.UpgradeStatus(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check if building is upgradable: %w", err)
+		return nil, fmt.Errorf("failed to check upgrade status: %w", err)
 	}
 	if upgradeStatus == serverv1.Building_UPGRADE_STATUS_UPGRADABLE {
 		village, err := building.Village(ctx)
@@ -64,7 +64,6 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 			return nil, fmt.Errorf("failed to update village: %w", err)
 		}
 
-		building.Level++
 		building.UpgradeTimeLeft = db.BuildingUpgradeTime
 		err = db.UpdateBuilding(ctx, building.Id, building)
 		if err != nil {
@@ -80,6 +79,46 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 	return connectgo.NewResponse(&serverv1.UpgradeBuildingResponse{Building: pBuilding}), nil
 }
 
+// TODO: Use transaction SELECT FOR UPDATE
+func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.CancelUpgradeBuildingRequest]) (*connectgo.Response[serverv1.CancelUpgradeBuildingResponse], error) {
+	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "building not found")
+	}
+
+	upgradeStatus, err := building.UpgradeStatus(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check upgrade status: %w", err)
+	}
+	if upgradeStatus == serverv1.Building_UPGRADE_STATUS_UPGRADING {
+		building.UpgradeTimeLeft = 0
+		err = db.UpdateBuilding(ctx, building.Id, building)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update building: %w", err)
+		}
+
+		village, err := building.Village(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get village: %w", err)
+		}
+		village.Gold += building.UpgradeGoldCost
+		err = db.UpdateVillage(ctx, village.Id, village)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update village: %w", err)
+		}
+	}
+
+	pBuilding, err := building.ToProtobuf(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert building to protobuf: %w", err)
+	}
+
+	return connectgo.NewResponse(&serverv1.CancelUpgradeBuildingResponse{Building: pBuilding}), nil
+}
+
 func main() {
 	go runServer()
 
@@ -87,6 +126,7 @@ func main() {
 	for range ticker.C {
 		ctx := context.Background()
 
+		// TODO: Use transaction SELECT FOR UPDATE
 		villages, err := db.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)
@@ -109,6 +149,10 @@ func main() {
 			for _, building := range buildings {
 				if building.UpgradeTimeLeft > 0 {
 					building.UpgradeTimeLeft--
+					if building.UpgradeTimeLeft == 0 {
+						building.Level++
+					}
+
 					err = db.UpdateBuilding(ctx, building.Id, building)
 					if err != nil {
 						log.Printf("failed to update building (id: %d): %v", building.Id, err)

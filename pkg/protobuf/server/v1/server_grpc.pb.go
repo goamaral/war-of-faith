@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ServiceClient interface {
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
 	UpgradeBuilding(ctx context.Context, in *UpgradeBuildingRequest, opts ...grpc.CallOption) (*UpgradeBuildingResponse, error)
+	CancelUpgradeBuilding(ctx context.Context, in *CancelUpgradeBuildingRequest, opts ...grpc.CallOption) (*CancelUpgradeBuildingResponse, error)
 }
 
 type serviceClient struct {
@@ -52,12 +53,22 @@ func (c *serviceClient) UpgradeBuilding(ctx context.Context, in *UpgradeBuilding
 	return out, nil
 }
 
+func (c *serviceClient) CancelUpgradeBuilding(ctx context.Context, in *CancelUpgradeBuildingRequest, opts ...grpc.CallOption) (*CancelUpgradeBuildingResponse, error) {
+	out := new(CancelUpgradeBuildingResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/CancelUpgradeBuilding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility
 type ServiceServer interface {
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
 	UpgradeBuilding(context.Context, *UpgradeBuildingRequest) (*UpgradeBuildingResponse, error)
+	CancelUpgradeBuilding(context.Context, *CancelUpgradeBuildingRequest) (*CancelUpgradeBuildingResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have forward compatible implementations.
@@ -69,6 +80,9 @@ func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest
 }
 func (UnimplementedServiceServer) UpgradeBuilding(context.Context, *UpgradeBuildingRequest) (*UpgradeBuildingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpgradeBuilding not implemented")
+}
+func (UnimplementedServiceServer) CancelUpgradeBuilding(context.Context, *CancelUpgradeBuildingRequest) (*CancelUpgradeBuildingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelUpgradeBuilding not implemented")
 }
 
 // UnsafeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -118,6 +132,24 @@ func _Service_UpgradeBuilding_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_CancelUpgradeBuilding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelUpgradeBuildingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).CancelUpgradeBuilding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/CancelUpgradeBuilding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).CancelUpgradeBuilding(ctx, req.(*CancelUpgradeBuildingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -132,6 +164,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpgradeBuilding",
 			Handler:    _Service_UpgradeBuilding_Handler,
+		},
+		{
+			MethodName: "CancelUpgradeBuilding",
+			Handler:    _Service_CancelUpgradeBuilding_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

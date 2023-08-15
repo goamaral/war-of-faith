@@ -14,10 +14,9 @@ message Building {
   uint32 id = 1;
   Building.Kind kind = 2;
   uint32 level = 3;
-  uint32 village_id = 4;
-  Building.UpgradeStatus upgrade_status = 5;
-  uint32 upgrade_time_left = 6;
-  Resources upgrade_cost = 7;
+  Building.UpgradeStatus upgrade_status = 4;
+  uint32 upgrade_time_left = 5;
+  Resources upgrade_cost = 6;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
@@ -50,14 +49,22 @@ message GetVillageResponse {
 
 // UpgradeBuilding
 message UpgradeBuildingRequest {
-  uint32 village_id = 1;
-  Building.Kind kind = 2;
+  uint32 id = 1;
 }
 message UpgradeBuildingResponse {
+  Building building = 1;
+}
+
+// CancelUpgradeBuilding
+message CancelUpgradeBuildingRequest {
+  uint32 id = 1;
+}
+message CancelUpgradeBuildingResponse {
   Building building = 1;
 }
 
 service Service {
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
   rpc UpgradeBuilding(UpgradeBuildingRequest) returns (UpgradeBuildingResponse);
+  rpc CancelUpgradeBuilding(CancelUpgradeBuildingRequest) returns (CancelUpgradeBuildingResponse);
 }

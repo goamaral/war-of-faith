@@ -37,12 +37,16 @@ const (
 	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
 	// ServiceUpgradeBuildingProcedure is the fully-qualified name of the Service's UpgradeBuilding RPC.
 	ServiceUpgradeBuildingProcedure = "/server.v1.Service/UpgradeBuilding"
+	// ServiceCancelUpgradeBuildingProcedure is the fully-qualified name of the Service's
+	// CancelUpgradeBuilding RPC.
+	ServiceCancelUpgradeBuildingProcedure = "/server.v1.Service/CancelUpgradeBuilding"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
 type ServiceClient interface {
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
+	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -65,13 +69,19 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceUpgradeBuildingProcedure,
 			opts...,
 		),
+		cancelUpgradeBuilding: connect_go.NewClient[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse](
+			httpClient,
+			baseURL+ServiceCancelUpgradeBuildingProcedure,
+			opts...,
+		),
 	}
 }
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	getVillage      *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
-	upgradeBuilding *connect_go.Client[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse]
+	getVillage            *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
+	upgradeBuilding       *connect_go.Client[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse]
+	cancelUpgradeBuilding *connect_go.Client[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -84,10 +94,16 @@ func (c *serviceClient) UpgradeBuilding(ctx context.Context, req *connect_go.Req
 	return c.upgradeBuilding.CallUnary(ctx, req)
 }
 
+// CancelUpgradeBuilding calls server.v1.Service.CancelUpgradeBuilding.
+func (c *serviceClient) CancelUpgradeBuilding(ctx context.Context, req *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error) {
+	return c.cancelUpgradeBuilding.CallUnary(ctx, req)
+}
+
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
+	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -106,12 +122,19 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.UpgradeBuilding,
 		opts...,
 	)
+	serviceCancelUpgradeBuildingHandler := connect_go.NewUnaryHandler(
+		ServiceCancelUpgradeBuildingProcedure,
+		svc.CancelUpgradeBuilding,
+		opts...,
+	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
 			serviceGetVillageHandler.ServeHTTP(w, r)
 		case ServiceUpgradeBuildingProcedure:
 			serviceUpgradeBuildingHandler.ServeHTTP(w, r)
+		case ServiceCancelUpgradeBuildingProcedure:
+			serviceCancelUpgradeBuildingHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -127,4 +150,8 @@ func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Reque
 
 func (UnimplementedServiceHandler) UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.UpgradeBuilding is not implemented"))
+}
+
+func (UnimplementedServiceHandler) CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelUpgradeBuilding is not implemented"))
 }

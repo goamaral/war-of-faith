@@ -63,22 +63,17 @@ export class Building extends Message<Building> {
   level = 0;
 
   /**
-   * @generated from field: uint32 village_id = 4;
-   */
-  villageId = 0;
-
-  /**
-   * @generated from field: server.v1.Building.UpgradeStatus upgrade_status = 5;
+   * @generated from field: server.v1.Building.UpgradeStatus upgrade_status = 4;
    */
   upgradeStatus = Building_UpgradeStatus.UNSPECIFIED;
 
   /**
-   * @generated from field: uint32 upgrade_time_left = 6;
+   * @generated from field: uint32 upgrade_time_left = 5;
    */
   upgradeTimeLeft = 0;
 
   /**
-   * @generated from field: server.v1.Resources upgrade_cost = 7;
+   * @generated from field: server.v1.Resources upgrade_cost = 6;
    */
   upgradeCost?: Resources;
 
@@ -93,10 +88,9 @@ export class Building extends Message<Building> {
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
     { no: 3, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "upgrade_status", kind: "enum", T: proto3.getEnumType(Building_UpgradeStatus) },
-    { no: 6, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 7, name: "upgrade_cost", kind: "message", T: Resources },
+    { no: 4, name: "upgrade_status", kind: "enum", T: proto3.getEnumType(Building_UpgradeStatus) },
+    { no: 5, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 6, name: "upgrade_cost", kind: "message", T: Resources },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
@@ -312,14 +306,9 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
  */
 export class UpgradeBuildingRequest extends Message<UpgradeBuildingRequest> {
   /**
-   * @generated from field: uint32 village_id = 1;
+   * @generated from field: uint32 id = 1;
    */
-  villageId = 0;
-
-  /**
-   * @generated from field: server.v1.Building.Kind kind = 2;
-   */
-  kind = Building_Kind.UNSPECIFIED;
+  id = 0;
 
   constructor(data?: PartialMessage<UpgradeBuildingRequest>) {
     super();
@@ -329,8 +318,7 @@ export class UpgradeBuildingRequest extends Message<UpgradeBuildingRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.UpgradeBuildingRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpgradeBuildingRequest {
@@ -384,6 +372,82 @@ export class UpgradeBuildingResponse extends Message<UpgradeBuildingResponse> {
 
   static equals(a: UpgradeBuildingResponse | PlainMessage<UpgradeBuildingResponse> | undefined, b: UpgradeBuildingResponse | PlainMessage<UpgradeBuildingResponse> | undefined): boolean {
     return proto3.util.equals(UpgradeBuildingResponse, a, b);
+  }
+}
+
+/**
+ * CancelUpgradeBuilding
+ *
+ * @generated from message server.v1.CancelUpgradeBuildingRequest
+ */
+export class CancelUpgradeBuildingRequest extends Message<CancelUpgradeBuildingRequest> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<CancelUpgradeBuildingRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelUpgradeBuildingRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelUpgradeBuildingRequest {
+    return new CancelUpgradeBuildingRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingRequest {
+    return new CancelUpgradeBuildingRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingRequest {
+    return new CancelUpgradeBuildingRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelUpgradeBuildingRequest | PlainMessage<CancelUpgradeBuildingRequest> | undefined, b: CancelUpgradeBuildingRequest | PlainMessage<CancelUpgradeBuildingRequest> | undefined): boolean {
+    return proto3.util.equals(CancelUpgradeBuildingRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.CancelUpgradeBuildingResponse
+ */
+export class CancelUpgradeBuildingResponse extends Message<CancelUpgradeBuildingResponse> {
+  /**
+   * @generated from field: server.v1.Building building = 1;
+   */
+  building?: Building;
+
+  constructor(data?: PartialMessage<CancelUpgradeBuildingResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelUpgradeBuildingResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "building", kind: "message", T: Building },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelUpgradeBuildingResponse {
+    return new CancelUpgradeBuildingResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingResponse {
+    return new CancelUpgradeBuildingResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingResponse {
+    return new CancelUpgradeBuildingResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelUpgradeBuildingResponse | PlainMessage<CancelUpgradeBuildingResponse> | undefined, b: CancelUpgradeBuildingResponse | PlainMessage<CancelUpgradeBuildingResponse> | undefined): boolean {
+    return proto3.util.equals(CancelUpgradeBuildingResponse, a, b);
   }
 }
 

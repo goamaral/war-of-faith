@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { GetVillageRequest, GetVillageResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
+import { CancelUpgradeBuildingRequest, CancelUpgradeBuildingResponse, GetVillageRequest, GetVillageResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -28,6 +28,15 @@ export const Service = {
       name: "UpgradeBuilding",
       I: UpgradeBuildingRequest,
       O: UpgradeBuildingResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.CancelUpgradeBuilding
+     */
+    cancelUpgradeBuilding: {
+      name: "CancelUpgradeBuilding",
+      I: CancelUpgradeBuildingRequest,
+      O: CancelUpgradeBuildingResponse,
       kind: MethodKind.Unary,
     },
   }
