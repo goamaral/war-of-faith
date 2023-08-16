@@ -51,7 +51,7 @@ func (b *Building) Village(ctx context.Context) (Village, error) {
 			return Village{}, err
 		}
 		if !found {
-			return Village{}, fmt.Errorf("village not found")
+			return Village{}, ErrNotFound
 		}
 		b.village = &village
 	}

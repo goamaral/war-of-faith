@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	"github.com/doug-martin/goqu/v9/exp"
@@ -23,7 +22,7 @@ type Troop struct {
 	village   *Village
 }
 
-func (t *Troop) ToProtobuf() *serverv1.Troop {
+func (t Troop) ToProtobuf() *serverv1.Troop {
 	return &serverv1.Troop{
 		Id:        t.Id,
 		Kind:      t.Kind,
@@ -37,12 +36,16 @@ func (t *Troop) Village(ctx context.Context) (Village, error) {
 	if t.village == nil {
 		village, found, err := GetVillage(ctx, exp.Ex{"id": t.VillageId})
 		if err != nil {
-			return Village{}, fmt.Errorf("failed to get Village: %w", err)
+			return Village{}, err
 		}
 		if !found {
-			return Village{}, fmt.Errorf("Village not found")
+			return Village{}, ErrNotFound
 		}
 		t.village = &village
 	}
 	return *t.village, nil
+}
+
+func (t Troop) TrainCost(quantity uint32) Resources {
+	return TroopTrainCost.Multiply(quantity)
 }

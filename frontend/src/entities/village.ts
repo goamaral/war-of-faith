@@ -1,7 +1,5 @@
-import { makeAutoObservable } from "mobx"
-
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
-import { Building, Troop, Resources } from "."
+import { Building, Troop, Resources, TroopTrainingOrder } from "."
 
 export default class Village{
   id: number
@@ -9,13 +7,14 @@ export default class Village{
 
   buildings: Map<serverV1Types.Building_Kind, Building>
   troops: Map<serverV1Types.Troop_Kind, Troop>
+  troopTrainingOrders: TroopTrainingOrder[]
 
   constructor(village: serverV1Types.Village) {
-    makeAutoObservable(this)
     this.id = village.id
     this.gold = village.resources?.gold!
     this.buildings = new Map<serverV1Types.Building_Kind, Building>(village.buildings.map(b => [b.kind, new Building(b)]))
     this.troops = new Map<serverV1Types.Troop_Kind, Troop>(village.troops.map(t => [t.kind!, new Troop(t, this)]))
+    this.troopTrainingOrders = village.troopTrainingOrders.map(o => new TroopTrainingOrder(o, this))
   }
 
   get hall(): Building | undefined {
@@ -27,7 +26,12 @@ export default class Village{
   }
 
   get trainableLeaders(): number {
-    return (this.troops.get(serverV1Types.Troop_Kind.LEADER)?.quantity ?? 0) - 1
+    const maxLeaders = 1
+    let leaders = this.troops.get(serverV1Types.Troop_Kind.LEADER)?.quantity ?? 0
+    this.troopTrainingOrders.forEach(o => {
+      if (o.troop.kind === serverV1Types.Troop_Kind.LEADER) leaders++
+    })
+    return maxLeaders - leaders
   }
   
   canAfford(cost: Resources) {
@@ -41,5 +45,9 @@ export default class Village{
 
   addGold(quantity: number) {
     this.gold += quantity
+  }
+
+  addTroopTrainingOrder(order: TroopTrainingOrder) {
+    this.troopTrainingOrders.push(order)
   }
 }

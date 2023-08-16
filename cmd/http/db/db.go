@@ -15,6 +15,7 @@ import (
 
 var db *sqlx.DB
 var dialect goqu.DialectWrapper
+var ErrNotFound = errors.New("not found")
 
 func init() {
 	db = sqlx.MustOpen("sqlite", ":memory:")
@@ -45,6 +46,17 @@ func init() {
 			quantity INTEGER NOT NULL,
 
 			village_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS troop_training_orders (
+			id INTEGER PRIMARY KEY,
+			quantity INTEGER NOT NULL,
+			time_left INTEGER NOT NULL,
+
+			troop_id INTEGER NOT NULL,
+			village_id INTEGER NOT NULL,
+			FOREIGN KEY(troop_id) REFERENCES troops(id),
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 	`)
@@ -105,4 +117,16 @@ func insertQuery(ctx context.Context, qry *goqu.InsertDataset) (int64, error) {
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func deleteQuery(ctx context.Context, qry *goqu.SelectDataset) (int64, error) {
+	sql, params, err := qry.Delete().ToSQL()
+	if err != nil {
+		return 0, fmt.Errorf("failed to build query: %w", err)
+	}
+	res, err := db.ExecContext(ctx, sql, params...)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }

@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { observer } from 'mobx-react'
 import { useEffect, useState } from 'preact/hooks'
+import { makeAutoObservable } from "mobx"
 
 import * as serverV1Types from "../lib/protobuf/server/v1/server_pb"
 import * as entities from './entities'
@@ -22,7 +23,9 @@ export default function VillagePage() {
 
   async function updateVillage() {
     const res = await server.getVillage({ id: parseInt(id) })
-    setVillage(new entities.Village(res.Village!))
+    const village = new entities.Village(res.Village!)
+    makeAutoObservable(village)
+    setVillage(village)
   }
 
   useEffect(() => {
@@ -128,7 +131,15 @@ const VillageTroops = observer(({ village }: { village: entities.Village }) => {
   function TrainStatus({ troop }: { troop: entities.Troop }) {
     const max = troop.kind == serverV1Types.Troop_Kind.LEADER ? village.trainableLeaders : undefined
 
-    function train() {}
+    async function train() {
+      try {
+        const { order } = await server.issueTroopTrainingOrder({ troopId: troop.id, quantity })
+        village.addTroopTrainingOrder(new entities.TroopTrainingOrder(order!, village))
+        village.addGold(-troop.trainCost(quantity).gold)
+      } catch (err) {
+        alert(`Failed to issue troop training order for ${troop.name} (quantity: ${quantity}): ${err}`)
+      }
+    }
 
     switch (troop.trainStatus(quantity)) {
       case entities.TroopTrainStatus.TRAINABLE:
@@ -155,14 +166,20 @@ const VillageTroops = observer(({ village }: { village: entities.Village }) => {
     <div>
       <h2>Troops</h2>
       <ul>
-        <li>
-          {Array.from(village.troops.values()).map(troop => {
+        {Array.from(village.troops.values()).map(troop => {
+          return (<li>
+            {troop.name} - {troop.quantity}
+            <TrainStatus troop={troop} />
+          </li>)
+        })}
+      </ul>
+      <h4>Orders</h4>
+      <ul>
+          {Array.from(village.troopTrainingOrders.map(order => {
             return (<li>
-              {troop.name} - {troop.quantity}
-              <TrainStatus troop={troop} />
+              {order.quantity} {order.troop.name} - {order.timeLeft}s
             </li>)
-          })}
-        </li>
+          }))}
       </ul>
     </div>
   )

@@ -11,7 +11,7 @@ message Village {
   Resources resources = 2;
   repeated Building buildings = 3;
   repeated Troop troops = 4;
-  repeated Troop.TrainOrder troop_train_orders = 5;
+  repeated Troop.TrainingOrder troop_training_orders = 5;
 }
 
 message Resources {
@@ -56,10 +56,12 @@ message Troop {
     KIND_LEADER = 1;
   }
 
-  message TrainOrder {
-    Troop troop = 1;
-    uint32 quantity = 2;
-    Resources cost = 3;
+  message TrainingOrder {
+    uint32 id = 1;
+    uint32 quantity = 3;
+    uint32 time_left = 4;
+    Resources cost = 5;
+    Troop troop = 6;
   }
 }
 
@@ -87,8 +89,18 @@ message CancelUpgradeBuildingResponse {
   Building building = 1;
 }
 
+// IssueTroopTrainingOrder
+message IssueTroopTrainingOrderRequest {
+  uint32 troop_id = 1;
+  uint32 quantity = 2;
+}
+message IssueTroopTrainingOrderResponse {
+  Troop.TrainingOrder order = 1;
+}
+
 service Service {
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
   rpc UpgradeBuilding(UpgradeBuildingRequest) returns (UpgradeBuildingResponse);
   rpc CancelUpgradeBuilding(CancelUpgradeBuildingRequest) returns (CancelUpgradeBuildingResponse);
+  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
 }

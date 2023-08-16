@@ -8,6 +8,7 @@ export enum TroopTrainStatus {
 }
 
 export default class Troop {
+  id: number
   kind: serverV1Types.Troop_Kind
   name: string
   troopTrainCost: Resources
@@ -16,6 +17,7 @@ export default class Troop {
   village: Village
 
   constructor(troop: serverV1Types.Troop, village: Village) {
+    this.id = troop.id
     this.kind = troop.kind
     this.name = troop.name
     this.troopTrainCost = new Resources(troop.trainCost!)
@@ -29,9 +31,8 @@ export default class Troop {
   }
 
   trainStatus(quantity: number): TroopTrainStatus {
-    if (!this.village.canAfford(this.trainCost(quantity))) return TroopTrainStatus.NOT_ENOUGH_RESOURCES
-
     if (this.kind == serverV1Types.Troop_Kind.LEADER && this.village.trainableLeaders == 0) return TroopTrainStatus.NO_MORE_LEADERS
+    if (!this.village.canAfford(this.trainCost(quantity))) return TroopTrainStatus.NOT_ENOUGH_RESOURCES
 
     return TroopTrainStatus.TRAINABLE
   }

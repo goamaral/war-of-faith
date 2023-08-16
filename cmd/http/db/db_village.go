@@ -11,9 +11,11 @@ import (
 	"github.com/doug-martin/goqu/v9/exp"
 )
 
+const VillagesTableName = "villages"
+
 func CreateVillage(ctx context.Context) (Village, error) {
 	village := Village{Id: rand.Uint32(), buildings: &[]Building{}, troops: &[]Troop{}} // TODO: Improve id generation
-	id, err := insertQuery(ctx, goqu.Insert("villages").Rows(village))
+	id, err := insertQuery(ctx, goqu.Insert(VillagesTableName).Rows(village))
 	if err != nil {
 		return Village{}, err
 	}
@@ -46,14 +48,14 @@ func CreateVillage(ctx context.Context) (Village, error) {
 }
 
 func GetVillages(ctx context.Context, exprs ...exp.Expression) ([]Village, error) {
-	return findQuery[Village](ctx, dialect.From("villages").Where(exprs...))
+	return findQuery[Village](ctx, dialect.From(VillagesTableName).Where(exprs...))
 }
 
 func GetVillage(ctx context.Context, exprs ...exp.Expression) (Village, bool, error) {
-	return firstQuery[Village](ctx, dialect.From("villages").Where(exprs...))
+	return firstQuery[Village](ctx, dialect.From(VillagesTableName).Where(exprs...))
 }
 
 func UpdateVillage(ctx context.Context, id uint32, village Village) error {
-	_, err := updateQuery(ctx, dialect.Update("villages").Where(exp.Ex{"id": id}).Set(village))
+	_, err := updateQuery(ctx, dialect.Update(VillagesTableName).Where(exp.Ex{"id": id}).Set(village))
 	return err
 }

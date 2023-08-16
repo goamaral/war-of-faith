@@ -40,6 +40,9 @@ const (
 	// ServiceCancelUpgradeBuildingProcedure is the fully-qualified name of the Service's
 	// CancelUpgradeBuilding RPC.
 	ServiceCancelUpgradeBuildingProcedure = "/server.v1.Service/CancelUpgradeBuilding"
+	// ServiceIssueTroopTrainingOrderProcedure is the fully-qualified name of the Service's
+	// IssueTroopTrainingOrder RPC.
+	ServiceIssueTroopTrainingOrderProcedure = "/server.v1.Service/IssueTroopTrainingOrder"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
@@ -47,6 +50,7 @@ type ServiceClient interface {
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
 	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
+	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -74,14 +78,20 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceCancelUpgradeBuildingProcedure,
 			opts...,
 		),
+		issueTroopTrainingOrder: connect_go.NewClient[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse](
+			httpClient,
+			baseURL+ServiceIssueTroopTrainingOrderProcedure,
+			opts...,
+		),
 	}
 }
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	getVillage            *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
-	upgradeBuilding       *connect_go.Client[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse]
-	cancelUpgradeBuilding *connect_go.Client[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse]
+	getVillage              *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
+	upgradeBuilding         *connect_go.Client[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse]
+	cancelUpgradeBuilding   *connect_go.Client[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse]
+	issueTroopTrainingOrder *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -99,11 +109,17 @@ func (c *serviceClient) CancelUpgradeBuilding(ctx context.Context, req *connect_
 	return c.cancelUpgradeBuilding.CallUnary(ctx, req)
 }
 
+// IssueTroopTrainingOrder calls server.v1.Service.IssueTroopTrainingOrder.
+func (c *serviceClient) IssueTroopTrainingOrder(ctx context.Context, req *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
+	return c.issueTroopTrainingOrder.CallUnary(ctx, req)
+}
+
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
 	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
+	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -127,6 +143,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.CancelUpgradeBuilding,
 		opts...,
 	)
+	serviceIssueTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueTroopTrainingOrderProcedure,
+		svc.IssueTroopTrainingOrder,
+		opts...,
+	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
@@ -135,6 +156,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceUpgradeBuildingHandler.ServeHTTP(w, r)
 		case ServiceCancelUpgradeBuildingProcedure:
 			serviceCancelUpgradeBuildingHandler.ServeHTTP(w, r)
+		case ServiceIssueTroopTrainingOrderProcedure:
+			serviceIssueTroopTrainingOrderHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -154,4 +177,8 @@ func (UnimplementedServiceHandler) UpgradeBuilding(context.Context, *connect_go.
 
 func (UnimplementedServiceHandler) CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelUpgradeBuilding is not implemented"))
+}
+
+func (UnimplementedServiceHandler) IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueTroopTrainingOrder is not implemented"))
 }

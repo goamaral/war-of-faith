@@ -13,8 +13,9 @@ type Village struct {
 
 	Gold uint32 `db:"gold"`
 
-	buildings *[]Building
-	troops    *[]Troop
+	buildings           *[]Building
+	troops              *[]Troop
+	troopTrainingOrders *[]TroopTrainingOrder
 }
 
 func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
@@ -46,14 +47,26 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		}
 	}
 
+	troopTrainingOrders, err := GetTroopTrainingOrders(ctx, exp.Ex{"village_id": v.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village troop training orders: %w", err)
+	}
+	pTroopTrainingOrders := make([]*serverv1.Troop_TrainingOrder, len(troopTrainingOrders))
+	for i, t := range troopTrainingOrders {
+		pTroopTrainingOrders[i], err = t.ToProtobuf(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert village troop training order to protobuf: %w", err)
+		}
+	}
+
 	return &serverv1.Village{
 		Id: v.Id,
 		Resources: &serverv1.Resources{
 			Gold: v.Gold,
 		},
-		Buildings:        pBuildings,
-		Troops:           pTroops,
-		TroopTrainOrders: []*serverv1.Troop_TrainOrder{}, // TODO
+		Buildings:           pBuildings,
+		Troops:              pTroops,
+		TroopTrainingOrders: pTroopTrainingOrders,
 	}, nil
 }
 
@@ -77,4 +90,23 @@ func (v *Village) Troops(ctx context.Context) ([]Troop, error) {
 		v.troops = &troops
 	}
 	return *v.troops, nil
+}
+
+func (v *Village) TroopTrainingOrders(ctx context.Context) ([]TroopTrainingOrder, error) {
+	if v.troops == nil {
+		troopTrainingOrders, err := GetTroopTrainingOrders(ctx, exp.Ex{"village_id": v.Id})
+		if err != nil {
+			return nil, err
+		}
+		v.troopTrainingOrders = &troopTrainingOrders
+	}
+	return *v.troopTrainingOrders, nil
+}
+
+func (v Village) CanAfford(resources Resources) bool {
+	return v.Gold >= resources.Gold
+}
+
+func (v *Village) SpendResources(resources Resources) {
+	v.Gold -= resources.Gold
 }
