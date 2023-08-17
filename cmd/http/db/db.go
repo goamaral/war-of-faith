@@ -7,15 +7,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/bufbuild/connect-go"
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/jmoiron/sqlx"
 )
 
+var ErrNotFound = connect.NewError(connect.CodeNotFound, errors.New("not found"))
+
 var db *sqlx.DB
 var dialect goqu.DialectWrapper
-var ErrNotFound = errors.New("not found")
 
 func init() {
 	db = sqlx.MustOpen("sqlite", ":memory:")

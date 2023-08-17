@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/bufbuild/connect-go"
 	connectgo "github.com/bufbuild/connect-go"
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/gin-contrib/cors"
@@ -287,6 +288,18 @@ func main() {
 	}
 }
 
+func ExtractStatusCodeInterceptor() connect.UnaryInterceptorFunc {
+	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			res, err := next(ctx, req)
+			if code := status.Code(err); code != codes.OK {
+				return nil, connect.NewError(connect.Code(code), err)
+			}
+			return res, err
+		})
+	})
+}
+
 func runServer() {
 	server := gin.Default()
 	server.SetTrustedProxies(nil)
@@ -298,7 +311,10 @@ func runServer() {
 		AllowCredentials: true,
 	}))
 
-	path, handler := serverv1connect.NewServiceHandler(&Server{})
+	path, handler := serverv1connect.NewServiceHandler(
+		&Server{},
+		connect.WithInterceptors(ExtractStatusCodeInterceptor()),
+	)
 	server.Any(fmt.Sprintf("%s*w", path), gin.WrapH(handler))
 	server.Run(":3000")
 }
