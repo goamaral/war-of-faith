@@ -12,6 +12,10 @@ var TroopTrainCost = Resources{
 	Gold: 10,
 }
 
+func CalculateTrainCost(quantity uint32) Resources {
+	return TroopTrainCost.Multiply(quantity)
+}
+
 type Troop struct {
 	Id       uint32              `db:"id"`
 	Kind     serverv1.Troop_Kind `db:"kind"`
@@ -44,8 +48,4 @@ func (t *Troop) Village(ctx context.Context) (Village, error) {
 		t.village = &village
 	}
 	return *t.village, nil
-}
-
-func (t Troop) TrainCost(quantity uint32) Resources {
-	return TroopTrainCost.Multiply(quantity)
 }

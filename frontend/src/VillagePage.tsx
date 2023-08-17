@@ -126,58 +126,74 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
 
 
 const VillageTroops = observer(({ village }: { village: entities.Village }) => {
-  const [quantity, setQuantity] = useState(1)
-
-  function TrainStatus({ troop }: { troop: entities.Troop }) {
-    const max = troop.kind == serverV1Types.Troop_Kind.LEADER ? village.trainableLeaders : undefined
-
-    async function train() {
-      try {
-        const { order } = await server.issueTroopTrainingOrder({ troopId: troop.id, quantity })
-        village.addTroopTrainingOrder(new entities.TroopTrainingOrder(order!, village))
-        village.addGold(-troop.trainCost(quantity).gold)
-      } catch (err) {
-        alert(`Failed to issue troop training order for ${troop.name} (quantity: ${quantity}): ${err}`)
-      }
+  async function issueTrainingOrder(troop: entities.Troop, quantity: number) {
+    try {
+      const { order } = await server.issueTroopTrainingOrder({ troopId: troop.id, quantity })
+      village.addTroopTrainingOrder(new entities.TroopTrainingOrder(order!, village))
+      village.addGold(-troop.trainCost(quantity).gold)
+    } catch (err) {
+      alert(`Failed to issue troop training order for ${troop.name} (quantity: ${quantity}): ${err}`)
     }
+  }
 
+  async function cancelTrainingOrder(order: entities.TroopTrainingOrder) {
+    try {
+      await server.cancelTroopTrainingOrder({ id: order.id })
+      village.removeTroopTrainingOrder(order.id)
+      village.addGold(order.troop.trainCost(order.quantity).gold)
+    } catch (err) {
+      alert(`Failed to cancel troop training order (id: ${order.id}): ${err}`)
+    }
+  }
+
+  function VillageTroop({ troop }: { troop: entities.Troop }) {
+    const [quantity, setQuantity] = useState(1)
+
+    const max = troop.kind == serverV1Types.Troop_Kind.LEADER ? village.trainableLeaders : undefined
+    const quantityTraining = village.troopTrainingOrders.reduce((acc, order) => {
+      return acc + (order.troop.id == troop.id ? order.quantity : 0)
+    }, 0)
+
+    const children = []
     switch (troop.trainStatus(quantity)) {
       case entities.TroopTrainStatus.TRAINABLE:
-        return <>
-          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />
-          <button onClick={train}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
-        </>
+        children.push(
+          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />,
+          <button onClick={() => issueTrainingOrder(troop, quantity)}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
+        )
+        break
 
       case entities.TroopTrainStatus.NOT_ENOUGH_RESOURCES:
-        return <>
-          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />
+        children.push(
+          <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />,
           <button disabled={true}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
-        </>
+        )
+        break
 
       case entities.TroopTrainStatus.NO_MORE_LEADERS:
-        return <></>
+        break
 
       default:
         throw new Error(`Unknown village troop train status: ${troop.trainStatus(quantity).toString()}`)
     }
+
+    return <li>
+      {troop.name} - {troop.quantity} ({quantityTraining})
+      {children}
+    </li>
   }
 
   return (
     <div>
       <h2>Troops</h2>
       <ul>
-        {Array.from(village.troops.values()).map(troop => {
-          return (<li>
-            {troop.name} - {troop.quantity}
-            <TrainStatus troop={troop} />
-          </li>)
-        })}
+        {Array.from(village.troops.values()).map(troop => <VillageTroop troop={troop} />)}
       </ul>
       <h4>Orders</h4>
       <ul>
           {Array.from(village.troopTrainingOrders.map(order => {
             return (<li>
-              {order.quantity} {order.troop.name} - {order.timeLeft}s
+              {order.quantity} {order.troop.name} - {order.timeLeft}s <button onClick={() => cancelTrainingOrder(order)}>cancel</button>
             </li>)
           }))}
       </ul>

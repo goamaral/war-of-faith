@@ -29,7 +29,7 @@ func (o *TroopTrainingOrder) ToProtobuf(ctx context.Context) (*serverv1.Troop_Tr
 		Id:       o.Id,
 		Quantity: o.Quantity,
 		TimeLeft: o.TimeLeft,
-		Cost:     troop.TrainCost(o.Quantity).ToProtobuf(),
+		Cost:     CalculateTrainCost(o.Quantity).ToProtobuf(),
 		Troop:    troop.ToProtobuf(), // TODO: Return troop kind instead of troop
 	}, nil
 }

@@ -701,3 +701,73 @@ export class IssueTroopTrainingOrderResponse extends Message<IssueTroopTrainingO
   }
 }
 
+/**
+ * CancelTroopTrainingOrder
+ *
+ * @generated from message server.v1.CancelTroopTrainingOrderRequest
+ */
+export class CancelTroopTrainingOrderRequest extends Message<CancelTroopTrainingOrderRequest> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<CancelTroopTrainingOrderRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelTroopTrainingOrderRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelTroopTrainingOrderRequest {
+    return new CancelTroopTrainingOrderRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelTroopTrainingOrderRequest {
+    return new CancelTroopTrainingOrderRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelTroopTrainingOrderRequest {
+    return new CancelTroopTrainingOrderRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelTroopTrainingOrderRequest | PlainMessage<CancelTroopTrainingOrderRequest> | undefined, b: CancelTroopTrainingOrderRequest | PlainMessage<CancelTroopTrainingOrderRequest> | undefined): boolean {
+    return proto3.util.equals(CancelTroopTrainingOrderRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.CancelTroopTrainingOrderResponse
+ */
+export class CancelTroopTrainingOrderResponse extends Message<CancelTroopTrainingOrderResponse> {
+  constructor(data?: PartialMessage<CancelTroopTrainingOrderResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelTroopTrainingOrderResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelTroopTrainingOrderResponse {
+    return new CancelTroopTrainingOrderResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelTroopTrainingOrderResponse {
+    return new CancelTroopTrainingOrderResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelTroopTrainingOrderResponse {
+    return new CancelTroopTrainingOrderResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined, b: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined): boolean {
+    return proto3.util.equals(CancelTroopTrainingOrderResponse, a, b);
+  }
+}
+

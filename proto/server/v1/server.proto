@@ -98,9 +98,16 @@ message IssueTroopTrainingOrderResponse {
   Troop.TrainingOrder order = 1;
 }
 
+// CancelTroopTrainingOrder
+message CancelTroopTrainingOrderRequest {
+  uint32 id = 1;
+}
+message CancelTroopTrainingOrderResponse {}
+
 service Service {
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
   rpc UpgradeBuilding(UpgradeBuildingRequest) returns (UpgradeBuildingResponse);
   rpc CancelUpgradeBuilding(CancelUpgradeBuildingRequest) returns (CancelUpgradeBuildingResponse);
   rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
+  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
 }

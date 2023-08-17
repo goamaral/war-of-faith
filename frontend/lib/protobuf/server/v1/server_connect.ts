@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CancelUpgradeBuildingRequest, CancelUpgradeBuildingResponse, GetVillageRequest, GetVillageResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
+import { CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, CancelUpgradeBuildingRequest, CancelUpgradeBuildingResponse, GetVillageRequest, GetVillageResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -46,6 +46,15 @@ export const Service = {
       name: "IssueTroopTrainingOrder",
       I: IssueTroopTrainingOrderRequest,
       O: IssueTroopTrainingOrderResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.CancelTroopTrainingOrder
+     */
+    cancelTroopTrainingOrder: {
+      name: "CancelTroopTrainingOrder",
+      I: CancelTroopTrainingOrderRequest,
+      O: CancelTroopTrainingOrderResponse,
       kind: MethodKind.Unary,
     },
   }

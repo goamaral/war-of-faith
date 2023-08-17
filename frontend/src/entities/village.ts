@@ -50,4 +50,8 @@ export default class Village{
   addTroopTrainingOrder(order: TroopTrainingOrder) {
     this.troopTrainingOrders.push(order)
   }
+
+  removeTroopTrainingOrder(id: number) {
+    this.troopTrainingOrders = this.troopTrainingOrders.filter(o => o.id !== id)
+  }
 }

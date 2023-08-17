@@ -39,7 +39,7 @@ func (s *Server) GetVillage(ctx context.Context, req *connectgo.Request[serverv1
 	return connectgo.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
-// TODO: Use mutexes
+// TODO: Use mutexes and transaction
 func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.UpgradeBuildingRequest]) (*connectgo.Response[serverv1.UpgradeBuildingResponse], error) {
 	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
 	if err != nil {
@@ -79,7 +79,7 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connectgo.Request[ser
 	return connectgo.NewResponse(&serverv1.UpgradeBuildingResponse{Building: pBuilding}), nil
 }
 
-// TODO: Use mutexes
+// TODO: Use mutexes and transaction
 func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connectgo.Request[serverv1.CancelUpgradeBuildingRequest]) (*connectgo.Response[serverv1.CancelUpgradeBuildingResponse], error) {
 	building, found, err := db.GetBuilding(ctx, exp.Ex{"id": req.Msg.Id})
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connectgo.Reque
 	return connectgo.NewResponse(&serverv1.CancelUpgradeBuildingResponse{Building: pBuilding}), nil
 }
 
-// TODO: Use mutexes
+// TODO: Use mutexes and transaction
 func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connectgo.Request[serverv1.IssueTroopTrainingOrderRequest]) (*connectgo.Response[serverv1.IssueTroopTrainingOrderResponse], error) {
 	troop, found, err := db.GetTroop(ctx, exp.Ex{"id": req.Msg.TroopId})
 	if err != nil {
@@ -129,7 +129,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connectgo.Req
 		return nil, status.Error(codes.NotFound, "troop not found")
 	}
 
-	cost := troop.TrainCost(req.Msg.Quantity)
+	cost := db.CalculateTrainCost(req.Msg.Quantity)
 	village, err := troop.Village(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
@@ -176,6 +176,35 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connectgo.Req
 	return connectgo.NewResponse(&serverv1.IssueTroopTrainingOrderResponse{Order: pOrder}), nil
 }
 
+// TODO: Use mutexes and transaction
+func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connectgo.Request[serverv1.CancelTroopTrainingOrderRequest]) (*connectgo.Response[serverv1.CancelTroopTrainingOrderResponse], error) {
+	order, found, err := db.GetTroopTrainingOrder(ctx, exp.Ex{"id": req.Msg.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get troop training order: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "troop training order not found")
+	}
+
+	cost := db.CalculateTrainCost(order.Quantity)
+	village, err := order.Village(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+	village.EarnResources(cost)
+	err = db.UpdateVillage(ctx, village.Id, village)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update village: %w", err)
+	}
+
+	err = db.DeleteTroopTrainingOrder(ctx, exp.Ex{"id": order.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete troop training order: %w", err)
+	}
+
+	return connectgo.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
+}
+
 func main() {
 	go runServer()
 
@@ -183,7 +212,7 @@ func main() {
 	for range ticker.C {
 		ctx := context.Background()
 
-		// TODO: Use mutexes
+		// TODO: Use mutexes and transaction
 		villages, err := db.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)

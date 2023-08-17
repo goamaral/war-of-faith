@@ -110,3 +110,7 @@ func (v Village) CanAfford(resources Resources) bool {
 func (v *Village) SpendResources(resources Resources) {
 	v.Gold -= resources.Gold
 }
+
+func (v *Village) EarnResources(resources Resources) {
+	v.Gold += resources.Gold
+}
