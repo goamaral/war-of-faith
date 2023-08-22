@@ -5,13 +5,13 @@ import (
 	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
-	"github.com/doug-martin/goqu/v9/exp"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type Village struct {
-	Id uint32 `db:"id"`
+	Id uint32 `json:"id"`
 
-	Gold uint32 `db:"gold"`
+	Gold uint32 `json:"gold"`
 
 	buildings           *[]Building
 	troops              *[]Troop
@@ -47,7 +47,7 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		}
 	}
 
-	troopTrainingOrders, err := GetTroopTrainingOrders(ctx, exp.Ex{"village_id": v.Id})
+	troopTrainingOrders, err := GetTroopTrainingOrders(ctx, sq.Eq{"village_id": v.Id})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village troop training orders: %w", err)
 	}
@@ -72,7 +72,7 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 
 func (v *Village) Buildings(ctx context.Context) ([]Building, error) {
 	if v.buildings == nil {
-		buildings, err := GetBuildings(ctx, exp.Ex{"village_id": v.Id})
+		buildings, err := GetBuildings(ctx, sq.Eq{"village_id": v.Id})
 		if err != nil {
 			return nil, err
 		}
@@ -83,7 +83,7 @@ func (v *Village) Buildings(ctx context.Context) ([]Building, error) {
 
 func (v *Village) Troops(ctx context.Context) ([]Troop, error) {
 	if v.troops == nil {
-		troops, err := GetTroops(ctx, exp.Ex{"village_id": v.Id})
+		troops, err := GetTroops(ctx, sq.Eq{"village_id": v.Id})
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +94,7 @@ func (v *Village) Troops(ctx context.Context) ([]Troop, error) {
 
 func (v *Village) TroopTrainingOrders(ctx context.Context) ([]TroopTrainingOrder, error) {
 	if v.troops == nil {
-		troopTrainingOrders, err := GetTroopTrainingOrders(ctx, exp.Ex{"village_id": v.Id})
+		troopTrainingOrders, err := GetTroopTrainingOrders(ctx, sq.Eq{"village_id": v.Id})
 		if err != nil {
 			return nil, err
 		}

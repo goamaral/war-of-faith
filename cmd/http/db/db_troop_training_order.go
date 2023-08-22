@@ -2,38 +2,28 @@ package db
 
 import (
 	"context"
-	"math/rand"
 
-	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
+	sq "github.com/Masterminds/squirrel"
 )
 
 const TroopTrainingOrdersTableName = "troop_training_orders"
 
 func CreateTroopTrainingOrder(ctx context.Context, order *TroopTrainingOrder) (*TroopTrainingOrder, error) {
-	order.Id = rand.Uint32()
-	_, err := insertQuery(ctx, goqu.Insert(TroopTrainingOrdersTableName).Rows(order))
-	if err != nil {
-		order.Id = 0
-		return order, err
-	}
-	return order, err
+	return order, insertQuery(ctx, TroopTrainingOrdersTableName, order)
 }
 
-func GetTroopTrainingOrder(ctx context.Context, exprs ...exp.Expression) (TroopTrainingOrder, bool, error) {
-	return firstQuery[TroopTrainingOrder](ctx, dialect.From(TroopTrainingOrdersTableName).Where(exprs...))
+func GetTroopTrainingOrder(ctx context.Context, id uint32) (TroopTrainingOrder, bool, error) {
+	return firstQuery[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, sq.Eq{"id": id})
 }
 
-func GetTroopTrainingOrders(ctx context.Context, exprs ...exp.Expression) ([]TroopTrainingOrder, error) {
-	return findQuery[TroopTrainingOrder](ctx, dialect.From(TroopTrainingOrdersTableName).Where(exprs...))
+func GetTroopTrainingOrders(ctx context.Context, exprs ...QryExp) ([]TroopTrainingOrder, error) {
+	return findQuery[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, exprs...)
 }
 
 func UpdateTroopTrainingOrder(ctx context.Context, id uint32, order TroopTrainingOrder) error {
-	_, err := updateQuery(ctx, dialect.Update(TroopTrainingOrdersTableName).Where(exp.Ex{"id": id}).Set(order))
-	return err
+	return updateQuery(ctx, TroopTrainingOrdersTableName, order, sq.Eq{"id": id})
 }
 
-func DeleteTroopTrainingOrder(ctx context.Context, exprs ...exp.Expression) error {
-	_, err := deleteQuery(ctx, dialect.From(TroopTrainingOrdersTableName).Where(exprs...))
-	return err
+func DeleteTroopTrainingOrder(ctx context.Context, id uint32) error {
+	return deleteQuery(ctx, TroopTrainingOrdersTableName, sq.Eq{"id": id})
 }

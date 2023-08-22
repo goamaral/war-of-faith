@@ -5,9 +5,12 @@ Bundler - https://github.com/vitejs/vite
 
 # Backend
 HTTP server - https://github.com/gin-gonic/gin
-SQL query builder - https://github.com/doug-martin/goqu
-SQLite driver - https://github.com/glebarez/go-sqlite
+SQL query builder - https://github.com/Masterminds/squirrel
+SQLite implementaion - https://gitlab.com/cznic/sqlite
+SQLite driver - https://github.com/libsql/libsql-client-go
 DB connector - https://github.com/jmoiron/sqlx
 
 # Other
-Protobuf - https://github.com/bufbuild/buf
+Protobuf compiler - https://github.com/bufbuild/buf
+Protobuf transport protocol - https://github.com/bufbuild/connect-go
+General Utilities - github.com/samber/lo

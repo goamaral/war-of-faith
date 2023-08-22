@@ -3,29 +3,36 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/bufbuild/connect-go"
-	"github.com/doug-martin/goqu/v9"
-	_ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
-	_ "github.com/glebarez/go-sqlite"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/libsql/libsql-client-go/libsql"
+	"github.com/samber/lo"
+	_ "modernc.org/sqlite"
 )
 
 var ErrNotFound = connect.NewError(connect.CodeNotFound, errors.New("not found"))
 
 var db *sqlx.DB
-var dialect goqu.DialectWrapper
 
-func init() {
-	db = sqlx.MustOpen("sqlite", ":memory:")
-	// db = sqlx.MustOpen("sqlite", "db.sqlite3")
-	dialect = goqu.Dialect("sqlite3")
+func Init(uri string) error {
+	var err error
 
-	db.MustExec("PRAGMA foreign_keys = ON;")
-	db.MustExec(`
+	db, err = sqlx.Open("libsql", uri)
+	if err != nil {
+		return fmt.Errorf("failed to open db: %w", err)
+	}
+
+	_, err = db.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return fmt.Errorf("failed to enable foreign keys: %w", err)
+	}
+
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS villages (
 			id INTEGER PRIMARY KEY,
 			gold INTERGER NOT NULL
@@ -62,73 +69,135 @@ func init() {
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 	`)
-
-	ctx := context.Background()
-
-	village, err := CreateVillage(ctx)
 	if err != nil {
-		log.Panic(err)
+		return fmt.Errorf("failed to create tables: %w", err)
 	}
-	fmt.Println(village)
+
+	return nil
 }
 
-func findQuery[T any](ctx context.Context, qry *goqu.SelectDataset) ([]T, error) {
+func Seed() error {
+	village, err := CreateVillage(context.Background())
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Created village: %d\n", village.Id)
+
+	return nil
+}
+
+func Drop() error {
+	_, err := db.Exec(`DROP TABLE IF EXISTS villages;`)
+	return err
+}
+
+func recordToMap(record any) (map[string]any, error) {
+	recordBytes, err := json.Marshal(record)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal record: %w", err)
+	}
+	recordMap := map[string]any{}
+	err = json.Unmarshal(recordBytes, &recordMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal record: %w", err)
+	}
+	return recordMap, nil
+}
+
+type QryExp interface {
+	ToSql() (sql string, args []interface{}, err error)
+}
+
+func newQuery(exprs ...QryExp) sq.StatementBuilderType {
+	if len(exprs) >= 1 {
+		return sq.StatementBuilder.Where(exprs[0], lo.Map(exprs[1:], func(expr QryExp, _ int) any { return expr.(any) }))
+	}
+	return sq.StatementBuilder
+}
+
+func insertQuery[T any](ctx context.Context, table string, record *T) error {
+	recordMap, err := recordToMap(record)
+	if err != nil {
+		return fmt.Errorf("failed to convert record to map: %w", err)
+	}
+	delete(recordMap, "id")
+
+	qrySql, args, err := sq.Insert(table).SetMap(recordMap).Suffix("RETURNING *").ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build sql query: %w", err)
+	}
+
+	return db.QueryRowxContext(ctx, qrySql, args...).StructScan(record)
+}
+
+func findQuery[T any](ctx context.Context, table string, exprs ...QryExp) ([]T, error) {
 	var records []T
-	sql, params, err := qry.ToSQL()
+	qrySql, args, err := newQuery(exprs...).Select("*").From(table).ToSql()
 	if err != nil {
-		return []T{}, fmt.Errorf("failed to build query: %w", err)
+		return nil, fmt.Errorf("failed to build sql query: %w", err)
 	}
-	return records, db.SelectContext(ctx, &records, sql, params...)
+
+	rows, err := db.QueryxContext(ctx, qrySql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to run sql query: %w", err)
+	}
+
+	for rows.Next() {
+		var record T
+		err = rows.StructScan(&record)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		records = append(records, record)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to scan rows: %w", err)
+	}
+
+	return records, nil
 }
 
-func firstQuery[T any](ctx context.Context, qry *goqu.SelectDataset) (T, bool, error) {
+func firstQuery[T any](ctx context.Context, table string, exprs ...QryExp) (T, bool, error) {
 	var record T
-	qrySql, params, err := qry.ToSQL()
+
+	qrySql, args, err := newQuery(exprs...).Select("*").From(table).ToSql()
 	if err != nil {
-		return record, false, fmt.Errorf("failed to build query: %w", err)
+		return record, false, fmt.Errorf("failed to build sql query: %w", err)
 	}
-	err = db.GetContext(ctx, &record, qrySql, params...)
+
+	err = db.QueryRowxContext(ctx, qrySql, args...).StructScan(&record)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, false, nil
 		}
 		return record, false, err
 	}
+
 	return record, true, nil
 }
 
-func updateQuery(ctx context.Context, qry *goqu.UpdateDataset) (int64, error) {
-	sql, params, err := qry.ToSQL()
+func updateQuery(ctx context.Context, table string, record any, exprs ...QryExp) error {
+	recordMap, err := recordToMap(record)
 	if err != nil {
-		return 0, fmt.Errorf("failed to build query: %w", err)
+		return fmt.Errorf("failed to convert record to map: %w", err)
 	}
-	res, err := db.ExecContext(ctx, sql, params...)
+
+	qrySql, args, err := newQuery(exprs...).Update(table).SetMap(recordMap).ToSql()
 	if err != nil {
-		return 0, err
+		return fmt.Errorf("failed to build sql query: %w", err)
 	}
-	return res.RowsAffected()
+
+	_, err = db.ExecContext(ctx, qrySql, args...)
+	return err
 }
 
-func insertQuery(ctx context.Context, qry *goqu.InsertDataset) (int64, error) {
-	sql, params, err := qry.ToSQL()
+func deleteQuery(ctx context.Context, table string, exprs ...QryExp) error {
+	qrySql, args, err := newQuery(exprs...).Delete(TroopTrainingOrdersTableName).ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("failed to build query: %w", err)
+		return fmt.Errorf("failed to build sql query: %w", err)
 	}
-	res, err := db.ExecContext(ctx, sql, params...)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
-}
 
-func deleteQuery(ctx context.Context, qry *goqu.SelectDataset) (int64, error) {
-	sql, params, err := qry.Delete().ToSQL()
-	if err != nil {
-		return 0, fmt.Errorf("failed to build query: %w", err)
-	}
-	res, err := db.ExecContext(ctx, sql, params...)
-	if err != nil {
-		return 0, err
-	}
-	return res.RowsAffected()
+	_, err = db.ExecContext(ctx, qrySql, args...)
+	return err
 }

@@ -81,7 +81,7 @@ const VillageBuildings = observer(({ village }: { village: entities.Village }) =
       const updatedBuilding = new entities.Building(res.building!)
       village.updateBuilding(updatedBuilding)
     
-      if (updatedBuilding.upgradeStatus != serverV1Types.Building_UpgradeStatus.UPGRADABLE) {
+      if (updatedBuilding.upgradeStatus == serverV1Types.Building_UpgradeStatus.UPGRADING) {
         alert(`Failed to cancel upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus.toString()})`)
         return
       }

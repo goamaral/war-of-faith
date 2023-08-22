@@ -4,18 +4,16 @@ import (
 	"context"
 	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
-
-	"github.com/doug-martin/goqu/v9/exp"
 )
 
 type TroopTrainingOrder struct {
-	Id       uint32 `db:"id"`
-	Quantity uint32 `db:"quantity"`
-	TimeLeft uint32 `db:"time_left"`
+	Id       uint32 `json:"id" db:"id"`
+	Quantity uint32 `json:"quantity" db:"quantity"`
+	TimeLeft uint32 `json:"time_left" db:"time_left"`
 
-	TroopId   uint32 `db:"troop_id"`
+	TroopId   uint32 `json:"troop_id" db:"troop_id"`
 	troop     *Troop
-	VillageId uint32 `db:"village_id"`
+	VillageId uint32 `json:"village_id" db:"village_id"`
 	village   *Village
 }
 
@@ -36,7 +34,7 @@ func (o *TroopTrainingOrder) ToProtobuf(ctx context.Context) (*serverv1.Troop_Tr
 
 func (o *TroopTrainingOrder) Troop(ctx context.Context) (Troop, error) {
 	if o.troop == nil {
-		troop, found, err := GetTroop(ctx, exp.Ex{"id": o.TroopId})
+		troop, found, err := GetTroop(ctx, o.TroopId)
 		if err != nil {
 			return Troop{}, err
 		}
@@ -50,7 +48,7 @@ func (o *TroopTrainingOrder) Troop(ctx context.Context) (Troop, error) {
 
 func (o *TroopTrainingOrder) Village(ctx context.Context) (Village, error) {
 	if o.village == nil {
-		village, found, err := GetVillage(ctx, exp.Ex{"id": o.VillageId})
+		village, found, err := GetVillage(ctx, o.VillageId)
 		if err != nil {
 			return Village{}, err
 		}

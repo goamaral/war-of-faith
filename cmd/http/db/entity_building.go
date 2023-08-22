@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
-
-	"github.com/doug-martin/goqu/v9/exp"
 )
 
 const BuildingMaxLevel = 10
@@ -16,13 +14,13 @@ var BuildingUpgradeCost = Resources{
 }
 
 type Building struct {
-	Id    uint32                 `db:"id"`
-	Kind  serverv1.Building_Kind `db:"kind"`
-	Level uint32                 `db:"level"`
+	Id    uint32                 `json:"id" db:"id"`
+	Kind  serverv1.Building_Kind `json:"kind" db:"kind"`
+	Level uint32                 `json:"level" db:"level"`
 
-	UpgradeTimeLeft uint32 `db:"upgrade_time_left"`
+	UpgradeTimeLeft uint32 `json:"upgrade_time_left" db:"upgrade_time_left"`
 
-	VillageId uint32 `db:"village_id"`
+	VillageId uint32 `json:"village_id" db:"village_id"`
 
 	village *Village
 }
@@ -46,7 +44,7 @@ func (b *Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
 
 func (b *Building) Village(ctx context.Context) (Village, error) {
 	if b.village == nil {
-		village, found, err := GetVillage(ctx, exp.Ex{"id": b.VillageId})
+		village, found, err := GetVillage(ctx, b.VillageId)
 		if err != nil {
 			return Village{}, err
 		}

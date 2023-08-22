@@ -3,8 +3,6 @@ package db
 import (
 	"context"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
-
-	"github.com/doug-martin/goqu/v9/exp"
 )
 
 var TroopTrainCost = Resources{
@@ -17,12 +15,12 @@ func CalculateTrainCost(quantity uint32) Resources {
 }
 
 type Troop struct {
-	Id       uint32              `db:"id"`
-	Kind     serverv1.Troop_Kind `db:"kind"`
-	Name     string              `db:"name"`
-	Quantity uint32              `db:"quantity"`
+	Id       uint32              `json:"id" db:"id"`
+	Kind     serverv1.Troop_Kind `json:"kind" db:"kind"`
+	Name     string              `json:"name" db:"name"`
+	Quantity uint32              `json:"quantity" db:"quantity"`
 
-	VillageId uint32 `db:"village_id"`
+	VillageId uint32 `json:"village_id" db:"village_id"`
 	village   *Village
 }
 
@@ -38,7 +36,7 @@ func (t Troop) ToProtobuf() *serverv1.Troop {
 
 func (t *Troop) Village(ctx context.Context) (Village, error) {
 	if t.village == nil {
-		village, found, err := GetVillage(ctx, exp.Ex{"id": t.VillageId})
+		village, found, err := GetVillage(ctx, t.VillageId)
 		if err != nil {
 			return Village{}, err
 		}

@@ -3,23 +3,20 @@ package db
 import (
 	"context"
 	"fmt"
-	"math/rand"
 
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
-	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
+	sq "github.com/Masterminds/squirrel"
 )
 
 const VillagesTableName = "villages"
 
 func CreateVillage(ctx context.Context) (Village, error) {
-	village := Village{Id: rand.Uint32(), buildings: &[]Building{}, troops: &[]Troop{}} // TODO: Improve id generation
-	id, err := insertQuery(ctx, goqu.Insert(VillagesTableName).Rows(village))
+	village := Village{buildings: &[]Building{}, troops: &[]Troop{}}
+	err := insertQuery(ctx, VillagesTableName, &village)
 	if err != nil {
-		return Village{}, err
+		return Village{}, fmt.Errorf("failed to create village: %w", err)
 	}
-	village.Id = uint32(id)
 
 	/* BUILDINGS */
 	// Hall
@@ -47,15 +44,14 @@ func CreateVillage(ctx context.Context) (Village, error) {
 	return village, nil
 }
 
-func GetVillages(ctx context.Context, exprs ...exp.Expression) ([]Village, error) {
-	return findQuery[Village](ctx, dialect.From(VillagesTableName).Where(exprs...))
+func GetVillages(ctx context.Context, exprs ...QryExp) ([]Village, error) {
+	return findQuery[Village](ctx, VillagesTableName, exprs...)
 }
 
-func GetVillage(ctx context.Context, exprs ...exp.Expression) (Village, bool, error) {
-	return firstQuery[Village](ctx, dialect.From(VillagesTableName).Where(exprs...))
+func GetVillage(ctx context.Context, id uint32) (Village, bool, error) {
+	return firstQuery[Village](ctx, VillagesTableName, sq.Eq{"id": id})
 }
 
 func UpdateVillage(ctx context.Context, id uint32, village Village) error {
-	_, err := updateQuery(ctx, dialect.Update(VillagesTableName).Where(exp.Ex{"id": id}).Set(village))
-	return err
+	return updateQuery(ctx, VillagesTableName, village, sq.Eq{"id": id})
 }
