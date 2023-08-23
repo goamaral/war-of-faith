@@ -1,7 +1,7 @@
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 import { Building, Troop, Resources, TroopTrainingOrder } from "."
 
-export default class Village{
+export default class Village {
   id: number
   gold: number
 

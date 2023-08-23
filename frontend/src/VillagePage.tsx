@@ -15,33 +15,32 @@ function parseNumber(n: any): number {
   }
 }
 
-export default function VillagePage() {
+export default () => {
   const { id } = useParams() as { id: string }
 
-  const [isLoading, setIsLoading] = useState(true)
+  const [Loading, setLoading] = useState(true)
   const [village, setVillage] = useState<entities.Village>()
 
   async function updateVillage() {
     const res = await server.getVillage({ id: parseInt(id) })
     const village = new entities.Village(res.Village!)
-    makeAutoObservable(village)
-    setVillage(village)
+    setVillage(makeAutoObservable(village))
   }
 
   useEffect(() => {
-    updateVillage().then(() => setIsLoading(false)).catch(err => alert(err))
+    updateVillage().then(() => setLoading(false)).catch(err => alert(err))
   }, [])
 
   // TODO: Replace with SSE
   useEffect(() => {
-    const intervalId = isLoading ? 0 : setInterval(updateVillage, 1000)
+    const intervalId = Loading ? 0 : setInterval(updateVillage, 1000)
 
     return () => {
       if (intervalId !== -1) clearInterval(intervalId)
     }
-  }, [isLoading])
+  }, [Loading])
 
-  if (isLoading) {
+  if (Loading) {
     return <div>Loading...</div>
   } else {
     return <Village village={village!} />

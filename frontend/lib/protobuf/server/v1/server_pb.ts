@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, UInt32Value } from "@bufbuild/protobuf";
+import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
  * @generated from message server.v1.Village
@@ -392,15 +392,145 @@ export class Troop_TrainingOrder extends Message<Troop_TrainingOrder> {
 }
 
 /**
+ * @generated from message server.v1.World
+ */
+export class World extends Message<World> {
+  /**
+   * @generated from field: uint32 width = 1;
+   */
+  width = 0;
+
+  /**
+   * @generated from field: uint32 height = 2;
+   */
+  height = 0;
+
+  /**
+   * @generated from field: map<string, server.v1.World.Cell> cells = 3;
+   */
+  cells: { [key: string]: World_Cell } = {};
+
+  constructor(data?: PartialMessage<World>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.World";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "width", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "height", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "cells", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: World_Cell} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World {
+    return new World().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World {
+    return new World().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World {
+    return new World().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: World | PlainMessage<World> | undefined, b: World | PlainMessage<World> | undefined): boolean {
+    return proto3.util.equals(World, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.World.Cell
+ */
+export class World_Cell extends Message<World_Cell> {
+  /**
+   * @generated from field: string coords = 1;
+   */
+  coords = "";
+
+  /**
+   * @generated from field: uint32 x = 2;
+   */
+  x = 0;
+
+  /**
+   * @generated from field: uint32 y = 3;
+   */
+  y = 0;
+
+  /**
+   * @generated from field: server.v1.World.Cell.EntityKind entity_kind = 4;
+   */
+  entityKind = World_Cell_EntityKind.UNSPECIFIED;
+
+  /**
+   * @generated from field: uint32 entity_id = 5;
+   */
+  entityId = 0;
+
+  constructor(data?: PartialMessage<World_Cell>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.World.Cell";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "coords", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "x", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "y", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Cell_EntityKind) },
+    { no: 5, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Cell {
+    return new World_Cell().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Cell {
+    return new World_Cell().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Cell {
+    return new World_Cell().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: World_Cell | PlainMessage<World_Cell> | undefined, b: World_Cell | PlainMessage<World_Cell> | undefined): boolean {
+    return proto3.util.equals(World_Cell, a, b);
+  }
+}
+
+/**
+ * @generated from enum server.v1.World.Cell.EntityKind
+ */
+export enum World_Cell_EntityKind {
+  /**
+   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_VILLAGE = 1;
+   */
+  VILLAGE = 1,
+}
+// Retrieve enum metadata with: proto3.getEnumType(World_Cell_EntityKind)
+proto3.util.setEnumType(World_Cell_EntityKind, "server.v1.World.Cell.EntityKind", [
+  { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
+  { no: 1, name: "ENTITY_KIND_VILLAGE" },
+]);
+
+/**
  * GetVillage
  *
  * @generated from message server.v1.GetVillageRequest
  */
 export class GetVillageRequest extends Message<GetVillageRequest> {
   /**
-   * @generated from field: google.protobuf.UInt32Value id = 1;
+   * @generated from field: uint32 id = 1;
    */
-  id?: number;
+  id = 0;
 
   constructor(data?: PartialMessage<GetVillageRequest>) {
     super();
@@ -410,7 +540,7 @@ export class GetVillageRequest extends Message<GetVillageRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.GetVillageRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "message", T: UInt32Value },
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillageRequest {
@@ -768,6 +898,82 @@ export class CancelTroopTrainingOrderResponse extends Message<CancelTroopTrainin
 
   static equals(a: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined, b: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined): boolean {
     return proto3.util.equals(CancelTroopTrainingOrderResponse, a, b);
+  }
+}
+
+/**
+ * GetWorld
+ *
+ * @generated from message server.v1.GetWorldRequest
+ */
+export class GetWorldRequest extends Message<GetWorldRequest> {
+  /**
+   * @generated from field: bool load_cells = 1;
+   */
+  loadCells = false;
+
+  constructor(data?: PartialMessage<GetWorldRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetWorldRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "load_cells", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetWorldRequest | PlainMessage<GetWorldRequest> | undefined, b: GetWorldRequest | PlainMessage<GetWorldRequest> | undefined): boolean {
+    return proto3.util.equals(GetWorldRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetWorldResponse
+ */
+export class GetWorldResponse extends Message<GetWorldResponse> {
+  /**
+   * @generated from field: server.v1.World world = 1;
+   */
+  world?: World;
+
+  constructor(data?: PartialMessage<GetWorldResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetWorldResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "world", kind: "message", T: World },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetWorldResponse | PlainMessage<GetWorldResponse> | undefined, b: GetWorldResponse | PlainMessage<GetWorldResponse> | undefined): boolean {
+    return proto3.util.equals(GetWorldResponse, a, b);
   }
 }
 

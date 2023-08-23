@@ -68,6 +68,15 @@ func Init(uri string) error {
 			FOREIGN KEY(troop_id) REFERENCES troops(id),
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
+
+		CREATE TABLE IF NOT EXISTS world_cells (
+			coords TEXT PRIMARY KEY,
+			x INTEGER NOT NULL,
+			y INTEGER NOT NULL,
+			entity_kind INTERGER NOT NULL,
+			entity_id INTEGER NOT NULL
+		);
+		CREATE UNIQUE INDEX IF NOT EXISTS unq_x_y ON world_cells(x, y);
 	`)
 	if err != nil {
 		return fmt.Errorf("failed to create tables: %w", err)
@@ -77,7 +86,7 @@ func Init(uri string) error {
 }
 
 func Seed() error {
-	village, err := CreateVillage(context.Background())
+	village, err := CreateVillage(context.Background(), 4, 4)
 	if err != nil {
 		return err
 	}

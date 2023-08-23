@@ -22,11 +22,15 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceClient interface {
+	// VILLAGES
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
+	// ORDERS
 	UpgradeBuilding(ctx context.Context, in *UpgradeBuildingRequest, opts ...grpc.CallOption) (*UpgradeBuildingResponse, error)
 	CancelUpgradeBuilding(ctx context.Context, in *CancelUpgradeBuildingRequest, opts ...grpc.CallOption) (*CancelUpgradeBuildingResponse, error)
 	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
+	// WORLD
+	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
 }
 
 type serviceClient struct {
@@ -82,15 +86,28 @@ func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, in *Cancel
 	return out, nil
 }
 
+func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error) {
+	out := new(GetWorldResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetWorld", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility
 type ServiceServer interface {
+	// VILLAGES
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
+	// ORDERS
 	UpgradeBuilding(context.Context, *UpgradeBuildingRequest) (*UpgradeBuildingResponse, error)
 	CancelUpgradeBuilding(context.Context, *CancelUpgradeBuildingRequest) (*CancelUpgradeBuildingResponse, error)
 	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
+	// WORLD
+	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have forward compatible implementations.
@@ -111,6 +128,9 @@ func (UnimplementedServiceServer) IssueTroopTrainingOrder(context.Context, *Issu
 }
 func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelTroopTrainingOrder not implemented")
+}
+func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
 }
 
 // UnsafeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -214,6 +234,24 @@ func _Service_CancelTroopTrainingOrder_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorldRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetWorld(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetWorld",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetWorld(ctx, req.(*GetWorldRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -240,6 +278,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelTroopTrainingOrder",
 			Handler:    _Service_CancelTroopTrainingOrder_Handler,
+		},
+		{
+			MethodName: "GetWorld",
+			Handler:    _Service_GetWorld_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

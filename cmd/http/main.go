@@ -23,13 +23,14 @@ type Server struct {
 	serverv1.UnimplementedServiceServer
 }
 
+/* VILLAGES */
 func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.GetVillageRequest]) (*connect.Response[serverv1.GetVillageResponse], error) {
-	village, found, err := db.GetVillage(ctx, req.Msg.Id.Value)
+	village, found, err := db.GetVillage(ctx, req.Msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
 	if !found {
-		return nil, status.Error(codes.NotFound, "village not found")
+		return nil, status.Errorf(codes.NotFound, "village (id: %d) not found", req.Msg.Id)
 	}
 
 	pVillage, err := village.ToProtobuf(ctx)
@@ -40,6 +41,7 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 	return connect.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
+/* ORDERS */
 // TODO: Use mutexes and transaction
 func (s *Server) UpgradeBuilding(ctx context.Context, req *connect.Request[serverv1.UpgradeBuildingRequest]) (*connect.Response[serverv1.UpgradeBuildingResponse], error) {
 	building, found, err := db.GetBuilding(ctx, req.Msg.Id)
@@ -204,6 +206,18 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 	}
 
 	return connect.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
+}
+
+/* WORLD */
+func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.GetWorldRequest]) (*connect.Response[serverv1.GetWorldResponse], error) {
+	world := db.GetWorld(ctx)
+
+	pWorld, err := world.ToProtobuf(ctx, req.Msg.LoadCells)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert world to protobuf: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.GetWorldResponse{World: pWorld}), nil
 }
 
 func main() {

@@ -2,7 +2,7 @@ import { render } from 'preact'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import VillagePage from './VillagePage'
-// import GridMapPage from './GridMapPage'
+import WorldMapPage from './WorldMapPage'
 
 function App() {
   const router = createBrowserRouter([
@@ -10,10 +10,10 @@ function App() {
       path: "/villages/:id",
       element: <VillagePage />
     },
-    // {
-    //   path: "/grid-map",
-    //   element: <GridMapPage />
-    // },
+    {
+      path: "/world-map",
+      element: <WorldMapPage />
+    },
   ])
 
   return  <RouterProvider router={router} />
