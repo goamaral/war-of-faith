@@ -14,13 +14,13 @@ var BuildingUpgradeCost = Resources{
 }
 
 type Building struct {
-	Id    uint32                 `json:"id" db:"id"`
-	Kind  serverv1.Building_Kind `json:"kind" db:"kind"`
-	Level uint32                 `json:"level" db:"level"`
+	Id    uint32                 `db:"id"`
+	Kind  serverv1.Building_Kind `db:"kind"`
+	Level uint32                 `db:"level"`
 
-	UpgradeTimeLeft uint32 `json:"upgrade_time_left" db:"upgrade_time_left"`
+	UpgradeTimeLeft uint32 `db:"upgrade_time_left"`
 
-	VillageId uint32 `json:"village_id" db:"village_id"`
+	VillageId uint32 `db:"village_id"`
 
 	village *Village
 }

@@ -3,9 +3,9 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/bufbuild/connect-go"
@@ -92,16 +92,24 @@ func Drop() error {
 	return err
 }
 
-func recordToMap(record any) (map[string]any, error) {
-	recordBytes, err := json.Marshal(record)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal record: %w", err)
+func RecordToMap(record any) (map[string]any, error) {
+	v := reflect.ValueOf(record)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
 	}
+
+	if v.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("record must be a struct (found %s)", v.Kind().String())
+	}
+
 	recordMap := map[string]any{}
-	err = json.Unmarshal(recordBytes, &recordMap)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal record: %w", err)
+	for i := 0; i < v.NumField(); i++ {
+		fieldName := v.Type().Field(i).Tag.Get("db")
+		if fieldName != "" {
+			recordMap[fieldName] = v.Field(i).Interface()
+		}
 	}
+
 	return recordMap, nil
 }
 
@@ -117,7 +125,7 @@ func newQuery(exprs ...QryExp) sq.StatementBuilderType {
 }
 
 func insertQuery[T any](ctx context.Context, table string, record *T) error {
-	recordMap, err := recordToMap(record)
+	recordMap, err := RecordToMap(record)
 	if err != nil {
 		return fmt.Errorf("failed to convert record to map: %w", err)
 	}
@@ -178,7 +186,7 @@ func firstQuery[T any](ctx context.Context, table string, exprs ...QryExp) (T, b
 }
 
 func updateQuery(ctx context.Context, table string, record any, exprs ...QryExp) error {
-	recordMap, err := recordToMap(record)
+	recordMap, err := RecordToMap(record)
 	if err != nil {
 		return fmt.Errorf("failed to convert record to map: %w", err)
 	}

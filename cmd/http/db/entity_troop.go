@@ -15,12 +15,12 @@ func CalculateTrainCost(quantity uint32) Resources {
 }
 
 type Troop struct {
-	Id       uint32              `json:"id" db:"id"`
-	Kind     serverv1.Troop_Kind `json:"kind" db:"kind"`
-	Name     string              `json:"name" db:"name"`
-	Quantity uint32              `json:"quantity" db:"quantity"`
+	Id       uint32              `db:"id"`
+	Kind     serverv1.Troop_Kind `db:"kind"`
+	Name     string              `db:"name"`
+	Quantity uint32              `db:"quantity"`
 
-	VillageId uint32 `json:"village_id" db:"village_id"`
+	VillageId uint32 `db:"village_id"`
 	village   *Village
 }
 

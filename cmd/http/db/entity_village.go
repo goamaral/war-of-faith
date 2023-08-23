@@ -9,9 +9,9 @@ import (
 )
 
 type Village struct {
-	Id uint32 `json:"id"`
+	Id uint32 `db:"id"`
 
-	Gold uint32 `json:"gold"`
+	Gold uint32 `db:"gold"`
 
 	buildings           *[]Building
 	troops              *[]Troop

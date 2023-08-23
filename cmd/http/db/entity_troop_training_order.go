@@ -7,13 +7,13 @@ import (
 )
 
 type TroopTrainingOrder struct {
-	Id       uint32 `json:"id" db:"id"`
-	Quantity uint32 `json:"quantity" db:"quantity"`
-	TimeLeft uint32 `json:"time_left" db:"time_left"`
+	Id       uint32 `db:"id"`
+	Quantity uint32 `db:"quantity"`
+	TimeLeft uint32 `db:"time_left"`
 
-	TroopId   uint32 `json:"troop_id" db:"troop_id"`
+	TroopId   uint32 `db:"troop_id"`
 	troop     *Troop
-	VillageId uint32 `json:"village_id" db:"village_id"`
+	VillageId uint32 `db:"village_id"`
 	village   *Village
 }
 
