@@ -5,13 +5,10 @@ import (
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
-var TroopTrainCost = Resources{
-	Time: 10,
-	Gold: 10,
-}
-
+// TODO: Define troop training costs
+// TODO: Apply barracks bonus
 func CalculateTrainCost(quantity uint32) Resources {
-	return TroopTrainCost.Multiply(quantity)
+	return (Resources{Time: 10, Gold: 10}).Multiply(quantity)
 }
 
 type Troop struct {
@@ -26,11 +23,10 @@ type Troop struct {
 
 func (t Troop) ToProtobuf() *serverv1.Troop {
 	return &serverv1.Troop{
-		Id:        t.Id,
-		Kind:      t.Kind,
-		Name:      t.Name,
-		TrainCost: TroopTrainCost.ToProtobuf(),
-		Quantity:  t.Quantity,
+		Id:       t.Id,
+		Kind:     t.Kind,
+		Name:     t.Name,
+		Quantity: t.Quantity,
 	}
 }
 

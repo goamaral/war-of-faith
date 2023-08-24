@@ -12,7 +12,7 @@ export default class Village {
   constructor(village: serverV1Types.Village) {
     this.id = village.id
     this.gold = village.resources?.gold!
-    this.buildings = new Map<serverV1Types.Building_Kind, Building>(village.buildings.map(b => [b.kind, new Building(b)]))
+    this.buildings = new Map<serverV1Types.Building_Kind, Building>(village.buildings.map(b => [b.kind, new Building(b, this)]))
     this.troops = new Map<serverV1Types.Troop_Kind, Troop>(village.troops.map(t => [t.kind!, new Troop(t, this)]))
     this.troopTrainingOrders = village.troopTrainingOrders.map(o => new TroopTrainingOrder(o, this))
   }

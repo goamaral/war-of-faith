@@ -2,15 +2,16 @@ package db
 
 import (
 	"context"
-	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
-const BuildingMaxLevel = 10
+// TODO: Define building upgrade costs
+const PlaceholderBuildingMaxLevel = 10
 
-var BuildingUpgradeCost = Resources{
-	Time: 10,
-	Gold: 10,
+// TODO: Define building upgrade costs
+// TODO: Apply hall bonus
+func CalculateBuildingUpgradeCost() Resources {
+	return Resources{Time: 10, Gold: 10}
 }
 
 type Building struct {
@@ -26,19 +27,12 @@ type Building struct {
 }
 
 func (b *Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
-	upgradeStatus, err := b.UpgradeStatus(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check building status: %w", err)
-	}
-
 	return &serverv1.Building{
 		Id:              b.Id,
 		Kind:            b.Kind,
 		Name:            b.Name(),
 		Level:           b.Level,
-		UpgradeStatus:   upgradeStatus,
 		UpgradeTimeLeft: b.UpgradeTimeLeft,
-		UpgradeCost:     BuildingUpgradeCost.ToProtobuf(),
 	}, nil
 }
 
@@ -56,28 +50,7 @@ func (b *Building) Village(ctx context.Context) (Village, error) {
 	return *b.village, nil
 }
 
-func (b *Building) UpgradeStatus(ctx context.Context) (serverv1.Building_UpgradeStatus, error) {
-	if b.UpgradeTimeLeft > 0 {
-		return serverv1.Building_UPGRADE_STATUS_UPGRADING, nil
-	}
-
-	if b.Level >= BuildingMaxLevel {
-		return serverv1.Building_UPGRADE_STATUS_MAX_LEVEL, nil
-	}
-
-	village, err := b.Village(ctx)
-	if err != nil {
-		return serverv1.Building_UPGRADE_STATUS_UNSPECIFIED, fmt.Errorf("failed to get village: %w", err)
-	}
-
-	if BuildingUpgradeCost.Gold > village.Gold {
-		return serverv1.Building_UPGRADE_STATUS_INSUFFICIENT_RESOURCES, nil
-	}
-
-	return serverv1.Building_UPGRADE_STATUS_UPGRADABLE, nil
-}
-
-func (b *Building) Name() string {
+func (b Building) Name() string {
 	switch b.Kind {
 	case serverv1.Building_KIND_HALL:
 		return "Village Hall"

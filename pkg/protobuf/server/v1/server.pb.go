@@ -69,62 +69,6 @@ func (Building_Kind) EnumDescriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{2, 0}
 }
 
-// TODO: Move this logic to the frontend
-type Building_UpgradeStatus int32
-
-const (
-	Building_UPGRADE_STATUS_UNSPECIFIED            Building_UpgradeStatus = 0
-	Building_UPGRADE_STATUS_UPGRADABLE             Building_UpgradeStatus = 1
-	Building_UPGRADE_STATUS_UPGRADING              Building_UpgradeStatus = 2
-	Building_UPGRADE_STATUS_MAX_LEVEL              Building_UpgradeStatus = 3
-	Building_UPGRADE_STATUS_INSUFFICIENT_RESOURCES Building_UpgradeStatus = 4
-)
-
-// Enum value maps for Building_UpgradeStatus.
-var (
-	Building_UpgradeStatus_name = map[int32]string{
-		0: "UPGRADE_STATUS_UNSPECIFIED",
-		1: "UPGRADE_STATUS_UPGRADABLE",
-		2: "UPGRADE_STATUS_UPGRADING",
-		3: "UPGRADE_STATUS_MAX_LEVEL",
-		4: "UPGRADE_STATUS_INSUFFICIENT_RESOURCES",
-	}
-	Building_UpgradeStatus_value = map[string]int32{
-		"UPGRADE_STATUS_UNSPECIFIED":            0,
-		"UPGRADE_STATUS_UPGRADABLE":             1,
-		"UPGRADE_STATUS_UPGRADING":              2,
-		"UPGRADE_STATUS_MAX_LEVEL":              3,
-		"UPGRADE_STATUS_INSUFFICIENT_RESOURCES": 4,
-	}
-)
-
-func (x Building_UpgradeStatus) Enum() *Building_UpgradeStatus {
-	p := new(Building_UpgradeStatus)
-	*p = x
-	return p
-}
-
-func (x Building_UpgradeStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (Building_UpgradeStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_server_v1_server_proto_enumTypes[1].Descriptor()
-}
-
-func (Building_UpgradeStatus) Type() protoreflect.EnumType {
-	return &file_server_v1_server_proto_enumTypes[1]
-}
-
-func (x Building_UpgradeStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use Building_UpgradeStatus.Descriptor instead.
-func (Building_UpgradeStatus) EnumDescriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{2, 1}
-}
-
 type Troop_Kind int32
 
 const (
@@ -155,11 +99,11 @@ func (x Troop_Kind) String() string {
 }
 
 func (Troop_Kind) Descriptor() protoreflect.EnumDescriptor {
-	return file_server_v1_server_proto_enumTypes[2].Descriptor()
+	return file_server_v1_server_proto_enumTypes[1].Descriptor()
 }
 
 func (Troop_Kind) Type() protoreflect.EnumType {
-	return &file_server_v1_server_proto_enumTypes[2]
+	return &file_server_v1_server_proto_enumTypes[1]
 }
 
 func (x Troop_Kind) Number() protoreflect.EnumNumber {
@@ -201,11 +145,11 @@ func (x World_Cell_EntityKind) String() string {
 }
 
 func (World_Cell_EntityKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_server_v1_server_proto_enumTypes[3].Descriptor()
+	return file_server_v1_server_proto_enumTypes[2].Descriptor()
 }
 
 func (World_Cell_EntityKind) Type() protoreflect.EnumType {
-	return &file_server_v1_server_proto_enumTypes[3]
+	return &file_server_v1_server_proto_enumTypes[2]
 }
 
 func (x World_Cell_EntityKind) Number() protoreflect.EnumNumber {
@@ -356,13 +300,11 @@ type Building struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id              uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Kind            Building_Kind          `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.Building_Kind" json:"kind,omitempty"`
-	Name            string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Level           uint32                 `protobuf:"varint,4,opt,name=level,proto3" json:"level,omitempty"`
-	UpgradeStatus   Building_UpgradeStatus `protobuf:"varint,5,opt,name=upgrade_status,json=upgradeStatus,proto3,enum=server.v1.Building_UpgradeStatus" json:"upgrade_status,omitempty"`
-	UpgradeTimeLeft uint32                 `protobuf:"varint,6,opt,name=upgrade_time_left,json=upgradeTimeLeft,proto3" json:"upgrade_time_left,omitempty"`
-	UpgradeCost     *Resources             `protobuf:"bytes,7,opt,name=upgrade_cost,json=upgradeCost,proto3" json:"upgrade_cost,omitempty"`
+	Id              uint32        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind            Building_Kind `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.Building_Kind" json:"kind,omitempty"`
+	Name            string        `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Level           uint32        `protobuf:"varint,4,opt,name=level,proto3" json:"level,omitempty"`
+	UpgradeTimeLeft uint32        `protobuf:"varint,5,opt,name=upgrade_time_left,json=upgradeTimeLeft,proto3" json:"upgrade_time_left,omitempty"`
 }
 
 func (x *Building) Reset() {
@@ -425,13 +367,6 @@ func (x *Building) GetLevel() uint32 {
 	return 0
 }
 
-func (x *Building) GetUpgradeStatus() Building_UpgradeStatus {
-	if x != nil {
-		return x.UpgradeStatus
-	}
-	return Building_UPGRADE_STATUS_UNSPECIFIED
-}
-
 func (x *Building) GetUpgradeTimeLeft() uint32 {
 	if x != nil {
 		return x.UpgradeTimeLeft
@@ -439,23 +374,15 @@ func (x *Building) GetUpgradeTimeLeft() uint32 {
 	return 0
 }
 
-func (x *Building) GetUpgradeCost() *Resources {
-	if x != nil {
-		return x.UpgradeCost
-	}
-	return nil
-}
-
 type Troop struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint32     `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Kind      Troop_Kind `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.Troop_Kind" json:"kind,omitempty"`
-	Name      string     `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	TrainCost *Resources `protobuf:"bytes,4,opt,name=train_cost,json=trainCost,proto3" json:"train_cost,omitempty"`
-	Quantity  uint32     `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Id       uint32     `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind     Troop_Kind `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.Troop_Kind" json:"kind,omitempty"`
+	Name     string     `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Quantity uint32     `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 }
 
 func (x *Troop) Reset() {
@@ -509,13 +436,6 @@ func (x *Troop) GetName() string {
 		return x.Name
 	}
 	return ""
-}
-
-func (x *Troop) GetTrainCost() *Resources {
-	if x != nil {
-		return x.TrainCost
-	}
-	return nil
 }
 
 func (x *Troop) GetQuantity() uint32 {
@@ -1339,51 +1259,28 @@ var file_server_v1_server_proto_rawDesc = []byte{
 	0x64, 0x65, 0x72, 0x73, 0x22, 0x33, 0x0a, 0x09, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
 	0x73, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52,
 	0x04, 0x74, 0x69, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x67, 0x6f, 0x6c, 0x64, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x04, 0x67, 0x6f, 0x6c, 0x64, 0x22, 0x9a, 0x04, 0x0a, 0x08, 0x42, 0x75,
+	0x01, 0x28, 0x0d, 0x52, 0x04, 0x67, 0x6f, 0x6c, 0x64, 0x22, 0xdf, 0x01, 0x0a, 0x08, 0x42, 0x75,
 	0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x0d, 0x52, 0x02, 0x69, 0x64, 0x12, 0x2c, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x0e, 0x32, 0x18, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31,
 	0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x4b, 0x69, 0x6e, 0x64, 0x52, 0x04,
 	0x6b, 0x69, 0x6e, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65,
-	0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x48,
-	0x0a, 0x0e, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x21, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x70, 0x67, 0x72,
-	0x61, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x0d, 0x75, 0x70, 0x67, 0x72, 0x61,
-	0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x2a, 0x0a, 0x11, 0x75, 0x70, 0x67, 0x72,
-	0x61, 0x64, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x6c, 0x65, 0x66, 0x74, 0x18, 0x06, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x0f, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x54, 0x69, 0x6d, 0x65,
-	0x4c, 0x65, 0x66, 0x74, 0x12, 0x37, 0x0a, 0x0c, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x5f,
-	0x63, 0x6f, 0x73, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73,
-	0x52, 0x0b, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x43, 0x6f, 0x73, 0x74, 0x22, 0x3f, 0x0a,
-	0x04, 0x4b, 0x69, 0x6e, 0x64, 0x12, 0x14, 0x0a, 0x10, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x55, 0x4e,
-	0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4b,
-	0x49, 0x4e, 0x44, 0x5f, 0x48, 0x41, 0x4c, 0x4c, 0x10, 0x01, 0x12, 0x12, 0x0a, 0x0e, 0x4b, 0x49,
-	0x4e, 0x44, 0x5f, 0x47, 0x4f, 0x4c, 0x44, 0x5f, 0x4d, 0x49, 0x4e, 0x45, 0x10, 0x02, 0x22, 0xb5,
-	0x01, 0x0a, 0x0d, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x12, 0x1e, 0x0a, 0x1a, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x41, 0x54,
-	0x55, 0x53, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00,
-	0x12, 0x1d, 0x0a, 0x19, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x41, 0x54,
-	0x55, 0x53, 0x5f, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x41, 0x42, 0x4c, 0x45, 0x10, 0x01, 0x12,
-	0x1c, 0x0a, 0x18, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55,
-	0x53, 0x5f, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x49, 0x4e, 0x47, 0x10, 0x02, 0x12, 0x1c, 0x0a,
-	0x18, 0x55, 0x50, 0x47, 0x52, 0x41, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f,
-	0x4d, 0x41, 0x58, 0x5f, 0x4c, 0x45, 0x56, 0x45, 0x4c, 0x10, 0x03, 0x12, 0x29, 0x0a, 0x25, 0x55,
-	0x50, 0x47, 0x52, 0x41, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x49, 0x4e,
-	0x53, 0x55, 0x46, 0x46, 0x49, 0x43, 0x49, 0x45, 0x4e, 0x54, 0x5f, 0x52, 0x45, 0x53, 0x4f, 0x55,
-	0x52, 0x43, 0x45, 0x53, 0x10, 0x04, 0x22, 0x83, 0x03, 0x0a, 0x05, 0x54, 0x72, 0x6f, 0x6f, 0x70,
-	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x02, 0x69, 0x64,
-	0x12, 0x29, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x15,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x72, 0x6f, 0x6f, 0x70,
-	0x2e, 0x4b, 0x69, 0x6e, 0x64, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
-	0x33, 0x0a, 0x0a, 0x74, 0x72, 0x61, 0x69, 0x6e, 0x5f, 0x63, 0x6f, 0x73, 0x74, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e,
-	0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x09, 0x74, 0x72, 0x61, 0x69, 0x6e,
-	0x43, 0x6f, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79,
+	0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x2a,
+	0x0a, 0x11, 0x75, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x6c,
+	0x65, 0x66, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0f, 0x75, 0x70, 0x67, 0x72, 0x61,
+	0x64, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x4c, 0x65, 0x66, 0x74, 0x22, 0x3f, 0x0a, 0x04, 0x4b, 0x69,
+	0x6e, 0x64, 0x12, 0x14, 0x0a, 0x10, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45,
+	0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4b, 0x49, 0x4e, 0x44,
+	0x5f, 0x48, 0x41, 0x4c, 0x4c, 0x10, 0x01, 0x12, 0x12, 0x0a, 0x0e, 0x4b, 0x49, 0x4e, 0x44, 0x5f,
+	0x47, 0x4f, 0x4c, 0x44, 0x5f, 0x4d, 0x49, 0x4e, 0x45, 0x10, 0x02, 0x22, 0xce, 0x02, 0x0a, 0x05,
+	0x54, 0x72, 0x6f, 0x6f, 0x70, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0d, 0x52, 0x02, 0x69, 0x64, 0x12, 0x29, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x15, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e,
+	0x54, 0x72, 0x6f, 0x6f, 0x70, 0x2e, 0x4b, 0x69, 0x6e, 0x64, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79,
 	0x1a, 0xaa, 0x01, 0x0a, 0x0d, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64,
 	0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x02,
 	0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x18, 0x03,
@@ -1524,71 +1421,67 @@ func file_server_v1_server_proto_rawDescGZIP() []byte {
 	return file_server_v1_server_proto_rawDescData
 }
 
-var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_server_v1_server_proto_goTypes = []interface{}{
 	(Building_Kind)(0),                       // 0: server.v1.Building.Kind
-	(Building_UpgradeStatus)(0),              // 1: server.v1.Building.UpgradeStatus
-	(Troop_Kind)(0),                          // 2: server.v1.Troop.Kind
-	(World_Cell_EntityKind)(0),               // 3: server.v1.World.Cell.EntityKind
-	(*Village)(nil),                          // 4: server.v1.Village
-	(*Resources)(nil),                        // 5: server.v1.Resources
-	(*Building)(nil),                         // 6: server.v1.Building
-	(*Troop)(nil),                            // 7: server.v1.Troop
-	(*World)(nil),                            // 8: server.v1.World
-	(*GetVillageRequest)(nil),                // 9: server.v1.GetVillageRequest
-	(*GetVillageResponse)(nil),               // 10: server.v1.GetVillageResponse
-	(*UpgradeBuildingRequest)(nil),           // 11: server.v1.UpgradeBuildingRequest
-	(*UpgradeBuildingResponse)(nil),          // 12: server.v1.UpgradeBuildingResponse
-	(*CancelUpgradeBuildingRequest)(nil),     // 13: server.v1.CancelUpgradeBuildingRequest
-	(*CancelUpgradeBuildingResponse)(nil),    // 14: server.v1.CancelUpgradeBuildingResponse
-	(*IssueTroopTrainingOrderRequest)(nil),   // 15: server.v1.IssueTroopTrainingOrderRequest
-	(*IssueTroopTrainingOrderResponse)(nil),  // 16: server.v1.IssueTroopTrainingOrderResponse
-	(*CancelTroopTrainingOrderRequest)(nil),  // 17: server.v1.CancelTroopTrainingOrderRequest
-	(*CancelTroopTrainingOrderResponse)(nil), // 18: server.v1.CancelTroopTrainingOrderResponse
-	(*GetWorldRequest)(nil),                  // 19: server.v1.GetWorldRequest
-	(*GetWorldResponse)(nil),                 // 20: server.v1.GetWorldResponse
-	(*Troop_TrainingOrder)(nil),              // 21: server.v1.Troop.TrainingOrder
-	nil,                                      // 22: server.v1.World.CellsEntry
-	(*World_Cell)(nil),                       // 23: server.v1.World.Cell
+	(Troop_Kind)(0),                          // 1: server.v1.Troop.Kind
+	(World_Cell_EntityKind)(0),               // 2: server.v1.World.Cell.EntityKind
+	(*Village)(nil),                          // 3: server.v1.Village
+	(*Resources)(nil),                        // 4: server.v1.Resources
+	(*Building)(nil),                         // 5: server.v1.Building
+	(*Troop)(nil),                            // 6: server.v1.Troop
+	(*World)(nil),                            // 7: server.v1.World
+	(*GetVillageRequest)(nil),                // 8: server.v1.GetVillageRequest
+	(*GetVillageResponse)(nil),               // 9: server.v1.GetVillageResponse
+	(*UpgradeBuildingRequest)(nil),           // 10: server.v1.UpgradeBuildingRequest
+	(*UpgradeBuildingResponse)(nil),          // 11: server.v1.UpgradeBuildingResponse
+	(*CancelUpgradeBuildingRequest)(nil),     // 12: server.v1.CancelUpgradeBuildingRequest
+	(*CancelUpgradeBuildingResponse)(nil),    // 13: server.v1.CancelUpgradeBuildingResponse
+	(*IssueTroopTrainingOrderRequest)(nil),   // 14: server.v1.IssueTroopTrainingOrderRequest
+	(*IssueTroopTrainingOrderResponse)(nil),  // 15: server.v1.IssueTroopTrainingOrderResponse
+	(*CancelTroopTrainingOrderRequest)(nil),  // 16: server.v1.CancelTroopTrainingOrderRequest
+	(*CancelTroopTrainingOrderResponse)(nil), // 17: server.v1.CancelTroopTrainingOrderResponse
+	(*GetWorldRequest)(nil),                  // 18: server.v1.GetWorldRequest
+	(*GetWorldResponse)(nil),                 // 19: server.v1.GetWorldResponse
+	(*Troop_TrainingOrder)(nil),              // 20: server.v1.Troop.TrainingOrder
+	nil,                                      // 21: server.v1.World.CellsEntry
+	(*World_Cell)(nil),                       // 22: server.v1.World.Cell
 }
 var file_server_v1_server_proto_depIdxs = []int32{
-	5,  // 0: server.v1.Village.resources:type_name -> server.v1.Resources
-	6,  // 1: server.v1.Village.buildings:type_name -> server.v1.Building
-	7,  // 2: server.v1.Village.troops:type_name -> server.v1.Troop
-	21, // 3: server.v1.Village.troop_training_orders:type_name -> server.v1.Troop.TrainingOrder
+	4,  // 0: server.v1.Village.resources:type_name -> server.v1.Resources
+	5,  // 1: server.v1.Village.buildings:type_name -> server.v1.Building
+	6,  // 2: server.v1.Village.troops:type_name -> server.v1.Troop
+	20, // 3: server.v1.Village.troop_training_orders:type_name -> server.v1.Troop.TrainingOrder
 	0,  // 4: server.v1.Building.kind:type_name -> server.v1.Building.Kind
-	1,  // 5: server.v1.Building.upgrade_status:type_name -> server.v1.Building.UpgradeStatus
-	5,  // 6: server.v1.Building.upgrade_cost:type_name -> server.v1.Resources
-	2,  // 7: server.v1.Troop.kind:type_name -> server.v1.Troop.Kind
-	5,  // 8: server.v1.Troop.train_cost:type_name -> server.v1.Resources
-	22, // 9: server.v1.World.cells:type_name -> server.v1.World.CellsEntry
-	4,  // 10: server.v1.GetVillageResponse.Village:type_name -> server.v1.Village
-	6,  // 11: server.v1.UpgradeBuildingResponse.building:type_name -> server.v1.Building
-	6,  // 12: server.v1.CancelUpgradeBuildingResponse.building:type_name -> server.v1.Building
-	21, // 13: server.v1.IssueTroopTrainingOrderResponse.order:type_name -> server.v1.Troop.TrainingOrder
-	8,  // 14: server.v1.GetWorldResponse.world:type_name -> server.v1.World
-	5,  // 15: server.v1.Troop.TrainingOrder.cost:type_name -> server.v1.Resources
-	7,  // 16: server.v1.Troop.TrainingOrder.troop:type_name -> server.v1.Troop
-	23, // 17: server.v1.World.CellsEntry.value:type_name -> server.v1.World.Cell
-	3,  // 18: server.v1.World.Cell.entity_kind:type_name -> server.v1.World.Cell.EntityKind
-	9,  // 19: server.v1.Service.GetVillage:input_type -> server.v1.GetVillageRequest
-	11, // 20: server.v1.Service.UpgradeBuilding:input_type -> server.v1.UpgradeBuildingRequest
-	13, // 21: server.v1.Service.CancelUpgradeBuilding:input_type -> server.v1.CancelUpgradeBuildingRequest
-	15, // 22: server.v1.Service.IssueTroopTrainingOrder:input_type -> server.v1.IssueTroopTrainingOrderRequest
-	17, // 23: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
-	19, // 24: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
-	10, // 25: server.v1.Service.GetVillage:output_type -> server.v1.GetVillageResponse
-	12, // 26: server.v1.Service.UpgradeBuilding:output_type -> server.v1.UpgradeBuildingResponse
-	14, // 27: server.v1.Service.CancelUpgradeBuilding:output_type -> server.v1.CancelUpgradeBuildingResponse
-	16, // 28: server.v1.Service.IssueTroopTrainingOrder:output_type -> server.v1.IssueTroopTrainingOrderResponse
-	18, // 29: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
-	20, // 30: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
-	25, // [25:31] is the sub-list for method output_type
-	19, // [19:25] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	1,  // 5: server.v1.Troop.kind:type_name -> server.v1.Troop.Kind
+	21, // 6: server.v1.World.cells:type_name -> server.v1.World.CellsEntry
+	3,  // 7: server.v1.GetVillageResponse.Village:type_name -> server.v1.Village
+	5,  // 8: server.v1.UpgradeBuildingResponse.building:type_name -> server.v1.Building
+	5,  // 9: server.v1.CancelUpgradeBuildingResponse.building:type_name -> server.v1.Building
+	20, // 10: server.v1.IssueTroopTrainingOrderResponse.order:type_name -> server.v1.Troop.TrainingOrder
+	7,  // 11: server.v1.GetWorldResponse.world:type_name -> server.v1.World
+	4,  // 12: server.v1.Troop.TrainingOrder.cost:type_name -> server.v1.Resources
+	6,  // 13: server.v1.Troop.TrainingOrder.troop:type_name -> server.v1.Troop
+	22, // 14: server.v1.World.CellsEntry.value:type_name -> server.v1.World.Cell
+	2,  // 15: server.v1.World.Cell.entity_kind:type_name -> server.v1.World.Cell.EntityKind
+	8,  // 16: server.v1.Service.GetVillage:input_type -> server.v1.GetVillageRequest
+	10, // 17: server.v1.Service.UpgradeBuilding:input_type -> server.v1.UpgradeBuildingRequest
+	12, // 18: server.v1.Service.CancelUpgradeBuilding:input_type -> server.v1.CancelUpgradeBuildingRequest
+	14, // 19: server.v1.Service.IssueTroopTrainingOrder:input_type -> server.v1.IssueTroopTrainingOrderRequest
+	16, // 20: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
+	18, // 21: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
+	9,  // 22: server.v1.Service.GetVillage:output_type -> server.v1.GetVillageResponse
+	11, // 23: server.v1.Service.UpgradeBuilding:output_type -> server.v1.UpgradeBuildingResponse
+	13, // 24: server.v1.Service.CancelUpgradeBuilding:output_type -> server.v1.CancelUpgradeBuildingResponse
+	15, // 25: server.v1.Service.IssueTroopTrainingOrder:output_type -> server.v1.IssueTroopTrainingOrderResponse
+	17, // 26: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
+	19, // 27: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
+	22, // [22:28] is the sub-list for method output_type
+	16, // [16:22] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_server_v1_server_proto_init() }
@@ -1831,7 +1724,7 @@ func file_server_v1_server_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_server_v1_server_proto_rawDesc,
-			NumEnums:      4,
+			NumEnums:      3,
 			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,

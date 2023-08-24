@@ -24,23 +24,12 @@ message Building {
   Building.Kind kind = 2;
   string name = 3;
   uint32 level = 4;
-  Building.UpgradeStatus upgrade_status = 5;
-  uint32 upgrade_time_left = 6;
-  Resources upgrade_cost = 7;
+  uint32 upgrade_time_left = 5;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
     KIND_HALL = 1;
     KIND_GOLD_MINE = 2;
-  }
-
-  // TODO: Move this logic to the frontend
-  enum UpgradeStatus {
-    UPGRADE_STATUS_UNSPECIFIED = 0;
-    UPGRADE_STATUS_UPGRADABLE = 1;
-    UPGRADE_STATUS_UPGRADING = 2;
-    UPGRADE_STATUS_MAX_LEVEL = 3;
-    UPGRADE_STATUS_INSUFFICIENT_RESOURCES = 4;
   }
 }
 
@@ -48,8 +37,7 @@ message Troop {
   uint32 id = 1;
   Troop.Kind kind = 2;
   string name = 3;
-  Resources train_cost = 4;
-  uint32 quantity = 5;
+  uint32 quantity = 4;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;

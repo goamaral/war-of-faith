@@ -64,48 +64,45 @@ const Village = observer(({ village }: { village: entities.Village }) => {
 const VillageBuildings = observer(({ village }: { village: entities.Village }) => {  
   function UpgradeStatus({ building }: { building: entities.Building }) {
     async function upgrade() {
-      const res = await server.upgradeBuilding({ id: building.id })
-      const updatedBuilding = new entities.Building(res.building!)
-      village.updateBuilding(updatedBuilding)
-
-      if (updatedBuilding.upgradeStatus != serverV1Types.Building_UpgradeStatus.UPGRADING) {
-        alert(`Failed to upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus.toString()})`)
-        return
+      try {
+        const res = await server.upgradeBuilding({ id: building.id })
+        village.updateBuilding(new entities.Building(res.building!, village))
+        village.addGold(-building.upgradeCost.gold)
+      } catch (err) {
+        alert(`Failed to upgrade ${building.name}: ${err}`)
       }
-      village.addGold(-building.upgradeCost.gold)
     }
 
     async function cancelUpgrade() {
-      const res = await server.cancelUpgradeBuilding({ id: building.id })
-      const updatedBuilding = new entities.Building(res.building!)
-      village.updateBuilding(updatedBuilding)
-    
-      if (updatedBuilding.upgradeStatus == serverV1Types.Building_UpgradeStatus.UPGRADING) {
-        alert(`Failed to cancel upgrade ${updatedBuilding.name} (status: ${updatedBuilding.upgradeStatus.toString()})`)
-        return
+      try {
+        const res = await server.cancelUpgradeBuilding({ id: building.id })
+        const updatedBuilding = new entities.Building(res.building!, village)
+        village.updateBuilding(updatedBuilding)
+        village.addGold(building.upgradeCost.gold)
+      } catch (err) {
+        alert(`Failed to cancel ${building.name} upgrade: ${err}`)
       }
-      village.addGold(building.upgradeCost.gold)
     }
 
-    switch (building.upgradeStatus) {
-      case serverV1Types.Building_UpgradeStatus.UPGRADABLE:
+    switch (building.upgradeStatus()) {
+      case entities.BuildingUpgradeStatus.UPGRADABLE:
         return <button onClick={upgrade}>upgrade ({building.upgradeCost.time}s, {building.upgradeCost.gold} gold)</button>
 
-      case serverV1Types.Building_UpgradeStatus.UPGRADING:
+      case entities.BuildingUpgradeStatus.UPGRADING:
         return <>
           <button onClick={cancelUpgrade}>cancel</button>
           {building.upgradeTimeLeft}s left
         </>
 
-      case serverV1Types.Building_UpgradeStatus.MAX_LEVEL:
+      case entities.BuildingUpgradeStatus.MAX_LEVEL:
         return <></>
 
-      case serverV1Types.Building_UpgradeStatus.INSUFFICIENT_RESOURCES:
+      case entities.BuildingUpgradeStatus.INSUFFICIENT_RESOURCES:
         return <button disabled={true}>upgrade ({building.upgradeCost.time}s, {building.upgradeCost.gold} gold)</button>
 
 
       default:
-        throw new Error(`Unknown building upgrade status: ${building.upgradeStatus.toString()}`)
+        throw new Error(`Unknown building upgrade status: ${building.upgradeStatus().toString()}`)
     }
   }
 
@@ -162,14 +159,14 @@ const VillageTroops = observer(({ village }: { village: entities.Village }) => {
         )
         break
 
-      case entities.TroopTrainStatus.NOT_ENOUGH_RESOURCES:
+      case entities.TroopTrainStatus.INSUFFICIENT_RESOURCES:
         children.push(
           <input type="number" value={quantity} min={0} max={max} onChange={e => setQuantity(parseNumber(e.currentTarget.value))} />,
           <button disabled={true}>train ({troop.trainCost(quantity).time}s, {troop.trainCost(quantity).gold} gold)</button>
         )
         break
 
-      case entities.TroopTrainStatus.NO_MORE_LEADERS:
+      case entities.TroopTrainStatus.MAX_LEADERS:
         break
 
       default:

@@ -51,27 +51,30 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connect.Request[serve
 	if !found {
 		return nil, status.Error(codes.NotFound, "building not found")
 	}
-
-	upgradeStatus, err := building.UpgradeStatus(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check upgrade status: %w", err)
+	if building.UpgradeTimeLeft > 0 {
+		return nil, status.Error(codes.FailedPrecondition, "upgrade already in progress")
 	}
-	if upgradeStatus == serverv1.Building_UPGRADE_STATUS_UPGRADABLE {
-		village, err := building.Village(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get village: %w", err)
-		}
-		village.Gold -= db.BuildingUpgradeCost.Gold
-		err = db.UpdateVillage(ctx, village.Id, village)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update village: %w", err)
-		}
 
-		building.UpgradeTimeLeft = db.BuildingUpgradeCost.Time
-		err = db.UpdateBuilding(ctx, building.Id, building)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update building: %w", err)
-		}
+	village, err := building.Village(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+
+	cost := db.CalculateBuildingUpgradeCost()
+	if !village.CanAfford(cost) {
+		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
+	}
+
+	village.SpendResources(cost)
+	err = db.UpdateVillage(ctx, village.Id, village)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update village: %w", err)
+	}
+
+	building.UpgradeTimeLeft = cost.Time
+	err = db.UpdateBuilding(ctx, building.Id, building)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update building: %w", err)
 	}
 
 	pBuilding, err := building.ToProtobuf(ctx)
@@ -91,27 +94,26 @@ func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connect.Request
 	if !found {
 		return nil, status.Error(codes.NotFound, "building not found")
 	}
-
-	upgradeStatus, err := building.UpgradeStatus(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check upgrade status: %w", err)
+	if building.UpgradeTimeLeft == 0 {
+		return nil, status.Error(codes.FailedPrecondition, "no upgrade in progress")
 	}
-	if upgradeStatus == serverv1.Building_UPGRADE_STATUS_UPGRADING {
-		building.UpgradeTimeLeft = 0
-		err = db.UpdateBuilding(ctx, building.Id, building)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update building: %w", err)
-		}
 
-		village, err := building.Village(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get village: %w", err)
-		}
-		village.Gold += db.BuildingUpgradeCost.Gold
-		err = db.UpdateVillage(ctx, village.Id, village)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update village: %w", err)
-		}
+	village, err := building.Village(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+
+	cost := db.CalculateBuildingUpgradeCost()
+	village.EarnResources(cost)
+	err = db.UpdateVillage(ctx, village.Id, village)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update village: %w", err)
+	}
+
+	building.UpgradeTimeLeft = 0
+	err = db.UpdateBuilding(ctx, building.Id, building)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update building: %w", err)
 	}
 
 	pBuilding, err := building.ToProtobuf(ctx)
@@ -132,15 +134,15 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 		return nil, status.Error(codes.NotFound, "troop not found")
 	}
 
-	cost := db.CalculateTrainCost(req.Msg.Quantity)
 	village, err := troop.Village(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
+
+	cost := db.CalculateTrainCost(req.Msg.Quantity)
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
-
 	if troop.Kind == serverv1.Troop_KIND_LEADER {
 		if troop.Quantity > 0 {
 			return nil, status.Error(codes.FailedPrecondition, "no more leaders can be trained")
@@ -163,7 +165,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 
 	order, err := db.CreateTroopTrainingOrder(ctx, &db.TroopTrainingOrder{
 		Quantity:  req.Msg.Quantity,
-		TimeLeft:  db.TroopTrainCost.Time,
+		TimeLeft:  cost.Time,
 		TroopId:   req.Msg.TroopId,
 		VillageId: village.Id,
 	})
@@ -189,11 +191,12 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 		return nil, status.Error(codes.NotFound, "troop training order not found")
 	}
 
-	cost := db.CalculateTrainCost(order.Quantity)
 	village, err := order.Village(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
+
+	cost := db.CalculateTrainCost(order.Quantity)
 	village.EarnResources(cost)
 	err = db.UpdateVillage(ctx, village.Id, village)
 	if err != nil {

@@ -135,19 +135,9 @@ export class Building extends Message<Building> {
   level = 0;
 
   /**
-   * @generated from field: server.v1.Building.UpgradeStatus upgrade_status = 5;
-   */
-  upgradeStatus = Building_UpgradeStatus.UNSPECIFIED;
-
-  /**
-   * @generated from field: uint32 upgrade_time_left = 6;
+   * @generated from field: uint32 upgrade_time_left = 5;
    */
   upgradeTimeLeft = 0;
-
-  /**
-   * @generated from field: server.v1.Resources upgrade_cost = 7;
-   */
-  upgradeCost?: Resources;
 
   constructor(data?: PartialMessage<Building>) {
     super();
@@ -161,9 +151,7 @@ export class Building extends Message<Building> {
     { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
     { no: 3, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "upgrade_status", kind: "enum", T: proto3.getEnumType(Building_UpgradeStatus) },
-    { no: 6, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 7, name: "upgrade_cost", kind: "message", T: Resources },
+    { no: 5, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
@@ -210,46 +198,6 @@ proto3.util.setEnumType(Building_Kind, "server.v1.Building.Kind", [
 ]);
 
 /**
- * TODO: Move this logic to the frontend
- *
- * @generated from enum server.v1.Building.UpgradeStatus
- */
-export enum Building_UpgradeStatus {
-  /**
-   * @generated from enum value: UPGRADE_STATUS_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: UPGRADE_STATUS_UPGRADABLE = 1;
-   */
-  UPGRADABLE = 1,
-
-  /**
-   * @generated from enum value: UPGRADE_STATUS_UPGRADING = 2;
-   */
-  UPGRADING = 2,
-
-  /**
-   * @generated from enum value: UPGRADE_STATUS_MAX_LEVEL = 3;
-   */
-  MAX_LEVEL = 3,
-
-  /**
-   * @generated from enum value: UPGRADE_STATUS_INSUFFICIENT_RESOURCES = 4;
-   */
-  INSUFFICIENT_RESOURCES = 4,
-}
-// Retrieve enum metadata with: proto3.getEnumType(Building_UpgradeStatus)
-proto3.util.setEnumType(Building_UpgradeStatus, "server.v1.Building.UpgradeStatus", [
-  { no: 0, name: "UPGRADE_STATUS_UNSPECIFIED" },
-  { no: 1, name: "UPGRADE_STATUS_UPGRADABLE" },
-  { no: 2, name: "UPGRADE_STATUS_UPGRADING" },
-  { no: 3, name: "UPGRADE_STATUS_MAX_LEVEL" },
-  { no: 4, name: "UPGRADE_STATUS_INSUFFICIENT_RESOURCES" },
-]);
-
-/**
  * @generated from message server.v1.Troop
  */
 export class Troop extends Message<Troop> {
@@ -269,12 +217,7 @@ export class Troop extends Message<Troop> {
   name = "";
 
   /**
-   * @generated from field: server.v1.Resources train_cost = 4;
-   */
-  trainCost?: Resources;
-
-  /**
-   * @generated from field: uint32 quantity = 5;
+   * @generated from field: uint32 quantity = 4;
    */
   quantity = 0;
 
@@ -289,8 +232,7 @@ export class Troop extends Message<Troop> {
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Troop_Kind) },
     { no: 3, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "train_cost", kind: "message", T: Resources },
-    { no: 5, name: "quantity", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "quantity", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop {
