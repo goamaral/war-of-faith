@@ -10,6 +10,10 @@ function renderWorld(world: serverV1Types.World, onCellClick: (cell: serverV1Typ
     switch (kind) {
       case serverV1Types.World_Cell_EntityKind.VILLAGE:
         return { backgroundColor: 'green', cursor: 'pointer' }
+
+      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+        return { backgroundColor: 'yellow' }
+
       default:
         return {}
     }

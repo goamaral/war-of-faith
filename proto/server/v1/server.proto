@@ -68,8 +68,13 @@ message World {
     enum EntityKind {
       ENTITY_KIND_UNSPECIFIED = 0;
       ENTITY_KIND_VILLAGE = 1;
+      ENTITY_KIND_TEMPLE = 2;
     }
   }
+}
+
+message Temple {
+  uint32 id = 1;
 }
 
 /* VILLAGES */

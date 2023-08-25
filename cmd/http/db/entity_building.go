@@ -26,7 +26,7 @@ type Building struct {
 	village *Village
 }
 
-func (b *Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
+func (b Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
 	return &serverv1.Building{
 		Id:              b.Id,
 		Kind:            b.Kind,

@@ -456,12 +456,55 @@ export enum World_Cell_EntityKind {
    * @generated from enum value: ENTITY_KIND_VILLAGE = 1;
    */
   VILLAGE = 1,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_TEMPLE = 2;
+   */
+  TEMPLE = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(World_Cell_EntityKind)
 proto3.util.setEnumType(World_Cell_EntityKind, "server.v1.World.Cell.EntityKind", [
   { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
   { no: 1, name: "ENTITY_KIND_VILLAGE" },
+  { no: 2, name: "ENTITY_KIND_TEMPLE" },
 ]);
+
+/**
+ * @generated from message server.v1.Temple
+ */
+export class Temple extends Message<Temple> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<Temple>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Temple";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Temple {
+    return new Temple().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Temple {
+    return new Temple().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Temple {
+    return new Temple().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Temple | PlainMessage<Temple> | undefined, b: Temple | PlainMessage<Temple> | undefined): boolean {
+    return proto3.util.equals(Temple, a, b);
+  }
+}
 
 /**
  * GetVillage

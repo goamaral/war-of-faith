@@ -77,6 +77,10 @@ func Init(uri string) error {
 			entity_id INTEGER NOT NULL
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS unq_x_y ON world_cells(x, y);
+
+		CREATE TABLE IF NOT EXISTS temples (
+			id INTEGER PRIMARY KEY
+		);
 	`)
 	if err != nil {
 		return fmt.Errorf("failed to create tables: %w", err)
@@ -86,12 +90,26 @@ func Init(uri string) error {
 }
 
 func Seed() error {
-	village, err := CreateVillage(context.Background(), 4, 4)
+	_, err := CreateVillage(context.Background(), 3, 4)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create village: %w", err)
 	}
-
-	fmt.Printf("Created village: %d\n", village.Id)
+	_, err = CreateTemple(context.Background(), 1, 1)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (1,1): %w", err)
+	}
+	_, err = CreateTemple(context.Background(), 8, 1)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (8,1): %w", err)
+	}
+	_, err = CreateTemple(context.Background(), 8, 8)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (8,8): %w", err)
+	}
+	_, err = CreateTemple(context.Background(), 1, 8)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (1,8): %w", err)
+	}
 
 	return nil
 }
@@ -123,7 +141,7 @@ func RecordToMap(record any) (map[string]any, error) {
 }
 
 type QryExp interface {
-	ToSql() (sql string, args []interface{}, err error)
+	ToSql() (sql string, args []any, err error)
 }
 
 func newQuery(exprs ...QryExp) sq.StatementBuilderType {
@@ -140,9 +158,13 @@ func insertQuery[T any](ctx context.Context, table string, record *T) error {
 	}
 	delete(recordMap, "id")
 
-	qrySql, args, err := sq.Insert(table).SetMap(recordMap).Suffix("RETURNING *").ToSql()
-	if err != nil {
-		return fmt.Errorf("failed to build sql query: %w", err)
+	qrySql := fmt.Sprintf("INSERT INTO %s DEFAULT VALUES RETURNING *", table)
+	var args []any
+	if len(recordMap) != 0 {
+		qrySql, args, err = sq.Insert(table).SetMap(recordMap).Suffix("RETURNING *").ToSql()
+		if err != nil {
+			return fmt.Errorf("failed to build sql query: %w", err)
+		}
 	}
 
 	return db.QueryRowxContext(ctx, qrySql, args...).StructScan(record)

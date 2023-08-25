@@ -19,10 +19,6 @@ type Village struct {
 }
 
 func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
-	if v == nil {
-		return &serverv1.Village{}, nil
-	}
-
 	buildings, err := v.Buildings(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get buildings: %w", err)
