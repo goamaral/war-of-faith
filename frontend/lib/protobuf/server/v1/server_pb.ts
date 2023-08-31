@@ -26,12 +26,17 @@ export class Village extends Message<Village> {
   buildings: Building[] = [];
 
   /**
-   * @generated from field: repeated server.v1.Troop troops = 4;
+   * @generated from field: repeated server.v1.Building.UpgradeOrder building_upgrade_orders = 4;
+   */
+  buildingUpgradeOrders: Building_UpgradeOrder[] = [];
+
+  /**
+   * @generated from field: repeated server.v1.Troop troops = 5;
    */
   troops: Troop[] = [];
 
   /**
-   * @generated from field: repeated server.v1.Troop.TrainingOrder troop_training_orders = 5;
+   * @generated from field: repeated server.v1.Troop.TrainingOrder troop_training_orders = 6;
    */
   troopTrainingOrders: Troop_TrainingOrder[] = [];
 
@@ -46,8 +51,9 @@ export class Village extends Message<Village> {
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "resources", kind: "message", T: Resources },
     { no: 3, name: "buildings", kind: "message", T: Building, repeated: true },
-    { no: 4, name: "troops", kind: "message", T: Troop, repeated: true },
-    { no: 5, name: "troop_training_orders", kind: "message", T: Troop_TrainingOrder, repeated: true },
+    { no: 4, name: "building_upgrade_orders", kind: "message", T: Building_UpgradeOrder, repeated: true },
+    { no: 5, name: "troops", kind: "message", T: Troop, repeated: true },
+    { no: 6, name: "troop_training_orders", kind: "message", T: Troop_TrainingOrder, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village {
@@ -134,11 +140,6 @@ export class Building extends Message<Building> {
    */
   level = 0;
 
-  /**
-   * @generated from field: uint32 upgrade_time_left = 5;
-   */
-  upgradeTimeLeft = 0;
-
   constructor(data?: PartialMessage<Building>) {
     super();
     proto3.util.initPartial(data, this);
@@ -151,7 +152,6 @@ export class Building extends Message<Building> {
     { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
     { no: 3, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "upgrade_time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
@@ -196,6 +196,67 @@ proto3.util.setEnumType(Building_Kind, "server.v1.Building.Kind", [
   { no: 1, name: "KIND_HALL" },
   { no: 2, name: "KIND_GOLD_MINE" },
 ]);
+
+/**
+ * @generated from message server.v1.Building.UpgradeOrder
+ */
+export class Building_UpgradeOrder extends Message<Building_UpgradeOrder> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 level = 2;
+   */
+  level = 0;
+
+  /**
+   * @generated from field: uint32 time_left = 3;
+   */
+  timeLeft = 0;
+
+  /**
+   * @generated from field: server.v1.Resources cost = 4;
+   */
+  cost?: Resources;
+
+  /**
+   * @generated from field: uint32 building_id = 5;
+   */
+  buildingId = 0;
+
+  constructor(data?: PartialMessage<Building_UpgradeOrder>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Building.UpgradeOrder";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "cost", kind: "message", T: Resources },
+    { no: 5, name: "building_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined, b: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined): boolean {
+    return proto3.util.equals(Building_UpgradeOrder, a, b);
+  }
+}
 
 /**
  * @generated from message server.v1.Troop
@@ -297,9 +358,9 @@ export class Troop_TrainingOrder extends Message<Troop_TrainingOrder> {
   cost?: Resources;
 
   /**
-   * @generated from field: server.v1.Troop troop = 6;
+   * @generated from field: uint32 troop_id = 6;
    */
-  troop?: Troop;
+  troopId = 0;
 
   constructor(data?: PartialMessage<Troop_TrainingOrder>) {
     super();
@@ -313,7 +374,7 @@ export class Troop_TrainingOrder extends Message<Troop_TrainingOrder> {
     { no: 3, name: "quantity", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 4, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 5, name: "cost", kind: "message", T: Resources },
-    { no: 6, name: "troop", kind: "message", T: Troop },
+    { no: 6, name: "troop_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop_TrainingOrder {
@@ -583,154 +644,148 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
 }
 
 /**
- * UpgradeBuilding
+ * IssueBuildingUpgradeOrder
  *
- * @generated from message server.v1.UpgradeBuildingRequest
+ * @generated from message server.v1.IssueBuildingUpgradeOrderRequest
  */
-export class UpgradeBuildingRequest extends Message<UpgradeBuildingRequest> {
+export class IssueBuildingUpgradeOrderRequest extends Message<IssueBuildingUpgradeOrderRequest> {
+  /**
+   * @generated from field: uint32 building_id = 1;
+   */
+  buildingId = 0;
+
+  constructor(data?: PartialMessage<IssueBuildingUpgradeOrderRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.IssueBuildingUpgradeOrderRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "building_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueBuildingUpgradeOrderRequest {
+    return new IssueBuildingUpgradeOrderRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueBuildingUpgradeOrderRequest {
+    return new IssueBuildingUpgradeOrderRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueBuildingUpgradeOrderRequest {
+    return new IssueBuildingUpgradeOrderRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IssueBuildingUpgradeOrderRequest | PlainMessage<IssueBuildingUpgradeOrderRequest> | undefined, b: IssueBuildingUpgradeOrderRequest | PlainMessage<IssueBuildingUpgradeOrderRequest> | undefined): boolean {
+    return proto3.util.equals(IssueBuildingUpgradeOrderRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.IssueBuildingUpgradeOrderResponse
+ */
+export class IssueBuildingUpgradeOrderResponse extends Message<IssueBuildingUpgradeOrderResponse> {
+  /**
+   * @generated from field: server.v1.Building.UpgradeOrder order = 1;
+   */
+  order?: Building_UpgradeOrder;
+
+  constructor(data?: PartialMessage<IssueBuildingUpgradeOrderResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.IssueBuildingUpgradeOrderResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "order", kind: "message", T: Building_UpgradeOrder },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueBuildingUpgradeOrderResponse {
+    return new IssueBuildingUpgradeOrderResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueBuildingUpgradeOrderResponse {
+    return new IssueBuildingUpgradeOrderResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueBuildingUpgradeOrderResponse {
+    return new IssueBuildingUpgradeOrderResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IssueBuildingUpgradeOrderResponse | PlainMessage<IssueBuildingUpgradeOrderResponse> | undefined, b: IssueBuildingUpgradeOrderResponse | PlainMessage<IssueBuildingUpgradeOrderResponse> | undefined): boolean {
+    return proto3.util.equals(IssueBuildingUpgradeOrderResponse, a, b);
+  }
+}
+
+/**
+ * CancelBuildingUpgradeOrder
+ *
+ * @generated from message server.v1.CancelBuildingUpgradeOrderRequest
+ */
+export class CancelBuildingUpgradeOrderRequest extends Message<CancelBuildingUpgradeOrderRequest> {
   /**
    * @generated from field: uint32 id = 1;
    */
   id = 0;
 
-  constructor(data?: PartialMessage<UpgradeBuildingRequest>) {
+  constructor(data?: PartialMessage<CancelBuildingUpgradeOrderRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.UpgradeBuildingRequest";
+  static readonly typeName = "server.v1.CancelBuildingUpgradeOrderRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpgradeBuildingRequest {
-    return new UpgradeBuildingRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelBuildingUpgradeOrderRequest {
+    return new CancelBuildingUpgradeOrderRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpgradeBuildingRequest {
-    return new UpgradeBuildingRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelBuildingUpgradeOrderRequest {
+    return new CancelBuildingUpgradeOrderRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpgradeBuildingRequest {
-    return new UpgradeBuildingRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelBuildingUpgradeOrderRequest {
+    return new CancelBuildingUpgradeOrderRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UpgradeBuildingRequest | PlainMessage<UpgradeBuildingRequest> | undefined, b: UpgradeBuildingRequest | PlainMessage<UpgradeBuildingRequest> | undefined): boolean {
-    return proto3.util.equals(UpgradeBuildingRequest, a, b);
+  static equals(a: CancelBuildingUpgradeOrderRequest | PlainMessage<CancelBuildingUpgradeOrderRequest> | undefined, b: CancelBuildingUpgradeOrderRequest | PlainMessage<CancelBuildingUpgradeOrderRequest> | undefined): boolean {
+    return proto3.util.equals(CancelBuildingUpgradeOrderRequest, a, b);
   }
 }
 
 /**
- * @generated from message server.v1.UpgradeBuildingResponse
+ * @generated from message server.v1.CancelBuildingUpgradeOrderResponse
  */
-export class UpgradeBuildingResponse extends Message<UpgradeBuildingResponse> {
-  /**
-   * @generated from field: server.v1.Building building = 1;
-   */
-  building?: Building;
-
-  constructor(data?: PartialMessage<UpgradeBuildingResponse>) {
+export class CancelBuildingUpgradeOrderResponse extends Message<CancelBuildingUpgradeOrderResponse> {
+  constructor(data?: PartialMessage<CancelBuildingUpgradeOrderResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.UpgradeBuildingResponse";
+  static readonly typeName = "server.v1.CancelBuildingUpgradeOrderResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "building", kind: "message", T: Building },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpgradeBuildingResponse {
-    return new UpgradeBuildingResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelBuildingUpgradeOrderResponse {
+    return new CancelBuildingUpgradeOrderResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpgradeBuildingResponse {
-    return new UpgradeBuildingResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelBuildingUpgradeOrderResponse {
+    return new CancelBuildingUpgradeOrderResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpgradeBuildingResponse {
-    return new UpgradeBuildingResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelBuildingUpgradeOrderResponse {
+    return new CancelBuildingUpgradeOrderResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UpgradeBuildingResponse | PlainMessage<UpgradeBuildingResponse> | undefined, b: UpgradeBuildingResponse | PlainMessage<UpgradeBuildingResponse> | undefined): boolean {
-    return proto3.util.equals(UpgradeBuildingResponse, a, b);
-  }
-}
-
-/**
- * CancelUpgradeBuilding
- *
- * @generated from message server.v1.CancelUpgradeBuildingRequest
- */
-export class CancelUpgradeBuildingRequest extends Message<CancelUpgradeBuildingRequest> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  constructor(data?: PartialMessage<CancelUpgradeBuildingRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.CancelUpgradeBuildingRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelUpgradeBuildingRequest {
-    return new CancelUpgradeBuildingRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingRequest {
-    return new CancelUpgradeBuildingRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingRequest {
-    return new CancelUpgradeBuildingRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: CancelUpgradeBuildingRequest | PlainMessage<CancelUpgradeBuildingRequest> | undefined, b: CancelUpgradeBuildingRequest | PlainMessage<CancelUpgradeBuildingRequest> | undefined): boolean {
-    return proto3.util.equals(CancelUpgradeBuildingRequest, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.CancelUpgradeBuildingResponse
- */
-export class CancelUpgradeBuildingResponse extends Message<CancelUpgradeBuildingResponse> {
-  /**
-   * @generated from field: server.v1.Building building = 1;
-   */
-  building?: Building;
-
-  constructor(data?: PartialMessage<CancelUpgradeBuildingResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.CancelUpgradeBuildingResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "building", kind: "message", T: Building },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelUpgradeBuildingResponse {
-    return new CancelUpgradeBuildingResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingResponse {
-    return new CancelUpgradeBuildingResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelUpgradeBuildingResponse {
-    return new CancelUpgradeBuildingResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: CancelUpgradeBuildingResponse | PlainMessage<CancelUpgradeBuildingResponse> | undefined, b: CancelUpgradeBuildingResponse | PlainMessage<CancelUpgradeBuildingResponse> | undefined): boolean {
-    return proto3.util.equals(CancelUpgradeBuildingResponse, a, b);
+  static equals(a: CancelBuildingUpgradeOrderResponse | PlainMessage<CancelBuildingUpgradeOrderResponse> | undefined, b: CancelBuildingUpgradeOrderResponse | PlainMessage<CancelBuildingUpgradeOrderResponse> | undefined): boolean {
+    return proto3.util.equals(CancelBuildingUpgradeOrderResponse, a, b);
   }
 }
 

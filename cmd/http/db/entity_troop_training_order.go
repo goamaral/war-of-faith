@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
@@ -11,24 +10,18 @@ type TroopTrainingOrder struct {
 	Quantity uint32 `db:"quantity"`
 	TimeLeft uint32 `db:"time_left"`
 
-	TroopId   uint32 `db:"troop_id"`
+	TroopId   uint32 `db:"troop_id"` // TODO: Use Troop.Kind instead
 	troop     *Troop
-	VillageId uint32 `db:"village_id"`
-	village   *Village
+	VillageId uint32 `db:"village_id"` // TODO: Remove when joins are implemented
 }
 
 func (o *TroopTrainingOrder) ToProtobuf(ctx context.Context) (*serverv1.Troop_TrainingOrder, error) {
-	troop, err := o.Troop(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get troop (id: %d): %w", o.TroopId, err)
-	}
-
 	return &serverv1.Troop_TrainingOrder{
 		Id:       o.Id,
 		Quantity: o.Quantity,
 		TimeLeft: o.TimeLeft,
 		Cost:     CalculateTrainCost(o.Quantity).ToProtobuf(),
-		Troop:    troop.ToProtobuf(), // TODO: Return troop kind instead of troop
+		TroopId:  o.TroopId,
 	}, nil
 }
 
@@ -44,18 +37,4 @@ func (o *TroopTrainingOrder) Troop(ctx context.Context) (Troop, error) {
 		o.troop = &troop
 	}
 	return *o.troop, nil
-}
-
-func (o *TroopTrainingOrder) Village(ctx context.Context) (Village, error) {
-	if o.village == nil {
-		village, found, err := GetVillage(ctx, o.VillageId)
-		if err != nil {
-			return Village{}, err
-		}
-		if !found {
-			return Village{}, ErrNotFound
-		}
-		o.village = &village
-	}
-	return *o.village, nil
 }

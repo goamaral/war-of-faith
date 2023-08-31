@@ -10,8 +10,9 @@ message Village {
   uint32 id = 1;
   Resources resources = 2;
   repeated Building buildings = 3;
-  repeated Troop troops = 4;
-  repeated Troop.TrainingOrder troop_training_orders = 5;
+  repeated Building.UpgradeOrder building_upgrade_orders = 4;
+  repeated Troop troops = 5;
+  repeated Troop.TrainingOrder troop_training_orders = 6;
 }
 
 message Resources {
@@ -24,12 +25,19 @@ message Building {
   Building.Kind kind = 2;
   string name = 3;
   uint32 level = 4;
-  uint32 upgrade_time_left = 5;
 
   enum Kind {
     KIND_UNSPECIFIED = 0;
     KIND_HALL = 1;
     KIND_GOLD_MINE = 2;
+  }
+
+  message UpgradeOrder {
+    uint32 id = 1;
+    uint32 level = 2;
+    uint32 time_left = 3;
+    Resources cost = 4;
+    uint32 building_id = 5;
   }
 }
 
@@ -49,7 +57,7 @@ message Troop {
     uint32 quantity = 3;
     uint32 time_left = 4;
     Resources cost = 5;
-    Troop troop = 6;
+    uint32 troop_id = 6;
   }
 }
 
@@ -87,21 +95,19 @@ message GetVillageResponse {
 }
 
 /* ORDERS */
-// UpgradeBuilding
-message UpgradeBuildingRequest {
-  uint32 id = 1;
+// IssueBuildingUpgradeOrder
+message IssueBuildingUpgradeOrderRequest {
+  uint32 building_id = 1;
 }
-message UpgradeBuildingResponse {
-  Building building = 1;
+message IssueBuildingUpgradeOrderResponse {
+  Building.UpgradeOrder order = 1;
 }
 
-// CancelUpgradeBuilding
-message CancelUpgradeBuildingRequest {
+// CancelBuildingUpgradeOrder
+message CancelBuildingUpgradeOrderRequest {
   uint32 id = 1;
 }
-message CancelUpgradeBuildingResponse {
-  Building building = 1;
-}
+message CancelBuildingUpgradeOrderResponse {}
 
 // IssueTroopTrainingOrder
 message IssueTroopTrainingOrderRequest {
@@ -132,8 +138,8 @@ service Service {
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
 
   /* ORDERS */
-  rpc UpgradeBuilding(UpgradeBuildingRequest) returns (UpgradeBuildingResponse);
-  rpc CancelUpgradeBuilding(CancelUpgradeBuildingRequest) returns (CancelUpgradeBuildingResponse);
+  rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
+  rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
   rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
   rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
 

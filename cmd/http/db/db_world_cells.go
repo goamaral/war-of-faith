@@ -19,6 +19,6 @@ func CreateWorldCell(ctx context.Context, x uint32, y uint32, entityKind serverv
 	return cell, insertQuery(ctx, WorldCellsTableName, &cell)
 }
 
-func GetWorldCells(ctx context.Context, exprs ...QryExp) ([]WorldCell, error) {
-	return findQuery[WorldCell](ctx, WorldCellsTableName, exprs...)
+func GetWorldCells(ctx context.Context, opts ...QueryOption) ([]WorldCell, error) {
+	return findQuery[WorldCell](ctx, WorldCellsTableName, opts...)
 }

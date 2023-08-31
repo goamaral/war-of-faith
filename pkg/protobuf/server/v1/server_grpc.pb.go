@@ -25,8 +25,8 @@ type ServiceClient interface {
 	// VILLAGES
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
 	// ORDERS
-	UpgradeBuilding(ctx context.Context, in *UpgradeBuildingRequest, opts ...grpc.CallOption) (*UpgradeBuildingResponse, error)
-	CancelUpgradeBuilding(ctx context.Context, in *CancelUpgradeBuildingRequest, opts ...grpc.CallOption) (*CancelUpgradeBuildingResponse, error)
+	IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error)
+	CancelBuildingUpgradeOrder(ctx context.Context, in *CancelBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*CancelBuildingUpgradeOrderResponse, error)
 	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
@@ -50,18 +50,18 @@ func (c *serviceClient) GetVillage(ctx context.Context, in *GetVillageRequest, o
 	return out, nil
 }
 
-func (c *serviceClient) UpgradeBuilding(ctx context.Context, in *UpgradeBuildingRequest, opts ...grpc.CallOption) (*UpgradeBuildingResponse, error) {
-	out := new(UpgradeBuildingResponse)
-	err := c.cc.Invoke(ctx, "/server.v1.Service/UpgradeBuilding", in, out, opts...)
+func (c *serviceClient) IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error) {
+	out := new(IssueBuildingUpgradeOrderResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueBuildingUpgradeOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *serviceClient) CancelUpgradeBuilding(ctx context.Context, in *CancelUpgradeBuildingRequest, opts ...grpc.CallOption) (*CancelUpgradeBuildingResponse, error) {
-	out := new(CancelUpgradeBuildingResponse)
-	err := c.cc.Invoke(ctx, "/server.v1.Service/CancelUpgradeBuilding", in, out, opts...)
+func (c *serviceClient) CancelBuildingUpgradeOrder(ctx context.Context, in *CancelBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*CancelBuildingUpgradeOrderResponse, error) {
+	out := new(CancelBuildingUpgradeOrderResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/CancelBuildingUpgradeOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +102,8 @@ type ServiceServer interface {
 	// VILLAGES
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
 	// ORDERS
-	UpgradeBuilding(context.Context, *UpgradeBuildingRequest) (*UpgradeBuildingResponse, error)
-	CancelUpgradeBuilding(context.Context, *CancelUpgradeBuildingRequest) (*CancelUpgradeBuildingResponse, error)
+	IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error)
+	CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error)
 	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
@@ -117,11 +117,11 @@ type UnimplementedServiceServer struct {
 func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVillage not implemented")
 }
-func (UnimplementedServiceServer) UpgradeBuilding(context.Context, *UpgradeBuildingRequest) (*UpgradeBuildingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpgradeBuilding not implemented")
+func (UnimplementedServiceServer) IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssueBuildingUpgradeOrder not implemented")
 }
-func (UnimplementedServiceServer) CancelUpgradeBuilding(context.Context, *CancelUpgradeBuildingRequest) (*CancelUpgradeBuildingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CancelUpgradeBuilding not implemented")
+func (UnimplementedServiceServer) CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelBuildingUpgradeOrder not implemented")
 }
 func (UnimplementedServiceServer) IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueTroopTrainingOrder not implemented")
@@ -162,38 +162,38 @@ func _Service_GetVillage_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Service_UpgradeBuilding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpgradeBuildingRequest)
+func _Service_IssueBuildingUpgradeOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IssueBuildingUpgradeOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).UpgradeBuilding(ctx, in)
+		return srv.(ServiceServer).IssueBuildingUpgradeOrder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/server.v1.Service/UpgradeBuilding",
+		FullMethod: "/server.v1.Service/IssueBuildingUpgradeOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).UpgradeBuilding(ctx, req.(*UpgradeBuildingRequest))
+		return srv.(ServiceServer).IssueBuildingUpgradeOrder(ctx, req.(*IssueBuildingUpgradeOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Service_CancelUpgradeBuilding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelUpgradeBuildingRequest)
+func _Service_CancelBuildingUpgradeOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelBuildingUpgradeOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).CancelUpgradeBuilding(ctx, in)
+		return srv.(ServiceServer).CancelBuildingUpgradeOrder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/server.v1.Service/CancelUpgradeBuilding",
+		FullMethod: "/server.v1.Service/CancelBuildingUpgradeOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).CancelUpgradeBuilding(ctx, req.(*CancelUpgradeBuildingRequest))
+		return srv.(ServiceServer).CancelBuildingUpgradeOrder(ctx, req.(*CancelBuildingUpgradeOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -264,12 +264,12 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_GetVillage_Handler,
 		},
 		{
-			MethodName: "UpgradeBuilding",
-			Handler:    _Service_UpgradeBuilding_Handler,
+			MethodName: "IssueBuildingUpgradeOrder",
+			Handler:    _Service_IssueBuildingUpgradeOrder_Handler,
 		},
 		{
-			MethodName: "CancelUpgradeBuilding",
-			Handler:    _Service_CancelUpgradeBuilding_Handler,
+			MethodName: "CancelBuildingUpgradeOrder",
+			Handler:    _Service_CancelBuildingUpgradeOrder_Handler,
 		},
 		{
 			MethodName: "IssueTroopTrainingOrder",

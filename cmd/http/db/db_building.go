@@ -18,8 +18,8 @@ func GetBuilding(ctx context.Context, id uint32) (Building, bool, error) {
 	return firstQuery[Building](ctx, BuildingsTableName, sq.Eq{"id": id})
 }
 
-func GetBuildings(ctx context.Context, exprs ...QryExp) ([]Building, error) {
-	return findQuery[Building](ctx, BuildingsTableName, exprs...)
+func GetBuildings(ctx context.Context, opts ...QueryOption) ([]Building, error) {
+	return findQuery[Building](ctx, BuildingsTableName, opts...)
 }
 
 func UpdateBuilding(ctx context.Context, id uint32, building Building) error {

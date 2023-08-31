@@ -11,6 +11,7 @@ import (
 	"github.com/bufbuild/connect-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -43,24 +44,28 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 
 /* ORDERS */
 // TODO: Use mutexes and transaction
-func (s *Server) UpgradeBuilding(ctx context.Context, req *connect.Request[serverv1.UpgradeBuildingRequest]) (*connect.Response[serverv1.UpgradeBuildingResponse], error) {
-	building, found, err := db.GetBuilding(ctx, req.Msg.Id)
+func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.IssueBuildingUpgradeOrderResponse], error) {
+	building, found, err := db.GetBuilding(ctx, req.Msg.BuildingId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building: %w", err)
 	}
 	if !found {
 		return nil, status.Error(codes.NotFound, "building not found")
 	}
-	if building.UpgradeTimeLeft > 0 {
-		return nil, status.Error(codes.FailedPrecondition, "upgrade already in progress")
+
+	nextUpgradeLevel, err := building.NextUpgradeLevel(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building (id: %d) next upgrade level: %w", building.Id, err)
+	}
+	if nextUpgradeLevel > db.PlaceholderBuildingMaxLevel {
+		return nil, status.Error(codes.FailedPrecondition, "building is already at max level")
 	}
 
 	village, err := building.Village(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
-
-	cost := db.CalculateBuildingUpgradeCost()
+	cost := db.CalculateBuildingUpgradeCost(nextUpgradeLevel)
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
@@ -71,31 +76,45 @@ func (s *Server) UpgradeBuilding(ctx context.Context, req *connect.Request[serve
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	building.UpgradeTimeLeft = cost.Time
-	err = db.UpdateBuilding(ctx, building.Id, building)
+	order, err := db.CreateBuildingUpgradeOrder(ctx, &db.BuildingUpgradeOrder{
+		Level:      nextUpgradeLevel,
+		TimeLeft:   cost.Time,
+		BuildingId: building.Id,
+		VillageId:  village.Id, // TODO: Remove when joins are implemented
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to update building: %w", err)
+		return nil, fmt.Errorf("failed to create building upgrade order: %w", err)
 	}
 
-	pBuilding, err := building.ToProtobuf(ctx)
+	pOrder, err := order.ToProtobuf(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert building to protobuf: %w", err)
+		return nil, fmt.Errorf("failed to convert building upgrade order to protobuf: %w", err)
 	}
 
-	return connect.NewResponse(&serverv1.UpgradeBuildingResponse{Building: pBuilding}), nil
+	return connect.NewResponse(&serverv1.IssueBuildingUpgradeOrderResponse{Order: pOrder}), nil
 }
 
 // TODO: Use mutexes and transaction
-func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connect.Request[serverv1.CancelUpgradeBuildingRequest]) (*connect.Response[serverv1.CancelUpgradeBuildingResponse], error) {
-	building, found, err := db.GetBuilding(ctx, req.Msg.Id)
+func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.CancelBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.CancelBuildingUpgradeOrderResponse], error) {
+	order, found, err := db.GetBuildingUpgradeOrder(ctx, req.Msg.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get building: %w", err)
+		return nil, fmt.Errorf("failed to get building upgrade order: %w", err)
 	}
 	if !found {
-		return nil, status.Error(codes.NotFound, "building not found")
+		return nil, status.Error(codes.NotFound, "building upgrade order not found")
 	}
-	if building.UpgradeTimeLeft == 0 {
-		return nil, status.Error(codes.FailedPrecondition, "no upgrade in progress")
+
+	orders, err := db.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": order.BuildingId}, db.OrderQueryOption{Column: "level", Desc: true})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building (id: %d) upgrade orders: %w", order.BuildingId, err)
+	}
+	if order.Id != orders[0].Id {
+		return nil, status.Error(codes.FailedPrecondition, "building upgrade order is not the latest order")
+	}
+
+	building, err := order.Building(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building (id: %d): %w", order.BuildingId, err)
 	}
 
 	village, err := building.Village(ctx)
@@ -103,25 +122,19 @@ func (s *Server) CancelUpgradeBuilding(ctx context.Context, req *connect.Request
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
 
-	cost := db.CalculateBuildingUpgradeCost()
+	cost := db.CalculateBuildingUpgradeCost(order.Level)
 	village.EarnResources(cost)
 	err = db.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	building.UpgradeTimeLeft = 0
-	err = db.UpdateBuilding(ctx, building.Id, building)
+	err = db.DeleteBuildingUpgradeOrder(ctx, order.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update building: %w", err)
+		return nil, fmt.Errorf("failed to delete building upgrade order: %w", err)
 	}
 
-	pBuilding, err := building.ToProtobuf(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert building to protobuf: %w", err)
-	}
-
-	return connect.NewResponse(&serverv1.CancelUpgradeBuildingResponse{Building: pBuilding}), nil
+	return connect.NewResponse(&serverv1.CancelBuildingUpgradeOrderResponse{}), nil
 }
 
 // TODO: Use mutexes and transaction
@@ -167,7 +180,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 		Quantity:  req.Msg.Quantity,
 		TimeLeft:  cost.Time,
 		TroopId:   req.Msg.TroopId,
-		VillageId: village.Id,
+		VillageId: village.Id, // TODO: Remove when joins are implemented
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create troop training order: %w", err)
@@ -191,9 +204,14 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 		return nil, status.Error(codes.NotFound, "troop training order not found")
 	}
 
-	village, err := order.Village(ctx)
+	troop, err := order.Troop(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get village: %w", err)
+		return nil, fmt.Errorf("failed to get troop (id: %d): %w", order.TroopId, err)
+	}
+
+	village, err := troop.Village(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village (id: %d): %w", troop.VillageId, err)
 	}
 
 	cost := db.CalculateTrainCost(order.Quantity)
@@ -261,29 +279,59 @@ func main() {
 			continue
 		}
 		for _, village := range villages {
-			buildings, err := village.Buildings(ctx)
+			buildings, err := db.GetBuildings(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
-				log.Printf("failed to get village (id: %d) buildings: %v", village.Id, err)
+				log.Printf("failed to get buildings (village_id: %d): %v", village.Id, err)
 				continue
 			}
-			for _, building := range buildings {
-				if building.UpgradeTimeLeft > 0 {
-					building.UpgradeTimeLeft--
-					if building.UpgradeTimeLeft == 0 {
-						building.Level++
+			buildingIds := lo.Map(buildings, func(b db.Building, _ int) uint32 { return b.Id })
+			buildingUpgradeOrders, err := db.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": buildingIds})
+			if err != nil {
+				log.Printf("failed to get building (ids: %+v) upgrade orders: %v", buildingIds, err)
+				continue
+			}
+			for _, order := range buildingUpgradeOrders {
+				order.TimeLeft--
+				if order.TimeLeft == 0 {
+					err := db.DeleteBuildingUpgradeOrder(ctx, order.Id)
+					if err != nil {
+						log.Printf("failed to delete building upgrade order (id: %d): %v", order.Id, err)
+						continue
+					}
+					building, found, err := db.GetBuilding(ctx, order.BuildingId)
+					if err != nil {
+						log.Printf("failed to get building (id: %d): %v", order.BuildingId, err)
+						continue
+					}
+					if !found {
+						log.Printf("building not found (id: %d)", order.BuildingId)
+						continue
 					}
 
+					building.Level = order.Level
 					err = db.UpdateBuilding(ctx, building.Id, building)
 					if err != nil {
 						log.Printf("failed to update building (id: %d): %v", building.Id, err)
 						continue
 					}
+				} else {
+					err := db.UpdateBuildingUpgradeOrder(ctx, order.Id, order)
+					if err != nil {
+						log.Printf("failed to update building training order (id: %d): %v", order.Id, err)
+						continue
+					}
 				}
 			}
 
-			troopTrainingOrders, err := village.TroopTrainingOrders(ctx)
+			troops, err := db.GetTroops(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
-				log.Printf("failed to get village (id: %d) troop training orders: %v", village.Id, err)
+				log.Printf("failed to get troops (village_id: %d): %v", village.Id, err)
+				continue
+			}
+			troopIds := lo.Map(troops, func(t db.Troop, _ int) uint32 { return t.Id })
+			troopTrainingOrders, err := db.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troopIds})
+			if err != nil {
+				log.Printf("failed to get troop (ids: %+v) training orders: %v", troopIds, err)
 				continue
 			}
 			for _, order := range troopTrainingOrders {

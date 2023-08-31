@@ -16,8 +16,8 @@ func GetTroopTrainingOrder(ctx context.Context, id uint32) (TroopTrainingOrder, 
 	return firstQuery[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, sq.Eq{"id": id})
 }
 
-func GetTroopTrainingOrders(ctx context.Context, exprs ...QryExp) ([]TroopTrainingOrder, error) {
-	return findQuery[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, exprs...)
+func GetTroopTrainingOrders(ctx context.Context, opts ...QueryOption) ([]TroopTrainingOrder, error) {
+	return findQuery[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, opts...)
 }
 
 func UpdateTroopTrainingOrder(ctx context.Context, id uint32, order TroopTrainingOrder) error {

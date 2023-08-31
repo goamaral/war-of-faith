@@ -6,13 +6,21 @@ export default class TroopTrainingOrder {
   quantity: number
   timeLeft: number
   cost: Resources
-  troop: Troop
+  troopId: number
+
+  village: Village
 
   constructor(order: serverV1Types.Troop_TrainingOrder, village: Village) {
     this.id = order.id
     this.quantity = order.quantity
     this.timeLeft = order.timeLeft
     this.cost = new Resources(order.cost!)
-    this.troop = new Troop(order.troop!, village)
+    this.troopId = order.troopId
+
+    this.village = village
+  }
+
+  get troop(): Troop {
+    return this.village.troops.find(t => t.id == this.troopId)!
   }
 }

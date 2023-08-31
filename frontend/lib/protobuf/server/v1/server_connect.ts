@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, CancelUpgradeBuildingRequest, CancelUpgradeBuildingResponse, GetVillageRequest, GetVillageResponse, GetWorldRequest, GetWorldResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, UpgradeBuildingRequest, UpgradeBuildingResponse } from "./server_pb.js";
+import { CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetVillageRequest, GetVillageResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -26,21 +26,21 @@ export const Service = {
     /**
      * ORDERS 
      *
-     * @generated from rpc server.v1.Service.UpgradeBuilding
+     * @generated from rpc server.v1.Service.IssueBuildingUpgradeOrder
      */
-    upgradeBuilding: {
-      name: "UpgradeBuilding",
-      I: UpgradeBuildingRequest,
-      O: UpgradeBuildingResponse,
+    issueBuildingUpgradeOrder: {
+      name: "IssueBuildingUpgradeOrder",
+      I: IssueBuildingUpgradeOrderRequest,
+      O: IssueBuildingUpgradeOrderResponse,
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc server.v1.Service.CancelUpgradeBuilding
+     * @generated from rpc server.v1.Service.CancelBuildingUpgradeOrder
      */
-    cancelUpgradeBuilding: {
-      name: "CancelUpgradeBuilding",
-      I: CancelUpgradeBuildingRequest,
-      O: CancelUpgradeBuildingResponse,
+    cancelBuildingUpgradeOrder: {
+      name: "CancelBuildingUpgradeOrder",
+      I: CancelBuildingUpgradeOrderRequest,
+      O: CancelBuildingUpgradeOrderResponse,
       kind: MethodKind.Unary,
     },
     /**

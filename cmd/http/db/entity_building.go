@@ -2,7 +2,10 @@ package db
 
 import (
 	"context"
+	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 // TODO: Define building upgrade costs
@@ -10,7 +13,7 @@ const PlaceholderBuildingMaxLevel = 10
 
 // TODO: Define building upgrade costs
 // TODO: Apply hall bonus
-func CalculateBuildingUpgradeCost() Resources {
+func CalculateBuildingUpgradeCost(level uint32) Resources {
 	return Resources{Time: 10, Gold: 10}
 }
 
@@ -19,20 +22,17 @@ type Building struct {
 	Kind  serverv1.Building_Kind `db:"kind"`
 	Level uint32                 `db:"level"`
 
-	UpgradeTimeLeft uint32 `db:"upgrade_time_left"`
-
-	VillageId uint32 `db:"village_id"`
-
-	village *Village
+	VillageId     uint32 `db:"village_id"`
+	village       *Village
+	upgradeOrders *[]BuildingUpgradeOrder
 }
 
 func (b Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
 	return &serverv1.Building{
-		Id:              b.Id,
-		Kind:            b.Kind,
-		Name:            b.Name(),
-		Level:           b.Level,
-		UpgradeTimeLeft: b.UpgradeTimeLeft,
+		Id:    b.Id,
+		Kind:  b.Kind,
+		Name:  b.Name(),
+		Level: b.Level,
 	}, nil
 }
 
@@ -59,4 +59,23 @@ func (b Building) Name() string {
 	default:
 		return "Unknown"
 	}
+}
+
+func (b *Building) UpgradeOrders(ctx context.Context) ([]BuildingUpgradeOrder, error) {
+	if b.upgradeOrders == nil {
+		upgradeOrders, err := GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": b.Id})
+		if err != nil {
+			return nil, err
+		}
+		b.upgradeOrders = &upgradeOrders
+	}
+	return *b.upgradeOrders, nil
+}
+
+func (b *Building) NextUpgradeLevel(ctx context.Context) (uint32, error) {
+	upgradeOrders, err := b.UpgradeOrders(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get building (id: %d) upgrade orders: %w", b.Id, err)
+	}
+	return b.Level + uint32(len(upgradeOrders)) + 1, nil
 }

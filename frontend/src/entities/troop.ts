@@ -25,7 +25,6 @@ export default class Troop {
   }
 
   // TODO: Should come from the server
-  // TODO: Apply barracks bonus
   trainCost(quantity: number): Resources {
     return new Resources({ time: 10, gold: 10 }).multiply(quantity)
   }

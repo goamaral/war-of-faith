@@ -29,8 +29,8 @@ func GetTemple(ctx context.Context, id uint32) (Temple, bool, error) {
 	return firstQuery[Temple](ctx, TemplesTableName, sq.Eq{"id": id})
 }
 
-func GetTemples(ctx context.Context, exprs ...QryExp) ([]Temple, error) {
-	return findQuery[Temple](ctx, TemplesTableName, exprs...)
+func GetTemples(ctx context.Context, opts ...QueryOption) ([]Temple, error) {
+	return findQuery[Temple](ctx, TemplesTableName, opts...)
 }
 
 func UpdateTemple(ctx context.Context, id uint32, temple Temple) error {

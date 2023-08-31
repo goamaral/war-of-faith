@@ -11,7 +11,6 @@ import (
 	"github.com/bufbuild/connect-go"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/libsql/libsql-client-go/libsql"
-	"github.com/samber/lo"
 	_ "modernc.org/sqlite"
 )
 
@@ -42,10 +41,20 @@ func Init(uri string) error {
 			id INTEGER PRIMARY KEY,
 			kind INTERGER NOT NULL,
 			level INTERGER NOT NULL,
-			upgrade_time_left INTERGER NOT NULL,
 
 			village_id INTEGER NOT NULL,
 			FOREIGN KEY(village_id) REFERENCES villages(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS building_upgrade_orders (
+			id INTEGER PRIMARY KEY,
+			level INTEGER NOT NULL,
+			time_left INTEGER NOT NULL,
+
+			building_id INTEGER NOT NULL,
+			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
+			FOREIGN KEY(building_id) REFERENCES buildings(id),
+			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
 		);
 
 		CREATE TABLE IF NOT EXISTS troops (
@@ -64,9 +73,9 @@ func Init(uri string) error {
 			time_left INTEGER NOT NULL,
 
 			troop_id INTEGER NOT NULL,
-			village_id INTEGER NOT NULL,
+			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
 			FOREIGN KEY(troop_id) REFERENCES troops(id),
-			FOREIGN KEY(village_id) REFERENCES villages(id)
+			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
 		);
 
 		CREATE TABLE IF NOT EXISTS world_cells (
@@ -140,15 +149,57 @@ func RecordToMap(record any) (map[string]any, error) {
 	return recordMap, nil
 }
 
-type QryExp interface {
-	ToSql() (sql string, args []any, err error)
+type QueryOption sq.Sqlizer
+
+type OrderQueryOption struct {
+	Column string
+	Desc   bool
 }
 
-func newQuery(exprs ...QryExp) sq.StatementBuilderType {
-	if len(exprs) >= 1 {
-		return sq.StatementBuilder.Where(exprs[0], lo.Map(exprs[1:], func(expr QryExp, _ int) any { return expr.(any) }))
+func (o OrderQueryOption) ToSql() (string, []any, error) {
+	sql := o.Column
+	if o.Desc {
+		return sql + " DESC", nil, nil
 	}
-	return sq.StatementBuilder
+	return sql + " ASC", nil, nil
+}
+
+func applySelectQueryOptions(qry sq.SelectBuilder, opts ...QueryOption) (sq.Sqlizer, error) {
+	for _, opt := range opts {
+		switch o := opt.(type) {
+		case OrderQueryOption:
+			qry = qry.OrderByClause(o)
+		case sq.Sqlizer:
+			qry = qry.Where(o)
+		default:
+			return qry, fmt.Errorf("select queries do not support query options of kind %T", opt)
+		}
+	}
+	return qry, nil
+}
+
+func applyUpdateQueryOptions(qry sq.UpdateBuilder, opts ...QueryOption) (sq.Sqlizer, error) {
+	for _, opt := range opts {
+		switch o := opt.(type) {
+		case sq.Sqlizer:
+			qry = qry.Where(o)
+		default:
+			return qry, fmt.Errorf("update queries do not support query options of kind %T", opt)
+		}
+	}
+	return qry, nil
+}
+
+func applyDeleteQueryOptions(qry sq.DeleteBuilder, opts ...QueryOption) (sq.Sqlizer, error) {
+	for _, opt := range opts {
+		switch o := opt.(type) {
+		case sq.Sqlizer:
+			qry = qry.Where(o)
+		default:
+			return qry, fmt.Errorf("delete queries do not support query options of kind %T", opt)
+		}
+	}
+	return qry, nil
 }
 
 func insertQuery[T any](ctx context.Context, table string, record *T) error {
@@ -170,9 +221,14 @@ func insertQuery[T any](ctx context.Context, table string, record *T) error {
 	return db.QueryRowxContext(ctx, qrySql, args...).StructScan(record)
 }
 
-func findQuery[T any](ctx context.Context, table string, exprs ...QryExp) ([]T, error) {
+func findQuery[T any](ctx context.Context, table string, opts ...QueryOption) ([]T, error) {
 	var records []T
-	qrySql, args, err := newQuery(exprs...).Select("*").From(table).ToSql()
+	qry, err := applySelectQueryOptions(sq.Select("*").From(table), opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to apply query options: %w", err)
+	}
+
+	qrySql, args, err := qry.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build sql query: %w", err)
 	}
@@ -197,10 +253,15 @@ func findQuery[T any](ctx context.Context, table string, exprs ...QryExp) ([]T, 
 	return records, nil
 }
 
-func firstQuery[T any](ctx context.Context, table string, exprs ...QryExp) (T, bool, error) {
+func firstQuery[T any](ctx context.Context, table string, opts ...QueryOption) (T, bool, error) {
 	var record T
 
-	qrySql, args, err := newQuery(exprs...).Select("*").From(table).ToSql()
+	qry, err := applySelectQueryOptions(sq.Select("*").From(table), opts...)
+	if err != nil {
+		return record, false, fmt.Errorf("failed to apply query options: %w", err)
+	}
+
+	qrySql, args, err := qry.ToSql()
 	if err != nil {
 		return record, false, fmt.Errorf("failed to build sql query: %w", err)
 	}
@@ -216,13 +277,18 @@ func firstQuery[T any](ctx context.Context, table string, exprs ...QryExp) (T, b
 	return record, true, nil
 }
 
-func updateQuery(ctx context.Context, table string, record any, exprs ...QryExp) error {
+func updateQuery(ctx context.Context, table string, record any, opts ...QueryOption) error {
 	recordMap, err := RecordToMap(record)
 	if err != nil {
 		return fmt.Errorf("failed to convert record to map: %w", err)
 	}
 
-	qrySql, args, err := newQuery(exprs...).Update(table).SetMap(recordMap).ToSql()
+	qry, err := applyUpdateQueryOptions(sq.Update(table).SetMap(recordMap), opts...)
+	if err != nil {
+		return fmt.Errorf("failed to apply query options: %w", err)
+	}
+
+	qrySql, args, err := qry.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build sql query: %w", err)
 	}
@@ -231,8 +297,13 @@ func updateQuery(ctx context.Context, table string, record any, exprs ...QryExp)
 	return err
 }
 
-func deleteQuery(ctx context.Context, table string, exprs ...QryExp) error {
-	qrySql, args, err := newQuery(exprs...).Delete(TroopTrainingOrdersTableName).ToSql()
+func deleteQuery(ctx context.Context, table string, opts ...QueryOption) error {
+	qry, err := applyDeleteQueryOptions(sq.Delete(table), opts...)
+	if err != nil {
+		return fmt.Errorf("failed to apply query options: %w", err)
+	}
+
+	qrySql, args, err := qry.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build sql query: %w", err)
 	}

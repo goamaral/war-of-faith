@@ -35,11 +35,12 @@ const (
 const (
 	// ServiceGetVillageProcedure is the fully-qualified name of the Service's GetVillage RPC.
 	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
-	// ServiceUpgradeBuildingProcedure is the fully-qualified name of the Service's UpgradeBuilding RPC.
-	ServiceUpgradeBuildingProcedure = "/server.v1.Service/UpgradeBuilding"
-	// ServiceCancelUpgradeBuildingProcedure is the fully-qualified name of the Service's
-	// CancelUpgradeBuilding RPC.
-	ServiceCancelUpgradeBuildingProcedure = "/server.v1.Service/CancelUpgradeBuilding"
+	// ServiceIssueBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
+	// IssueBuildingUpgradeOrder RPC.
+	ServiceIssueBuildingUpgradeOrderProcedure = "/server.v1.Service/IssueBuildingUpgradeOrder"
+	// ServiceCancelBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
+	// CancelBuildingUpgradeOrder RPC.
+	ServiceCancelBuildingUpgradeOrderProcedure = "/server.v1.Service/CancelBuildingUpgradeOrder"
 	// ServiceIssueTroopTrainingOrderProcedure is the fully-qualified name of the Service's
 	// IssueTroopTrainingOrder RPC.
 	ServiceIssueTroopTrainingOrderProcedure = "/server.v1.Service/IssueTroopTrainingOrder"
@@ -55,8 +56,8 @@ type ServiceClient interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	// ORDERS
-	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
-	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
+	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
+	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
 	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
@@ -78,14 +79,14 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceGetVillageProcedure,
 			opts...,
 		),
-		upgradeBuilding: connect_go.NewClient[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse](
+		issueBuildingUpgradeOrder: connect_go.NewClient[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse](
 			httpClient,
-			baseURL+ServiceUpgradeBuildingProcedure,
+			baseURL+ServiceIssueBuildingUpgradeOrderProcedure,
 			opts...,
 		),
-		cancelUpgradeBuilding: connect_go.NewClient[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse](
+		cancelBuildingUpgradeOrder: connect_go.NewClient[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse](
 			httpClient,
-			baseURL+ServiceCancelUpgradeBuildingProcedure,
+			baseURL+ServiceCancelBuildingUpgradeOrderProcedure,
 			opts...,
 		),
 		issueTroopTrainingOrder: connect_go.NewClient[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse](
@@ -108,12 +109,12 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	getVillage               *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
-	upgradeBuilding          *connect_go.Client[v1.UpgradeBuildingRequest, v1.UpgradeBuildingResponse]
-	cancelUpgradeBuilding    *connect_go.Client[v1.CancelUpgradeBuildingRequest, v1.CancelUpgradeBuildingResponse]
-	issueTroopTrainingOrder  *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
-	cancelTroopTrainingOrder *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
-	getWorld                 *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
+	getVillage                 *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
+	issueBuildingUpgradeOrder  *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
+	cancelBuildingUpgradeOrder *connect_go.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
+	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
+	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
+	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -121,14 +122,14 @@ func (c *serviceClient) GetVillage(ctx context.Context, req *connect_go.Request[
 	return c.getVillage.CallUnary(ctx, req)
 }
 
-// UpgradeBuilding calls server.v1.Service.UpgradeBuilding.
-func (c *serviceClient) UpgradeBuilding(ctx context.Context, req *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error) {
-	return c.upgradeBuilding.CallUnary(ctx, req)
+// IssueBuildingUpgradeOrder calls server.v1.Service.IssueBuildingUpgradeOrder.
+func (c *serviceClient) IssueBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
+	return c.issueBuildingUpgradeOrder.CallUnary(ctx, req)
 }
 
-// CancelUpgradeBuilding calls server.v1.Service.CancelUpgradeBuilding.
-func (c *serviceClient) CancelUpgradeBuilding(ctx context.Context, req *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error) {
-	return c.cancelUpgradeBuilding.CallUnary(ctx, req)
+// CancelBuildingUpgradeOrder calls server.v1.Service.CancelBuildingUpgradeOrder.
+func (c *serviceClient) CancelBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
+	return c.cancelBuildingUpgradeOrder.CallUnary(ctx, req)
 }
 
 // IssueTroopTrainingOrder calls server.v1.Service.IssueTroopTrainingOrder.
@@ -151,8 +152,8 @@ type ServiceHandler interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	// ORDERS
-	UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error)
-	CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error)
+	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
+	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
 	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
@@ -170,14 +171,14 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.GetVillage,
 		opts...,
 	)
-	serviceUpgradeBuildingHandler := connect_go.NewUnaryHandler(
-		ServiceUpgradeBuildingProcedure,
-		svc.UpgradeBuilding,
+	serviceIssueBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueBuildingUpgradeOrderProcedure,
+		svc.IssueBuildingUpgradeOrder,
 		opts...,
 	)
-	serviceCancelUpgradeBuildingHandler := connect_go.NewUnaryHandler(
-		ServiceCancelUpgradeBuildingProcedure,
-		svc.CancelUpgradeBuilding,
+	serviceCancelBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
+		ServiceCancelBuildingUpgradeOrderProcedure,
+		svc.CancelBuildingUpgradeOrder,
 		opts...,
 	)
 	serviceIssueTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
@@ -199,10 +200,10 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
 			serviceGetVillageHandler.ServeHTTP(w, r)
-		case ServiceUpgradeBuildingProcedure:
-			serviceUpgradeBuildingHandler.ServeHTTP(w, r)
-		case ServiceCancelUpgradeBuildingProcedure:
-			serviceCancelUpgradeBuildingHandler.ServeHTTP(w, r)
+		case ServiceIssueBuildingUpgradeOrderProcedure:
+			serviceIssueBuildingUpgradeOrderHandler.ServeHTTP(w, r)
+		case ServiceCancelBuildingUpgradeOrderProcedure:
+			serviceCancelBuildingUpgradeOrderHandler.ServeHTTP(w, r)
 		case ServiceIssueTroopTrainingOrderProcedure:
 			serviceIssueTroopTrainingOrderHandler.ServeHTTP(w, r)
 		case ServiceCancelTroopTrainingOrderProcedure:
@@ -222,12 +223,12 @@ func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Reque
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillage is not implemented"))
 }
 
-func (UnimplementedServiceHandler) UpgradeBuilding(context.Context, *connect_go.Request[v1.UpgradeBuildingRequest]) (*connect_go.Response[v1.UpgradeBuildingResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.UpgradeBuilding is not implemented"))
+func (UnimplementedServiceHandler) IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueBuildingUpgradeOrder is not implemented"))
 }
 
-func (UnimplementedServiceHandler) CancelUpgradeBuilding(context.Context, *connect_go.Request[v1.CancelUpgradeBuildingRequest]) (*connect_go.Response[v1.CancelUpgradeBuildingResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelUpgradeBuilding is not implemented"))
+func (UnimplementedServiceHandler) CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelBuildingUpgradeOrder is not implemented"))
 }
 
 func (UnimplementedServiceHandler) IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {

@@ -49,8 +49,8 @@ func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
 	return village, nil
 }
 
-func GetVillages(ctx context.Context, exprs ...QryExp) ([]Village, error) {
-	return findQuery[Village](ctx, VillagesTableName, exprs...)
+func GetVillages(ctx context.Context, opts ...QueryOption) ([]Village, error) {
+	return findQuery[Village](ctx, VillagesTableName, opts...)
 }
 
 func GetVillage(ctx context.Context, id uint32) (Village, bool, error) {
