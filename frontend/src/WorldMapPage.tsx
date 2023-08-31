@@ -1,46 +1,12 @@
-import { useState, useEffect } from "preact/hooks"
+import { useState, useEffect, useRef } from "preact/hooks"
 import { useNavigate } from "react-router-dom" 
 
 import * as serverV1Types from "../lib/protobuf/server/v1/server_pb"
 import server from './server'
-import { JSX } from "preact/jsx-runtime"
-
-function renderWorld(world: serverV1Types.World, onCellClick: (cell: serverV1Types.World_Cell) => void): JSX.Element {
-  function cellKindStyles(kind: serverV1Types.World_Cell_EntityKind) {
-    switch (kind) {
-      case serverV1Types.World_Cell_EntityKind.VILLAGE:
-        return { backgroundColor: 'green', cursor: 'pointer' }
-
-      case serverV1Types.World_Cell_EntityKind.TEMPLE:
-        return { backgroundColor: 'yellow' }
-
-      default:
-        return {}
-    }
-  }
-
-  const rows = []
-  for (let y = 0; y < world.height; y++) {
-    const row = []
-    for (let x = 0; x < world.width; x++) {
-      const cell = world.cells[`${x},${y}`] || new serverV1Types.World_Cell({ x, y })
-      const style = {
-        border: '1px solid black',
-        width: '20px',
-        height: '20px',
-        ...cellKindStyles(cell.entityKind)
-      }
-      row.push(<div style={style} onClick={() => onCellClick(cell)}></div>)
-    }
-    rows.push(<div style={{ display: 'flex' }}>{row}</div>)
-  }
-  return <div>{rows}</div>
-}
 
 export default () => {
   const [loading, setLoading] = useState(true)
   const [world, setWorld] = useState<serverV1Types.World>(new serverV1Types.World())
-  const navigate = useNavigate()
 
   useEffect(() => {
     server.getWorld({ loadCells: true }).then(({ world }) => {
@@ -55,10 +21,95 @@ export default () => {
     return (
       <div>
         <h1>World Map</h1>
-        {renderWorld(world, cell => {
-          if (cell.entityKind == serverV1Types.World_Cell_EntityKind.VILLAGE) navigate(`/villages/${cell.entityId}`)
-        })}
+        <World world={world} />
       </div>
     )
   }
+}
+
+function World({ world }: { world: serverV1Types.World }) {
+  const [openDialogCoords, setOpenDialogCoords] = useState("")
+
+  const rows = []
+  for (let y = 0; y < world.height; y++) {
+    const row = []
+    for (let x = 0; x < world.width; x++) {
+      const coords = `${x},${y}`
+      const cell = world.cells[coords] || new serverV1Types.World_Cell({ coords, x, y })
+      row.push(<WorldCell cell={cell} openDialogCoords={openDialogCoords} setOpenDialogCoords={setOpenDialogCoords} />)
+    }
+    rows.push(<div style={{ display: 'flex' }}>{row}</div>)
+  }
+  return <div>{rows}</div>
+}
+
+
+function WorldCell({ cell, openDialogCoords, setOpenDialogCoords }: { cell: serverV1Types.World_Cell, openDialogCoords: string, setOpenDialogCoords: (n: string) => void }) {
+  function kindStyle() {
+    switch (cell.entityKind) {
+      case serverV1Types.World_Cell_EntityKind.VILLAGE:
+        return { backgroundColor: 'green', cursor: 'pointer' }
+
+      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+        return { backgroundColor: 'yellow' }
+
+      default:
+        return {}
+    }
+  }
+
+  function onCellClick() {
+    switch (cell.entityKind) {
+      case serverV1Types.World_Cell_EntityKind.VILLAGE:
+        navigate(`/villages/${cell.entityId}`)
+        break
+
+      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+        // TODO: Open temple page
+        break
+
+      default:
+        setOpenDialogCoords(cell.coords)
+        break
+    }
+  }
+
+  function conquer() {
+    // TODO: Call server conquer method
+    console.log(cell.coords)
+  }
+
+  const navigate = useNavigate()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const dialogIsOpen = openDialogCoords == cell.coords
+
+  useEffect(() => {
+    function onMoundDown(ev: MouseEvent) {
+      if (!dialogRef.current?.contains(ev.target as Node) && dialogIsOpen) setOpenDialogCoords("")
+    }
+    document.addEventListener('mousedown', onMoundDown)
+    return () => document.removeEventListener('mousedown', onMoundDown)
+  })
+
+  const cellStyle = {
+    border: '1px solid black',
+    width: '20px',
+    height: '20px',
+    position: 'relative',
+    ...kindStyle(),
+  }
+
+  const dialogStyle = {
+    position: 'absolute',
+    visibility: dialogIsOpen ? 'visible' : 'hidden',
+    zIndex: 1,
+  }
+
+  return (
+    <div style={cellStyle} onClick={onCellClick}>
+      <div ref={dialogRef} style={dialogStyle}>
+        <button onClick={conquer}>Conquer</button>
+      </div>
+    </div>
+  )
 }
