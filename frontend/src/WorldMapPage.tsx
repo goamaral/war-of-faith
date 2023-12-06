@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "preact/hooks"
-import { useNavigate } from "react-router-dom" 
+import { useState, useEffect } from 'preact/hooks'
+import { useSignal, Signal, useComputed } from '@preact/signals';
+import { useNavigate } from 'react-router-dom' 
 
-import * as serverV1Types from "../lib/protobuf/server/v1/server_pb"
+import * as serverV1Types from '../lib/protobuf/server/v1/server_pb'
 import server from './server'
 
 export default () => {
@@ -28,23 +29,34 @@ export default () => {
 }
 
 function World({ world }: { world: serverV1Types.World }) {
-  const [openDialogCoords, setOpenDialogCoords] = useState("")
+  const selectedCell = useSignal<serverV1Types.World_Cell|undefined>(undefined)
 
-  const rows = []
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${world.width}, 20px)`,
+    gridTemplateRows: `repeat(${world.height}, 20px)`,
+    width: 'fit-content',
+    borderBottom: '1px solid black',
+    borderRight: '1px solid black',
+  }
+
+  const cells = []
   for (let y = 0; y < world.height; y++) {
-    const row = []
     for (let x = 0; x < world.width; x++) {
       const coords = `${x},${y}`
       const cell = world.cells[coords] || new serverV1Types.World_Cell({ coords, x, y })
-      row.push(<WorldCell cell={cell} openDialogCoords={openDialogCoords} setOpenDialogCoords={setOpenDialogCoords} />)
+      cells.push(<Cell cell={cell} selectedCell={selectedCell} />)
     }
-    rows.push(<div style={{ display: 'flex' }}>{row}</div>)
   }
-  return <div>{rows}</div>
+
+  return <div style={{ display: 'flex' }}>
+    <div style={gridStyle}>{cells}</div>
+    <CellInfo selectedCell={selectedCell} />
+  </div>
 }
 
 
-function WorldCell({ cell, openDialogCoords, setOpenDialogCoords }: { cell: serverV1Types.World_Cell, openDialogCoords: string, setOpenDialogCoords: (n: string) => void }) {
+function Cell({ cell, selectedCell }: { cell: serverV1Types.World_Cell, selectedCell: Signal<serverV1Types.World_Cell | undefined> }) {
   function kindStyle() {
     switch (cell.entityKind) {
       case serverV1Types.World_Cell_EntityKind.VILLAGE:
@@ -58,58 +70,69 @@ function WorldCell({ cell, openDialogCoords, setOpenDialogCoords }: { cell: serv
     }
   }
 
-  function onCellClick() {
+  function onCellDblClick() {
     switch (cell.entityKind) {
       case serverV1Types.World_Cell_EntityKind.VILLAGE:
         navigate(`/villages/${cell.entityId}`)
         break
 
       case serverV1Types.World_Cell_EntityKind.TEMPLE:
-        // TODO: Open temple page
-        break
-
-      default:
-        setOpenDialogCoords(cell.coords)
+        alert('TODO: Open temple page')
         break
     }
-  }
-
-  function conquer() {
-    // TODO: Call server conquer method
-    console.log(cell.coords)
   }
 
   const navigate = useNavigate()
-  const dialogRef = useRef<HTMLDivElement>(null)
-  const dialogIsOpen = openDialogCoords == cell.coords
-
-  useEffect(() => {
-    function onMoundDown(ev: MouseEvent) {
-      if (!dialogRef.current?.contains(ev.target as Node) && dialogIsOpen) setOpenDialogCoords("")
-    }
-    document.addEventListener('mousedown', onMoundDown)
-    return () => document.removeEventListener('mousedown', onMoundDown)
-  })
 
   const cellStyle = {
-    border: '1px solid black',
-    width: '20px',
-    height: '20px',
     position: 'relative',
+    borderTop: '1px solid black',
+    borderLeft: '1px solid black',
     ...kindStyle(),
   }
 
-  const dialogStyle = {
-    position: 'absolute',
-    visibility: dialogIsOpen ? 'visible' : 'hidden',
-    zIndex: 1,
+  return (
+    <div style={cellStyle} onClick={() => selectedCell.value = cell} onDblClick={onCellDblClick}></div>
+  )
+}
+
+function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_Cell | undefined> }) {
+  const entityKindName = useComputed(() => {
+    switch (selectedCell.value?.entityKind) {
+      case serverV1Types.World_Cell_EntityKind.VILLAGE:
+        return 'Village'
+
+      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+        return 'Temple'
+
+      default:
+        return 'Wild Field'
+    }
+  })
+
+  function Info({ cell }: { cell: serverV1Types.World_Cell }) {
+    function conquer() {
+      alert('TODO: Call server conquer method')
+    }
+
+    function Actions() {
+      switch (cell.entityKind) {
+        case serverV1Types.World_Cell_EntityKind.VILLAGE:
+          return <button onClick={conquer}>Conquer</button>
+
+        default:
+          return null
+      }
+    }
+
+    return (<>
+      <h2>{entityKindName}</h2>
+      <p><strong>Coords</strong> {cell.coords}</p>
+      <Actions />
+    </>)
   }
 
-  return (
-    <div style={cellStyle} onClick={onCellClick}>
-      <div ref={dialogRef} style={dialogStyle}>
-        <button onClick={conquer}>Conquer</button>
-      </div>
-    </div>
-  )
+  return <div>
+    {selectedCell.value ? <Info cell={selectedCell.value} /> : <h2>No field selected</h2>}
+  </div>
 }

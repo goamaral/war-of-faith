@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+SCRIPT_PATH="$(cd "$(dirname "$0")" > /dev/null 2>&1; pwd -P)"
+
+export OVERMIND_AUTO_RESTART=all
+export OVERMIND_NO_PORT=1
+export OVERMIND_PROCFILE=$SCRIPT_PATH/Procfile
+
+overmind start
