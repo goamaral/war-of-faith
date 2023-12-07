@@ -127,7 +127,7 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
 
     return (<>
       <h2>{entityKindName}</h2>
-      <p><strong>Coords</strong> {cell.coords}</p>
+      <p><span>Coords</span> {cell.coords}</p>
       <Actions />
     </>)
   }
