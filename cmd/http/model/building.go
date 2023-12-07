@@ -1,8 +1,9 @@
-package db
+package model
 
 import (
 	"context"
 	"fmt"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	sq "github.com/Masterminds/squirrel"
@@ -43,7 +44,7 @@ func (b *Building) Village(ctx context.Context) (Village, error) {
 			return Village{}, err
 		}
 		if !found {
-			return Village{}, ErrNotFound
+			return Village{}, db.ErrNotFound
 		}
 		b.village = &village
 	}

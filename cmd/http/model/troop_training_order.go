@@ -1,7 +1,8 @@
-package db
+package model
 
 import (
 	"context"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
@@ -32,7 +33,7 @@ func (o *TroopTrainingOrder) Troop(ctx context.Context) (Troop, error) {
 			return Troop{}, err
 		}
 		if !found {
-			return Troop{}, ErrNotFound
+			return Troop{}, db.ErrNotFound
 		}
 		o.troop = &troop
 	}

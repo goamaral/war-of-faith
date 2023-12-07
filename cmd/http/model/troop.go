@@ -1,7 +1,8 @@
-package db
+package model
 
 import (
 	"context"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
@@ -37,7 +38,7 @@ func (t *Troop) Village(ctx context.Context) (Village, error) {
 			return Village{}, err
 		}
 		if !found {
-			return Village{}, ErrNotFound
+			return Village{}, db.ErrNotFound
 		}
 		t.village = &village
 	}

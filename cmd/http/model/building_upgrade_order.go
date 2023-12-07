@@ -1,7 +1,8 @@
-package db
+package model
 
 import (
 	"context"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
@@ -32,7 +33,7 @@ func (o *BuildingUpgradeOrder) Building(ctx context.Context) (Building, error) {
 			return Building{}, err
 		}
 		if !found {
-			return Building{}, ErrNotFound
+			return Building{}, db.ErrNotFound
 		}
 		o.building = &building
 	}

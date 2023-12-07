@@ -1,9 +1,10 @@
-package db
+package model
 
 import (
 	"context"
 	"fmt"
 
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,7 +14,7 @@ const VillagesTableName = "villages"
 
 func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
 	village := Village{buildings: &[]Building{}, troops: &[]Troop{}}
-	err := insertQuery(ctx, VillagesTableName, &village)
+	err := db.Insert(ctx, VillagesTableName, &village)
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village: %w", err)
 	}
@@ -49,14 +50,14 @@ func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
 	return village, nil
 }
 
-func GetVillages(ctx context.Context, opts ...QueryOption) ([]Village, error) {
-	return findQuery[Village](ctx, VillagesTableName, opts...)
+func GetVillages(ctx context.Context, opts ...db.QueryOption) ([]Village, error) {
+	return db.Find[Village](ctx, VillagesTableName, opts...)
 }
 
 func GetVillage(ctx context.Context, id uint32) (Village, bool, error) {
-	return firstQuery[Village](ctx, VillagesTableName, sq.Eq{"id": id})
+	return db.FindOne[Village](ctx, VillagesTableName, sq.Eq{"id": id})
 }
 
 func UpdateVillage(ctx context.Context, id uint32, village Village) error {
-	return updateQuery(ctx, VillagesTableName, village, sq.Eq{"id": id})
+	return db.Update(ctx, VillagesTableName, village, sq.Eq{"id": id})
 }

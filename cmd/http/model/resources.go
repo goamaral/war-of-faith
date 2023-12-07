@@ -1,4 +1,4 @@
-package db
+package model
 
 import serverv1 "war-of-faith/pkg/protobuf/server/v1"
 

@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"war-of-faith/cmd/http/db"
+	"war-of-faith/cmd/http/model"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 	"war-of-faith/pkg/protobuf/server/v1/serverv1connect"
 )
@@ -26,7 +27,7 @@ type Server struct {
 
 /* VILLAGES */
 func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.GetVillageRequest]) (*connect.Response[serverv1.GetVillageResponse], error) {
-	village, found, err := db.GetVillage(ctx, req.Msg.Id)
+	village, found, err := model.GetVillage(ctx, req.Msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
@@ -45,7 +46,7 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 /* ORDERS */
 // TODO: Use mutexes and transaction
 func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.IssueBuildingUpgradeOrderResponse], error) {
-	building, found, err := db.GetBuilding(ctx, req.Msg.BuildingId)
+	building, found, err := model.GetBuilding(ctx, req.Msg.BuildingId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building: %w", err)
 	}
@@ -57,7 +58,7 @@ func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Req
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building (id: %d) next upgrade level: %w", building.Id, err)
 	}
-	if nextUpgradeLevel > db.PlaceholderBuildingMaxLevel {
+	if nextUpgradeLevel > model.PlaceholderBuildingMaxLevel {
 		return nil, status.Error(codes.FailedPrecondition, "building is already at max level")
 	}
 
@@ -65,18 +66,18 @@ func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Req
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
-	cost := db.CalculateBuildingUpgradeCost(nextUpgradeLevel)
+	cost := model.CalculateBuildingUpgradeCost(nextUpgradeLevel)
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
 
 	village.SpendResources(cost)
-	err = db.UpdateVillage(ctx, village.Id, village)
+	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	order, err := db.CreateBuildingUpgradeOrder(ctx, &db.BuildingUpgradeOrder{
+	order, err := model.CreateBuildingUpgradeOrder(ctx, &model.BuildingUpgradeOrder{
 		Level:      nextUpgradeLevel,
 		TimeLeft:   cost.Time,
 		BuildingId: building.Id,
@@ -96,7 +97,7 @@ func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Req
 
 // TODO: Use mutexes and transaction
 func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.CancelBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.CancelBuildingUpgradeOrderResponse], error) {
-	order, found, err := db.GetBuildingUpgradeOrder(ctx, req.Msg.Id)
+	order, found, err := model.GetBuildingUpgradeOrder(ctx, req.Msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building upgrade order: %w", err)
 	}
@@ -104,7 +105,7 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 		return nil, status.Error(codes.NotFound, "building upgrade order not found")
 	}
 
-	orders, err := db.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": order.BuildingId}, db.OrderQueryOption{Column: "level", Desc: true})
+	orders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": order.BuildingId}, db.OrderQueryOption{Column: "level", Desc: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get building (id: %d) upgrade orders: %w", order.BuildingId, err)
 	}
@@ -122,14 +123,14 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
 
-	cost := db.CalculateBuildingUpgradeCost(order.Level)
+	cost := model.CalculateBuildingUpgradeCost(order.Level)
 	village.EarnResources(cost)
-	err = db.UpdateVillage(ctx, village.Id, village)
+	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	err = db.DeleteBuildingUpgradeOrder(ctx, order.Id)
+	err = model.DeleteBuildingUpgradeOrder(ctx, order.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete building upgrade order: %w", err)
 	}
@@ -139,7 +140,7 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 
 // TODO: Use mutexes and transaction
 func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.IssueTroopTrainingOrderRequest]) (*connect.Response[serverv1.IssueTroopTrainingOrderResponse], error) {
-	troop, found, err := db.GetTroop(ctx, req.Msg.TroopId)
+	troop, found, err := model.GetTroop(ctx, req.Msg.TroopId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get troop: %w", err)
 	}
@@ -152,7 +153,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
 
-	cost := db.CalculateTrainCost(req.Msg.Quantity)
+	cost := model.CalculateTrainCost(req.Msg.Quantity)
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
@@ -161,7 +162,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 			return nil, status.Error(codes.FailedPrecondition, "no more leaders can be trained")
 		}
 
-		orders, err := db.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troop.Id})
+		orders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troop.Id})
 		if err != nil {
 			return nil, fmt.Errorf("failed to get troop training orders: %w", err)
 		}
@@ -171,12 +172,12 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 	}
 
 	village.SpendResources(cost)
-	err = db.UpdateVillage(ctx, village.Id, village)
+	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	order, err := db.CreateTroopTrainingOrder(ctx, &db.TroopTrainingOrder{
+	order, err := model.CreateTroopTrainingOrder(ctx, &model.TroopTrainingOrder{
 		Quantity:  req.Msg.Quantity,
 		TimeLeft:  cost.Time,
 		TroopId:   req.Msg.TroopId,
@@ -196,7 +197,7 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 
 // TODO: Use mutexes and transaction
 func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.CancelTroopTrainingOrderRequest]) (*connect.Response[serverv1.CancelTroopTrainingOrderResponse], error) {
-	order, found, err := db.GetTroopTrainingOrder(ctx, req.Msg.Id)
+	order, found, err := model.GetTroopTrainingOrder(ctx, req.Msg.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get troop training order: %w", err)
 	}
@@ -214,14 +215,14 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 		return nil, fmt.Errorf("failed to get village (id: %d): %w", troop.VillageId, err)
 	}
 
-	cost := db.CalculateTrainCost(order.Quantity)
+	cost := model.CalculateTrainCost(order.Quantity)
 	village.EarnResources(cost)
-	err = db.UpdateVillage(ctx, village.Id, village)
+	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	err = db.DeleteTroopTrainingOrder(ctx, order.Id)
+	err = model.DeleteTroopTrainingOrder(ctx, order.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete troop training order: %w", err)
 	}
@@ -231,7 +232,7 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 
 /* WORLD */
 func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.GetWorldRequest]) (*connect.Response[serverv1.GetWorldResponse], error) {
-	world := db.GetWorld(ctx)
+	world := model.GetWorld(ctx)
 
 	pWorld, err := world.ToProtobuf(ctx, req.Msg.LoadCells)
 	if err != nil {
@@ -242,8 +243,9 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 }
 
 func main() {
-	seedDb := flag.Bool("db-seed", false, "seeds database")
-	dropDb := flag.Bool("db-drop", false, "drops database")
+	createDB := flag.Bool("db-create", false, "creates database")
+	recreateDB := flag.Bool("db-recreate", false, "recreates database")
+	seedDB := flag.Bool("db-seed", false, "seeds database")
 	dbUri := flag.String("db-uri", "file:db.sqlite3", "database uri")
 	flag.Parse()
 
@@ -252,15 +254,22 @@ func main() {
 		log.Fatalf("failed to initialize database: %v", err)
 	}
 
-	if *dropDb {
-		err := db.Drop()
+	if *recreateDB {
+		err := DropDB()
 		if err != nil {
 			log.Fatalf("failed to drop database: %v", err)
 		}
 	}
 
-	if *seedDb {
-		err := db.Seed()
+	if *recreateDB || *createDB {
+		err := CreateDB()
+		if err != nil {
+			log.Fatalf("failed to drop database: %v", err)
+		}
+	}
+
+	if *seedDB {
+		err := SeedDB()
 		if err != nil {
 			log.Fatalf("failed to seed database: %v", err)
 		}
@@ -273,19 +282,19 @@ func main() {
 		ctx := context.Background()
 
 		// TODO: Use mutexes and transaction
-		villages, err := db.GetVillages(ctx)
+		villages, err := model.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)
 			continue
 		}
 		for _, village := range villages {
-			buildings, err := db.GetBuildings(ctx, sq.Eq{"village_id": village.Id})
+			buildings, err := model.GetBuildings(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
 				log.Printf("failed to get buildings (village_id: %d): %v", village.Id, err)
 				continue
 			}
-			buildingIds := lo.Map(buildings, func(b db.Building, _ int) uint32 { return b.Id })
-			buildingUpgradeOrders, err := db.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": buildingIds})
+			buildingIds := lo.Map(buildings, func(b model.Building, _ int) uint32 { return b.Id })
+			buildingUpgradeOrders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": buildingIds})
 			if err != nil {
 				log.Printf("failed to get building (ids: %+v) upgrade orders: %v", buildingIds, err)
 				continue
@@ -293,12 +302,12 @@ func main() {
 			for _, order := range buildingUpgradeOrders {
 				order.TimeLeft--
 				if order.TimeLeft == 0 {
-					err := db.DeleteBuildingUpgradeOrder(ctx, order.Id)
+					err := model.DeleteBuildingUpgradeOrder(ctx, order.Id)
 					if err != nil {
 						log.Printf("failed to delete building upgrade order (id: %d): %v", order.Id, err)
 						continue
 					}
-					building, found, err := db.GetBuilding(ctx, order.BuildingId)
+					building, found, err := model.GetBuilding(ctx, order.BuildingId)
 					if err != nil {
 						log.Printf("failed to get building (id: %d): %v", order.BuildingId, err)
 						continue
@@ -309,13 +318,13 @@ func main() {
 					}
 
 					building.Level = order.Level
-					err = db.UpdateBuilding(ctx, building.Id, building)
+					err = model.UpdateBuilding(ctx, building.Id, building)
 					if err != nil {
 						log.Printf("failed to update building (id: %d): %v", building.Id, err)
 						continue
 					}
 				} else {
-					err := db.UpdateBuildingUpgradeOrder(ctx, order.Id, order)
+					err := model.UpdateBuildingUpgradeOrder(ctx, order.Id, order)
 					if err != nil {
 						log.Printf("failed to update building training order (id: %d): %v", order.Id, err)
 						continue
@@ -323,13 +332,13 @@ func main() {
 				}
 			}
 
-			troops, err := db.GetTroops(ctx, sq.Eq{"village_id": village.Id})
+			troops, err := model.GetTroops(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
 				log.Printf("failed to get troops (village_id: %d): %v", village.Id, err)
 				continue
 			}
-			troopIds := lo.Map(troops, func(t db.Troop, _ int) uint32 { return t.Id })
-			troopTrainingOrders, err := db.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troopIds})
+			troopIds := lo.Map(troops, func(t model.Troop, _ int) uint32 { return t.Id })
+			troopTrainingOrders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troopIds})
 			if err != nil {
 				log.Printf("failed to get troop (ids: %+v) training orders: %v", troopIds, err)
 				continue
@@ -337,12 +346,12 @@ func main() {
 			for _, order := range troopTrainingOrders {
 				order.TimeLeft--
 				if order.TimeLeft == 0 {
-					err := db.DeleteTroopTrainingOrder(ctx, order.Id)
+					err := model.DeleteTroopTrainingOrder(ctx, order.Id)
 					if err != nil {
 						log.Printf("failed to delete troop training order (id: %d): %v", order.Id, err)
 						continue
 					}
-					troop, found, err := db.GetTroop(ctx, order.TroopId)
+					troop, found, err := model.GetTroop(ctx, order.TroopId)
 					if err != nil {
 						log.Printf("failed to get troop (id: %d): %v", order.TroopId, err)
 						continue
@@ -353,13 +362,13 @@ func main() {
 					}
 
 					troop.Quantity += order.Quantity
-					err = db.UpdateTroop(ctx, troop.Id, troop)
+					err = model.UpdateTroop(ctx, troop.Id, troop)
 					if err != nil {
 						log.Printf("failed to update troop (id: %d): %v", troop.Id, err)
 						continue
 					}
 				} else {
-					err := db.UpdateTroopTrainingOrder(ctx, order.Id, order)
+					err := model.UpdateTroopTrainingOrder(ctx, order.Id, order)
 					if err != nil {
 						log.Printf("failed to update troop training order (id: %d): %v", order.Id, err)
 						continue
@@ -368,7 +377,7 @@ func main() {
 			}
 
 			village.Gold++
-			err = db.UpdateVillage(ctx, village.Id, village)
+			err = model.UpdateVillage(ctx, village.Id, village)
 			if err != nil {
 				log.Printf("failed to update village (id: %d): %v", village.Id, err)
 				continue
