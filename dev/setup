@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+SCRIPT_PATH=$(cd $(dirname "$0"); pwd -P)
+PROJECT_PATH=$SCRIPT_PATH/..
+
+(
+  echo "== Installing server dependencies =="
+  cd $PROJECT_PATH
+  go mod download
+  go install github.com/cosmtrek/air@latest
+)
+(
+  echo "== Installing client dependencies =="
+  cd $PROJECT_PATH/frontend
+  pnpm i
+)

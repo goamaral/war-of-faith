@@ -1,2 +1,2 @@
-server: go run ../cmd/http/main.go
+server: air
 frontend: (cd ../frontend && pnpm run dev)
