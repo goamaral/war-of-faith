@@ -4,6 +4,8 @@ import (
 	"context"
 	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type TroopTrainingOrder struct {
@@ -28,7 +30,7 @@ func (o *TroopTrainingOrder) ToProtobuf(ctx context.Context) (*serverv1.Troop_Tr
 
 func (o *TroopTrainingOrder) Troop(ctx context.Context) (Troop, error) {
 	if o.troop == nil {
-		troop, found, err := GetTroop(ctx, o.TroopId)
+		troop, found, err := GetTroop(ctx, sq.Eq{"id": o.TroopId})
 		if err != nil {
 			return Troop{}, err
 		}

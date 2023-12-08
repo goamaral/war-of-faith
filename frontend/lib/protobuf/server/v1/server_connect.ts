@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetVillageRequest, GetVillageResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
+import { AttackRequest, AttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetVillageRequest, GetVillageResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -70,6 +70,15 @@ export const Service = {
       name: "GetWorld",
       I: GetWorldRequest,
       O: GetWorldResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.Attack
+     */
+    attack: {
+      name: "Attack",
+      I: AttackRequest,
+      O: AttackResponse,
       kind: MethodKind.Unary,
     },
   }

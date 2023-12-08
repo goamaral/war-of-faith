@@ -140,7 +140,7 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 
 // TODO: Use mutexes and transaction
 func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.IssueTroopTrainingOrderRequest]) (*connect.Response[serverv1.IssueTroopTrainingOrderResponse], error) {
-	troop, found, err := model.GetTroop(ctx, req.Msg.TroopId)
+	troop, found, err := model.GetTroop(ctx, sq.Eq{"id": req.Msg.TroopId})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get troop: %w", err)
 	}
@@ -242,6 +242,23 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 	return connect.NewResponse(&serverv1.GetWorldResponse{World: pWorld}), nil
 }
 
+func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.AttackRequest]) (*connect.Response[serverv1.AttackResponse], error) {
+	_, found, err := model.GetWorldCell(ctx, sq.Eq{"x": req.Msg.Attack.TargetCoords.X, "y": req.Msg.Attack.TargetCoords.Y})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get world cell: %w", err)
+	}
+	if found {
+		return nil, status.Error(codes.AlreadyExists, "cell already exists")
+	}
+
+	_, err = model.CreateVillage(context.Background(), req.Msg.Attack.TargetCoords.X, req.Msg.Attack.TargetCoords.Y)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create village: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.AttackResponse{}), nil
+}
+
 func main() {
 	createDB := flag.Bool("db-create", false, "creates database")
 	recreateDB := flag.Bool("db-recreate", false, "recreates database")
@@ -264,7 +281,7 @@ func main() {
 	if *recreateDB || *createDB {
 		err := CreateDB()
 		if err != nil {
-			log.Fatalf("failed to drop database: %v", err)
+			log.Fatalf("failed to create database: %v", err)
 		}
 	}
 
@@ -351,7 +368,7 @@ func main() {
 						log.Printf("failed to delete troop training order (id: %d): %v", order.Id, err)
 						continue
 					}
-					troop, found, err := model.GetTroop(ctx, order.TroopId)
+					troop, found, err := model.GetTroop(ctx, sq.Eq{"id": order.TroopId})
 					if err != nil {
 						log.Printf("failed to get troop (id: %d): %v", order.TroopId, err)
 						continue
@@ -414,5 +431,113 @@ func runServer() {
 		connect.WithInterceptors(ExtractStatusCodeInterceptor()),
 	)
 	server.Any(fmt.Sprintf("%s*w", path), gin.WrapH(handler))
-	server.Run(":3000")
+	err := server.Run(":3000")
+	if err != nil {
+		log.Fatalf("failed run server: %v", err)
+	}
+}
+
+func CreateDB() error {
+	_, err := db.DB.Exec(`
+		CREATE TABLE villages (
+			id INTEGER PRIMARY KEY,
+			gold INTERGER NOT NULL
+		);
+
+		CREATE TABLE buildings (
+			id INTEGER PRIMARY KEY,
+			kind INTERGER NOT NULL,
+			level INTERGER NOT NULL,
+
+			village_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id)
+		);
+
+		CREATE TABLE building_upgrade_orders (
+			id INTEGER PRIMARY KEY,
+			level INTEGER NOT NULL,
+			time_left INTEGER NOT NULL,
+
+			building_id INTEGER NOT NULL,
+			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
+			FOREIGN KEY(building_id) REFERENCES buildings(id),
+			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
+		);
+
+		CREATE TABLE troops (
+			id INTEGER PRIMARY KEY,
+			kind INTERGER NOT NULL,
+			name TEXT NOT NULL,
+			quantity INTEGER NOT NULL,
+
+			village_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id)
+		);
+
+		CREATE TABLE troop_training_orders (
+			id INTEGER PRIMARY KEY,
+			quantity INTEGER NOT NULL,
+			time_left INTEGER NOT NULL,
+
+			troop_id INTEGER NOT NULL,
+			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
+			FOREIGN KEY(troop_id) REFERENCES troops(id),
+			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
+		);
+
+		CREATE TABLE world_cells (
+			x INTEGER NOT NULL,
+			y INTEGER NOT NULL,
+			entity_kind INTERGER NOT NULL,
+			entity_id INTEGER NOT NULL
+		);
+		CREATE UNIQUE INDEX unq_x_y ON world_cells(x, y);
+
+		CREATE TABLE temples (
+			id INTEGER PRIMARY KEY
+		);
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to create tables: %w", err)
+	}
+
+	return nil
+}
+
+func SeedDB() error {
+	_, err := model.CreateVillage(context.Background(), 3, 4)
+	if err != nil {
+		return fmt.Errorf("failed to create village: %w", err)
+	}
+	_, err = model.CreateTemple(context.Background(), 1, 1)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (1,1): %w", err)
+	}
+	_, err = model.CreateTemple(context.Background(), 8, 1)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (8,1): %w", err)
+	}
+	_, err = model.CreateTemple(context.Background(), 8, 8)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (8,8): %w", err)
+	}
+	_, err = model.CreateTemple(context.Background(), 1, 8)
+	if err != nil {
+		return fmt.Errorf("failed to create temple (1,8): %w", err)
+	}
+
+	return nil
+}
+
+func DropDB() error {
+	_, err := db.DB.Exec(`
+		DROP TABLE temples;
+		DROP TABLE world_cells;
+		DROP TABLE troop_training_orders;
+		DROP TABLE troops;
+		DROP TABLE building_upgrade_orders;
+		DROP TABLE buildings;
+		DROP TABLE villages;
+	`)
+	return err
 }

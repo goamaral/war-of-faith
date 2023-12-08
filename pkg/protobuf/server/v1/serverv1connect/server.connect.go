@@ -49,6 +49,8 @@ const (
 	ServiceCancelTroopTrainingOrderProcedure = "/server.v1.Service/CancelTroopTrainingOrder"
 	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
+	// ServiceAttackProcedure is the fully-qualified name of the Service's Attack RPC.
+	ServiceAttackProcedure = "/server.v1.Service/Attack"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
@@ -62,6 +64,7 @@ type ServiceClient interface {
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -104,6 +107,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceGetWorldProcedure,
 			opts...,
 		),
+		attack: connect_go.NewClient[v1.AttackRequest, v1.AttackResponse](
+			httpClient,
+			baseURL+ServiceAttackProcedure,
+			opts...,
+		),
 	}
 }
 
@@ -115,6 +123,7 @@ type serviceClient struct {
 	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
 	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
+	attack                     *connect_go.Client[v1.AttackRequest, v1.AttackResponse]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -147,6 +156,11 @@ func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1
 	return c.getWorld.CallUnary(ctx, req)
 }
 
+// Attack calls server.v1.Service.Attack.
+func (c *serviceClient) Attack(ctx context.Context, req *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
+	return c.attack.CallUnary(ctx, req)
+}
+
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
 	// VILLAGES
@@ -158,6 +172,7 @@ type ServiceHandler interface {
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -196,6 +211,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.GetWorld,
 		opts...,
 	)
+	serviceAttackHandler := connect_go.NewUnaryHandler(
+		ServiceAttackProcedure,
+		svc.Attack,
+		opts...,
+	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
@@ -210,6 +230,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
 		case ServiceGetWorldProcedure:
 			serviceGetWorldHandler.ServeHTTP(w, r)
+		case ServiceAttackProcedure:
+			serviceAttackHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -241,4 +263,8 @@ func (UnimplementedServiceHandler) CancelTroopTrainingOrder(context.Context, *co
 
 func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetWorld is not implemented"))
+}
+
+func (UnimplementedServiceHandler) Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.Attack is not implemented"))
 }

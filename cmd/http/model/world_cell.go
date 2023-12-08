@@ -5,7 +5,6 @@ import (
 )
 
 type WorldCell struct {
-	Coords     string                         `db:"coords"`
 	X          uint32                         `db:"x"`
 	Y          uint32                         `db:"y"`
 	EntityKind serverv1.World_Cell_EntityKind `db:"entity_kind"`
@@ -14,9 +13,7 @@ type WorldCell struct {
 
 func (wc WorldCell) ToProtobuf() (*serverv1.World_Cell, error) {
 	return &serverv1.World_Cell{
-		Coords:     wc.Coords,
-		X:          wc.X,
-		Y:          wc.Y,
+		Coords:     &serverv1.Coords{X: wc.X, Y: wc.Y},
 		EntityKind: wc.EntityKind,
 		EntityId:   wc.EntityId,
 	}, nil

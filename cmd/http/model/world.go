@@ -14,18 +14,19 @@ type World struct {
 }
 
 func (w *World) ToProtobuf(ctx context.Context, loadCells bool) (*serverv1.World, error) {
-	cells, err := w.Cells(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get cells: %w", err)
-	}
-
-	pCells := map[string]*serverv1.World_Cell{}
+	pCells := []*serverv1.World_Cell{}
 	if loadCells {
+		cells, err := w.Cells(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get cells: %w", err)
+		}
+
 		for _, cell := range cells {
-			pCells[cell.Coords], err = cell.ToProtobuf()
+			pCell, err := cell.ToProtobuf()
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert cell (coords: %s) to protobuf: %w", cell.Coords, err)
+				return nil, fmt.Errorf("failed to convert cell (x: %d, y: %d) to protobuf: %w", cell.X, cell.Y, err)
 			}
+			pCells = append(pCells, pCell)
 		}
 	}
 
@@ -40,7 +41,7 @@ func (w *World) Cells(ctx context.Context) ([]WorldCell, error) {
 	if w.cells == nil {
 		cells, err := GetWorldCells(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get world cells: %w", err)
+			return nil, err
 		}
 		w.cells = &cells
 	}

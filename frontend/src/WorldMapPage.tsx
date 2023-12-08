@@ -40,17 +40,16 @@ function World({ world }: { world: serverV1Types.World }) {
     borderRight: '1px solid black',
   }
 
-  const cells = []
-  for (let y = 0; y < world.height; y++) {
-    for (let x = 0; x < world.width; x++) {
-      const coords = `${x},${y}`
-      const cell = world.cells[coords] || new serverV1Types.World_Cell({ coords, x, y })
-      cells.push(<Cell cell={cell} selectedCell={selectedCell} />)
-    }
-  }
+  const cells = Array(world.width).fill(undefined)
+  cells.forEach((_, y) => {
+    cells[y] = Array(world.height).fill(undefined).map((_, x) => new serverV1Types.World_Cell({ coords: { x, y } }))
+  })
+  world.cells.forEach(cell => {
+    cells[cell.coords!.y][cell.coords!.x] = cell
+  })
 
   return <div style={{ display: 'flex' }}>
-    <div style={gridStyle}>{cells}</div>
+    <div style={gridStyle}>{cells.flat().map(cell => <Cell cell={cell} selectedCell={selectedCell} />)}</div>
     <CellInfo selectedCell={selectedCell} />
   </div>
 }
@@ -111,23 +110,39 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
   })
 
   function Info({ cell }: { cell: serverV1Types.World_Cell }) {
-    function conquer() {
-      alert('TODO: Call server conquer method')
+    async function attack() {
+      try {
+        const { Village: village } = await server.getVillage({ id: 1 }) // TODO: Get current village
+
+        await server.attack({
+          attack: new serverV1Types.Attack({
+            villageId: village!.id,
+            targetCoords: cell.coords,
+            troops: village!.troops,
+          }),
+        })
+
+        navigate(0)
+      } catch (err) {
+        alert(`Failed to attack world cell (coords: ${cell.coords}): ${err}`)
+      }
     }
 
     function Actions() {
       switch (cell.entityKind) {
-        case serverV1Types.World_Cell_EntityKind.VILLAGE:
-          return <button onClick={conquer}>Conquer</button>
+        case serverV1Types.World_Cell_EntityKind.UNSPECIFIED:
+          return <button onClick={attack}>Attack</button>
 
         default:
           return null
       }
     }
 
+    const navigate = useNavigate()
+
     return (<>
       <h2>{entityKindName}</h2>
-      <p><span>Coords</span> {cell.coords}</p>
+      <p><span>Coords</span> {cell.coords!.x}, {cell.coords!.y}</p>
       <Actions />
     </>)
   }

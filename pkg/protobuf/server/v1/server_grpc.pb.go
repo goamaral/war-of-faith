@@ -31,6 +31,7 @@ type ServiceClient interface {
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
+	Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error)
 }
 
 type serviceClient struct {
@@ -95,6 +96,15 @@ func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts 
 	return out, nil
 }
 
+func (c *serviceClient) Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error) {
+	out := new(AttackResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/Attack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility
@@ -108,6 +118,7 @@ type ServiceServer interface {
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
+	Attack(context.Context, *AttackRequest) (*AttackResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have forward compatible implementations.
@@ -131,6 +142,9 @@ func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *Can
 }
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
+}
+func (UnimplementedServiceServer) Attack(context.Context, *AttackRequest) (*AttackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Attack not implemented")
 }
 
 // UnsafeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -252,6 +266,24 @@ func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_Attack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).Attack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/Attack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).Attack(ctx, req.(*AttackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -282,6 +314,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetWorld",
 			Handler:    _Service_GetWorld_Handler,
+		},
+		{
+			MethodName: "Attack",
+			Handler:    _Service_Attack_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

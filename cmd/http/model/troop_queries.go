@@ -13,8 +13,8 @@ func CreateTroop(ctx context.Context, troop *Troop) (*Troop, error) {
 	return troop, db.Insert(ctx, TroopsTableName, troop)
 }
 
-func GetTroop(ctx context.Context, id uint32) (Troop, bool, error) {
-	return db.FindOne[Troop](ctx, TroopsTableName, sq.Eq{"id": id})
+func GetTroop(ctx context.Context, opts ...db.QueryOption) (Troop, bool, error) {
+	return db.FindOne[Troop](ctx, TroopsTableName, opts...)
 }
 
 func GetTroops(ctx context.Context, opts ...db.QueryOption) ([]Troop, error) {
