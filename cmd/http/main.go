@@ -140,29 +140,30 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 
 // TODO: Use mutexes and transaction
 func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.IssueTroopTrainingOrderRequest]) (*connect.Response[serverv1.IssueTroopTrainingOrderResponse], error) {
-	troop, found, err := model.GetTroop(ctx, sq.Eq{"id": req.Msg.TroopId})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get troop: %w", err)
-	}
-	if !found {
-		return nil, status.Error(codes.NotFound, "troop not found")
-	}
-
-	village, err := troop.Village(ctx)
+	village, found, err := model.GetVillage(ctx, req.Msg.VillageId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "village not found")
+	}
 
-	cost := model.CalculateTrainCost(req.Msg.Quantity)
+	troopKind, err := model.Troop_KindFromProtobuf(req.Msg.TroopKind)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid troop kind")
+	}
+
+	cost := troopKind.CalculateTrainingCost(req.Msg.Quantity, 0)
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
-	if troop.Kind == serverv1.Troop_KIND_LEADER {
-		if troop.Quantity > 0 {
+	if troopKind == model.Troop_Kind_LEADER {
+		nLeaders := village.TroopQuantity.Get(model.Troop_Kind_LEADER)
+		if nLeaders > 0 {
 			return nil, status.Error(codes.FailedPrecondition, "no more leaders can be trained")
 		}
 
-		orders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troop.Id})
+		orders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_kind": troopKind})
 		if err != nil {
 			return nil, fmt.Errorf("failed to get troop training orders: %w", err)
 		}
@@ -180,8 +181,8 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 	order, err := model.CreateTroopTrainingOrder(ctx, &model.TroopTrainingOrder{
 		Quantity:  req.Msg.Quantity,
 		TimeLeft:  cost.Time,
-		TroopId:   req.Msg.TroopId,
-		VillageId: village.Id, // TODO: Remove when joins are implemented
+		TroopKind: troopKind,
+		VillageId: village.Id,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create troop training order: %w", err)
@@ -205,17 +206,12 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 		return nil, status.Error(codes.NotFound, "troop training order not found")
 	}
 
-	troop, err := order.Troop(ctx)
+	village, err := order.Village(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get troop (id: %d): %w", order.TroopId, err)
+		return nil, fmt.Errorf("failed to get village (id: %d): %w", order.VillageId, err)
 	}
 
-	village, err := troop.Village(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get village (id: %d): %w", troop.VillageId, err)
-	}
-
-	cost := model.CalculateTrainCost(order.Quantity)
+	cost := order.TroopKind.CalculateTrainingCost(order.Quantity, 0)
 	village.EarnResources(cost)
 	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
@@ -228,6 +224,14 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 	}
 
 	return connect.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
+}
+
+/* TROOPS */
+// GetTroops
+func (s *Server) GetTroops(ctx context.Context, req *connect.Request[serverv1.GetTroopsRequest]) (*connect.Response[serverv1.GetTroopsResponse], error) {
+	return connect.NewResponse(&serverv1.GetTroopsResponse{
+		Troops: lo.Map(model.Troops, func(t model.Troop, _ int) *serverv1.Troop { return t.ToProtobuf() }),
+	}), nil
 }
 
 /* WORLD */
@@ -298,13 +302,13 @@ func main() {
 	for range ticker.C {
 		ctx := context.Background()
 
-		// TODO: Use mutexes and transaction
 		villages, err := model.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)
 			continue
 		}
 		for _, village := range villages {
+			// TODO: Use transaction
 			buildings, err := model.GetBuildings(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
 				log.Printf("failed to get buildings (village_id: %d): %v", village.Id, err)
@@ -349,15 +353,9 @@ func main() {
 				}
 			}
 
-			troops, err := model.GetTroops(ctx, sq.Eq{"village_id": village.Id})
+			troopTrainingOrders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
-				log.Printf("failed to get troops (village_id: %d): %v", village.Id, err)
-				continue
-			}
-			troopIds := lo.Map(troops, func(t model.Troop, _ int) uint32 { return t.Id })
-			troopTrainingOrders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_id": troopIds})
-			if err != nil {
-				log.Printf("failed to get troop (ids: %+v) training orders: %v", troopIds, err)
+				log.Printf("failed to get troop training orders (village_id: %d): %v", village.Id, err)
 				continue
 			}
 			for _, order := range troopTrainingOrders {
@@ -368,22 +366,8 @@ func main() {
 						log.Printf("failed to delete troop training order (id: %d): %v", order.Id, err)
 						continue
 					}
-					troop, found, err := model.GetTroop(ctx, sq.Eq{"id": order.TroopId})
-					if err != nil {
-						log.Printf("failed to get troop (id: %d): %v", order.TroopId, err)
-						continue
-					}
-					if !found {
-						log.Printf("troop not found (id: %d)", order.TroopId)
-						continue
-					}
 
-					troop.Quantity += order.Quantity
-					err = model.UpdateTroop(ctx, troop.Id, troop)
-					if err != nil {
-						log.Printf("failed to update troop (id: %d): %v", troop.Id, err)
-						continue
-					}
+					village.TroopQuantity.Increment(order.TroopKind, order.Quantity)
 				} else {
 					err := model.UpdateTroopTrainingOrder(ctx, order.Id, order)
 					if err != nil {
@@ -441,7 +425,8 @@ func CreateDB() error {
 	_, err := db.DB.Exec(`
 		CREATE TABLE villages (
 			id INTEGER PRIMARY KEY,
-			gold INTERGER NOT NULL
+			gold INTERGER NOT NULL,
+			troop_quantity TEXT NOT NULL
 		);
 
 		CREATE TABLE buildings (
@@ -464,25 +449,14 @@ func CreateDB() error {
 			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
 		);
 
-		CREATE TABLE troops (
-			id INTEGER PRIMARY KEY,
-			kind INTERGER NOT NULL,
-			name TEXT NOT NULL,
-			quantity INTEGER NOT NULL,
-
-			village_id INTEGER NOT NULL,
-			FOREIGN KEY(village_id) REFERENCES villages(id)
-		);
-
 		CREATE TABLE troop_training_orders (
 			id INTEGER PRIMARY KEY,
 			quantity INTEGER NOT NULL,
 			time_left INTEGER NOT NULL,
+			troop_kind VARCHAR(255) NOT NULL,
 
-			troop_id INTEGER NOT NULL,
-			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
-			FOREIGN KEY(troop_id) REFERENCES troops(id),
-			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
+			village_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 
 		CREATE TABLE world_cells (
@@ -534,7 +508,6 @@ func DropDB() error {
 		DROP TABLE temples;
 		DROP TABLE world_cells;
 		DROP TABLE troop_training_orders;
-		DROP TABLE troops;
 		DROP TABLE building_upgrade_orders;
 		DROP TABLE buildings;
 		DROP TABLE villages;

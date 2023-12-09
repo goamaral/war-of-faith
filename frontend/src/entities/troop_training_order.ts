@@ -1,4 +1,4 @@
-import { Resources, Troop, Village } from "."
+import { Resources, TroopKind, Village } from "."
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 
 export default class TroopTrainingOrder {
@@ -6,7 +6,7 @@ export default class TroopTrainingOrder {
   quantity: number
   timeLeft: number
   cost: Resources
-  troopId: number
+  troopKind: TroopKind
 
   village: Village
 
@@ -15,12 +15,8 @@ export default class TroopTrainingOrder {
     this.quantity = order.quantity
     this.timeLeft = order.timeLeft
     this.cost = new Resources(order.cost!)
-    this.troopId = order.troopId
+    this.troopKind = order.troopKind as TroopKind
 
     this.village = village
-  }
-
-  get troop(): Troop {
-    return this.village.troops.find(t => t.id == this.troopId)!
   }
 }

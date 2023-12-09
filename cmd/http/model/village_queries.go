@@ -13,7 +13,12 @@ import (
 const VillagesTableName = "villages"
 
 func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
-	village := Village{buildings: &[]Building{}, troops: &[]Troop{}}
+	village := Village{
+		buildings: &[]Building{},
+		TroopQuantity: Troop_Quantity{
+			Troop_Kind_LEADER: 0,
+		},
+	}
 	err := db.Insert(ctx, VillagesTableName, &village)
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village: %w", err)
@@ -38,14 +43,6 @@ func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
 		return Village{}, fmt.Errorf("failed to create gold mine building: %w", err)
 	}
 	*village.buildings = append(*village.buildings, goldMine)
-
-	/* TROOPS */
-	// Leaders
-	leaders, err := CreateTroop(ctx, &Troop{Kind: serverv1.Troop_KIND_LEADER, Name: "Leader", VillageId: village.Id})
-	if err != nil {
-		return Village{}, fmt.Errorf("failed to create leader troops: %w", err)
-	}
-	*village.troops = append(*village.troops, *leaders)
 
 	return village, nil
 }

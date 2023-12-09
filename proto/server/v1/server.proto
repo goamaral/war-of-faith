@@ -11,7 +11,7 @@ message Village {
   Resources resources = 2;
   repeated Building buildings = 3;
   repeated Building.UpgradeOrder building_upgrade_orders = 4;
-  repeated Troop troops = 5;
+  map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
   repeated Troop.TrainingOrder troop_training_orders = 6;
 }
 
@@ -42,22 +42,15 @@ message Building {
 }
 
 message Troop {
-  uint32 id = 1;
-  Troop.Kind kind = 2;
-  string name = 3;
-  uint32 quantity = 4;
-
-  enum Kind {
-    KIND_UNSPECIFIED = 0;
-    KIND_LEADER = 1;
-  }
+  string kind = 1;
+  string name = 2;
 
   message TrainingOrder {
     uint32 id = 1;
     uint32 quantity = 3;
     uint32 time_left = 4;
     Resources cost = 5;
-    uint32 troop_id = 6;
+    string troop_kind = 6;
   }
 }
 
@@ -87,7 +80,7 @@ message Attack {
   uint32 id = 1;
   uint32 village_id = 2;
   Coords target_coords = 3;
-  repeated Troop troops = 4;
+  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
   uint32 time_left = 5;
 }
 
@@ -122,8 +115,9 @@ message CancelBuildingUpgradeOrderResponse {}
 
 // IssueTroopTrainingOrder
 message IssueTroopTrainingOrderRequest {
-  uint32 troop_id = 1;
+  string troop_kind = 1;
   uint32 quantity = 2;
+  uint32 village_id = 3;
 }
 message IssueTroopTrainingOrderResponse {
   Troop.TrainingOrder order = 1;
@@ -134,6 +128,13 @@ message CancelTroopTrainingOrderRequest {
   uint32 id = 1;
 }
 message CancelTroopTrainingOrderResponse {}
+
+/* TROOPS */
+// GetTroops
+message GetTroopsRequest {}
+message GetTroopsResponse {
+  repeated Troop troops = 1;
+}
 
 /* WORLD */
 // GetWorld
@@ -161,6 +162,9 @@ service Service {
   rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
   rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
   rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
+
+  /* TROOPS */
+  rpc GetTroops(GetTroopsRequest) returns (GetTroopsResponse);
 
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);

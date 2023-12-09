@@ -1,5 +1,15 @@
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
-import { Building, Troop, Resources, TroopTrainingOrder, BuildingUpgradeOrder } from "."
+import { Building, Troop, Resources, TroopTrainingOrder, BuildingUpgradeOrder, TroopKind } from "."
+
+export enum TroopTrainingStatus {
+  TRAINABLE = 0,
+  INSUFFICIENT_RESOURCES = 1,
+  MAX_LEADERS = 2,
+}
+
+interface TroopQuantity {
+  [key: string]: number
+}
 
 export default class Village {
   id: number
@@ -7,7 +17,7 @@ export default class Village {
 
   buildings: Building[]
   buildingUpgradeOrders: BuildingUpgradeOrder[]
-  troops: Troop[]
+  troopQuantity: TroopQuantity
   troopTrainingOrders: TroopTrainingOrder[]
 
   constructor(village: serverV1Types.Village) {
@@ -15,7 +25,7 @@ export default class Village {
     this.gold = village.resources?.gold!
     this.buildings = village.buildings.map(b => new Building(b, this))
     this.buildingUpgradeOrders = village.buildingUpgradeOrders.map(o => new BuildingUpgradeOrder(o, this))
-    this.troops = village.troops.map(t => new Troop(t, this))
+    this.troopQuantity = village.troopQuantity
     this.troopTrainingOrders = village.troopTrainingOrders.map(o => new TroopTrainingOrder(o, this))
   }
 
@@ -29,9 +39,9 @@ export default class Village {
 
   get trainableLeaders(): number {
     const maxLeaders = 1
-    let leaders = this.troops.find(t => t.kind == serverV1Types.Troop_Kind.LEADER)?.quantity ?? 0
+    let leaders = this.troopQuantity[TroopKind.LEADER]
     this.troopTrainingOrders.forEach(o => {
-      if (o.troop.kind === serverV1Types.Troop_Kind.LEADER) leaders++
+      if (o.troopKind === TroopKind.LEADER) leaders++
     })
     return maxLeaders - leaders
   }
@@ -51,6 +61,12 @@ export default class Village {
 
   removeBuildingUpgradeOrder(id: number) {
     this.buildingUpgradeOrders = this.buildingUpgradeOrders.filter(o => o.id !== id)
+  }
+
+  troopTrainingStatus(troop: Troop, quantity: number): TroopTrainingStatus {
+    if (troop.kind == TroopKind.LEADER && this.trainableLeaders == 0) return TroopTrainingStatus.MAX_LEADERS
+    if (!this.canAfford(troop.trainCost(quantity))) return TroopTrainingStatus.INSUFFICIENT_RESOURCES
+    return TroopTrainingStatus.TRAINABLE
   }
 
   addTroopTrainingOrder(order: TroopTrainingOrder) {

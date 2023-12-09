@@ -29,6 +29,8 @@ type ServiceClient interface {
 	CancelBuildingUpgradeOrder(ctx context.Context, in *CancelBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*CancelBuildingUpgradeOrderResponse, error)
 	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
+	// TROOPS
+	GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
 	Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error)
@@ -87,6 +89,15 @@ func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, in *Cancel
 	return out, nil
 }
 
+func (c *serviceClient) GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error) {
+	out := new(GetTroopsResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetTroops", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error) {
 	out := new(GetWorldResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/GetWorld", in, out, opts...)
@@ -116,6 +127,8 @@ type ServiceServer interface {
 	CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error)
 	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
+	// TROOPS
+	GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
 	Attack(context.Context, *AttackRequest) (*AttackResponse, error)
@@ -139,6 +152,9 @@ func (UnimplementedServiceServer) IssueTroopTrainingOrder(context.Context, *Issu
 }
 func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelTroopTrainingOrder not implemented")
+}
+func (UnimplementedServiceServer) GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTroops not implemented")
 }
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
@@ -248,6 +264,24 @@ func _Service_CancelTroopTrainingOrder_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetTroops_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTroopsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetTroops(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetTroops",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetTroops(ctx, req.(*GetTroopsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetWorldRequest)
 	if err := dec(in); err != nil {
@@ -310,6 +344,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelTroopTrainingOrder",
 			Handler:    _Service_CancelTroopTrainingOrder_Handler,
+		},
+		{
+			MethodName: "GetTroops",
+			Handler:    _Service_GetTroops_Handler,
 		},
 		{
 			MethodName: "GetWorld",

@@ -40,10 +40,12 @@ export default class Building {
     return this.level + this.upgradeOrders.length + 1
   }
 
+  // TODO: Move to village
   get upgradeOrders(): BuildingUpgradeOrder[] {
     return this.village.buildingUpgradeOrders.filter(o => o.buildingId === this.id)
   }
 
+  // TODO: Move to village
   upgradeStatus(): BuildingUpgradeStatus {
     if (this.nextLevel > this.maxLevel) return BuildingUpgradeStatus.MAX_LEVEL
     if (!this.village.canAfford(this.upgradeCost())) return BuildingUpgradeStatus.INSUFFICIENT_RESOURCES

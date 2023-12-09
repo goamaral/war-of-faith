@@ -118,7 +118,7 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
           attack: new serverV1Types.Attack({
             villageId: village!.id,
             targetCoords: cell.coords,
-            troops: village!.troops,
+            troopQuantity: village!.troopQuantity,
           }),
         })
 
