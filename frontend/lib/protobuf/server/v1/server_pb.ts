@@ -42,6 +42,11 @@ export class Village extends Message<Village> {
    */
   troopTrainingOrders: Troop_TrainingOrder[] = [];
 
+  /**
+   * @generated from field: uint32 player_id = 7;
+   */
+  playerId = 0;
+
   constructor(data?: PartialMessage<Village>) {
     super();
     proto3.util.initPartial(data, this);
@@ -56,6 +61,7 @@ export class Village extends Message<Village> {
     { no: 4, name: "building_upgrade_orders", kind: "message", T: Building_UpgradeOrder, repeated: true },
     { no: 5, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
     { no: 6, name: "troop_training_orders", kind: "message", T: Troop_TrainingOrder, repeated: true },
+    { no: 7, name: "player_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village {

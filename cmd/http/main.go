@@ -255,7 +255,8 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 		return nil, status.Error(codes.AlreadyExists, "field already exists")
 	}
 
-	_, err = model.CreateVillage(context.Background(), req.Msg.Attack.TargetCoords.X, req.Msg.Attack.TargetCoords.Y)
+	// TODO: Get player from auth
+	_, err = model.CreateVillage(context.Background(), req.Msg.Attack.TargetCoords.X, req.Msg.Attack.TargetCoords.Y, 1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create village: %w", err)
 	}
@@ -423,10 +424,17 @@ func runServer() {
 
 func CreateDB() error {
 	_, err := db.DB.Exec(`
+		CREATE TABLE players (
+			id INTEGER PRIMARY KEY
+		);
+
 		CREATE TABLE villages (
 			id INTEGER PRIMARY KEY,
 			gold INTERGER NOT NULL,
-			troop_quantity TEXT NOT NULL
+			troop_quantity TEXT NOT NULL,
+
+			player_id INTEGER NOT NULL,
+			FOREIGN KEY(player_id) REFERENCES villages(id)
 		);
 
 		CREATE TABLE buildings (
@@ -479,9 +487,9 @@ func CreateDB() error {
 }
 
 func SeedDB() error {
-	_, err := model.CreateVillage(context.Background(), 3, 4)
+	_, err := model.CreatePlayer(context.Background(), 3, 4)
 	if err != nil {
-		return fmt.Errorf("failed to create village: %w", err)
+		return fmt.Errorf("failed to create player: %w", err)
 	}
 	_, err = model.CreateTemple(context.Background(), 1, 1)
 	if err != nil {
@@ -511,6 +519,7 @@ func DropDB() error {
 		DROP TABLE building_upgrade_orders;
 		DROP TABLE buildings;
 		DROP TABLE villages;
+		DROP TABLE players;
 	`)
 	return err
 }

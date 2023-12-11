@@ -14,6 +14,8 @@ type Village struct {
 	Gold          uint32         `db:"gold"`
 	TroopQuantity Troop_Quantity `db:"troop_quantity"`
 
+	PlayerId uint32 `db:"player_id"`
+
 	buildings           *[]Building
 	troopTrainingOrders *[]TroopTrainingOrder
 }

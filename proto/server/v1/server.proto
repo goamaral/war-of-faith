@@ -13,6 +13,7 @@ message Village {
   repeated Building.UpgradeOrder building_upgrade_orders = 4;
   map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
   repeated Troop.TrainingOrder troop_training_orders = 6;
+  uint32 player_id = 7;
 }
 
 message Resources {

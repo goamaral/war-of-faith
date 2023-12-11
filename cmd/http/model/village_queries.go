@@ -12,12 +12,13 @@ import (
 
 const VillagesTableName = "villages"
 
-func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
+func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Village, error) {
 	village := Village{
 		buildings: &[]Building{},
 		TroopQuantity: Troop_Quantity{
 			Troop_Kind_LEADER: 0,
 		},
+		PlayerId: playerId,
 	}
 	err := db.Insert(ctx, VillagesTableName, &village)
 	if err != nil {
