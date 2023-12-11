@@ -18,9 +18,9 @@ func CreateTemple(ctx context.Context, x uint32, y uint32) (Temple, error) {
 		return Temple{}, fmt.Errorf("failed to create temple: %w", err)
 	}
 
-	_, err = CreateWorldCell(ctx, x, y, serverv1.World_Cell_ENTITY_KIND_TEMPLE, temple.Id)
+	_, err = CreateWorldField(ctx, x, y, serverv1.World_Field_ENTITY_KIND_TEMPLE, temple.Id)
 	if err != nil {
-		return Temple{}, fmt.Errorf("failed to create temple world cell: %w", err)
+		return Temple{}, fmt.Errorf("failed to create temple world field: %w", err)
 	}
 
 	return temple, nil

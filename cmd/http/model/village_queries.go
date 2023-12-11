@@ -24,9 +24,9 @@ func CreateVillage(ctx context.Context, x uint32, y uint32) (Village, error) {
 		return Village{}, fmt.Errorf("failed to create village: %w", err)
 	}
 
-	_, err = CreateWorldCell(ctx, x, y, serverv1.World_Cell_ENTITY_KIND_VILLAGE, village.Id)
+	_, err = CreateWorldField(ctx, x, y, serverv1.World_Field_ENTITY_KIND_VILLAGE, village.Id)
 	if err != nil {
-		return Village{}, fmt.Errorf("failed to create village world cell: %w", err)
+		return Village{}, fmt.Errorf("failed to create village world field: %w", err)
 	}
 
 	/* BUILDINGS */

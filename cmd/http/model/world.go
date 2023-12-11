@@ -10,40 +10,40 @@ type World struct {
 	Width  uint32 `db:"width"`
 	Height uint32 `db:"height"`
 
-	cells *[]WorldCell
+	fields *[]WorldField
 }
 
-func (w *World) ToProtobuf(ctx context.Context, loadCells bool) (*serverv1.World, error) {
-	pCells := []*serverv1.World_Cell{}
-	if loadCells {
-		cells, err := w.Cells(ctx)
+func (w *World) ToProtobuf(ctx context.Context, loadFields bool) (*serverv1.World, error) {
+	pFields := []*serverv1.World_Field{}
+	if loadFields {
+		fields, err := w.Fields(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get cells: %w", err)
+			return nil, fmt.Errorf("failed to get fields: %w", err)
 		}
 
-		for _, cell := range cells {
-			pCell, err := cell.ToProtobuf()
+		for _, field := range fields {
+			pField, err := field.ToProtobuf()
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert cell (x: %d, y: %d) to protobuf: %w", cell.X, cell.Y, err)
+				return nil, fmt.Errorf("failed to convert field (x: %d, y: %d) to protobuf: %w", field.X, field.Y, err)
 			}
-			pCells = append(pCells, pCell)
+			pFields = append(pFields, pField)
 		}
 	}
 
 	return &serverv1.World{
 		Width:  w.Width,
 		Height: w.Height,
-		Cells:  pCells,
+		Fields: pFields,
 	}, nil
 }
 
-func (w *World) Cells(ctx context.Context) ([]WorldCell, error) {
-	if w.cells == nil {
-		cells, err := GetWorldCells(ctx)
+func (w *World) Fields(ctx context.Context) ([]WorldField, error) {
+	if w.fields == nil {
+		fields, err := GetWorldFields(ctx)
 		if err != nil {
 			return nil, err
 		}
-		w.cells = &cells
+		w.fields = &fields
 	}
-	return *w.cells, nil
+	return *w.fields, nil
 }

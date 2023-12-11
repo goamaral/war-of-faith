@@ -10,7 +10,7 @@ export default () => {
   const [world, setWorld] = useState<serverV1Types.World>(new serverV1Types.World())
 
   useEffect(() => {
-    server.getWorld({ loadCells: true }).then(({ world }) => {
+    server.getWorld({ loadFields: true }).then(({ world }) => {
       setWorld(world!)
       setLoading(false)
     })
@@ -29,7 +29,7 @@ export default () => {
 }
 
 function World({ world }: { world: serverV1Types.World }) {
-  const selectedCell = useSignal<serverV1Types.World_Cell|undefined>(undefined)
+  const selectedField = useSignal<serverV1Types.World_Field | undefined>(undefined)
 
   const gridStyle = {
     display: 'grid',
@@ -40,28 +40,28 @@ function World({ world }: { world: serverV1Types.World }) {
     borderRight: '1px solid black',
   }
 
-  const cells = Array(world.width).fill(undefined)
-  cells.forEach((_, y) => {
-    cells[y] = Array(world.height).fill(undefined).map((_, x) => new serverV1Types.World_Cell({ coords: { x, y } }))
+  const fields = Array(world.width).fill(undefined)
+  fields.forEach((_, y) => {
+    fields[y] = Array(world.height).fill(undefined).map((_, x) => new serverV1Types.World_Field({ coords: { x, y } }))
   })
-  world.cells.forEach(cell => {
-    cells[cell.coords!.y][cell.coords!.x] = cell
+  world.fields.forEach(field => {
+    fields[field.coords!.y][field.coords!.x] = field
   })
 
   return <div style={{ display: 'flex' }}>
-    <div style={gridStyle}>{cells.flat().map(cell => <Cell cell={cell} selectedCell={selectedCell} />)}</div>
-    <CellInfo selectedCell={selectedCell} />
+    <div style={gridStyle}>{fields.flat().map(field => <Field field={field} selectedField={selectedField} />)}</div>
+    <FieldInfo selectedField={selectedField} />
   </div>
 }
 
 
-function Cell({ cell, selectedCell }: { cell: serverV1Types.World_Cell, selectedCell: Signal<serverV1Types.World_Cell | undefined> }) {
+function Field({ field, selectedField }: { field: serverV1Types.World_Field, selectedField: Signal<serverV1Types.World_Field | undefined> }) {
   function kindStyle() {
-    switch (cell.entityKind) {
-      case serverV1Types.World_Cell_EntityKind.VILLAGE:
+    switch (field.entityKind) {
+      case serverV1Types.World_Field_EntityKind.VILLAGE:
         return { backgroundColor: 'green', cursor: 'pointer' }
 
-      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+      case serverV1Types.World_Field_EntityKind.TEMPLE:
         return { backgroundColor: 'yellow' }
 
       default:
@@ -69,13 +69,13 @@ function Cell({ cell, selectedCell }: { cell: serverV1Types.World_Cell, selected
     }
   }
 
-  function onCellDblClick() {
-    switch (cell.entityKind) {
-      case serverV1Types.World_Cell_EntityKind.VILLAGE:
-        navigate(`/villages/${cell.entityId}`)
+  function onFieldDblClick() {
+    switch (field.entityKind) {
+      case serverV1Types.World_Field_EntityKind.VILLAGE:
+        navigate(`/villages/${field.entityId}`)
         break
 
-      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+      case serverV1Types.World_Field_EntityKind.TEMPLE:
         alert('TODO: Open temple page')
         break
     }
@@ -83,7 +83,7 @@ function Cell({ cell, selectedCell }: { cell: serverV1Types.World_Cell, selected
 
   const navigate = useNavigate()
 
-  const cellStyle = {
+  const fieldStyle = {
     position: 'relative',
     borderTop: '1px solid black',
     borderLeft: '1px solid black',
@@ -91,17 +91,17 @@ function Cell({ cell, selectedCell }: { cell: serverV1Types.World_Cell, selected
   }
 
   return (
-    <div style={cellStyle} onClick={() => selectedCell.value = cell} onDblClick={onCellDblClick}></div>
+    <div style={fieldStyle} onClick={() => selectedField.value = field} onDblClick={onFieldDblClick}></div>
   )
 }
 
-function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_Cell | undefined> }) {
+function FieldInfo({ selectedField }: { selectedField: Signal<serverV1Types.World_Field | undefined> }) {
   const entityKindName = useComputed(() => {
-    switch (selectedCell.value?.entityKind) {
-      case serverV1Types.World_Cell_EntityKind.VILLAGE:
+    switch (selectedField.value?.entityKind) {
+      case serverV1Types.World_Field_EntityKind.VILLAGE:
         return 'Village'
 
-      case serverV1Types.World_Cell_EntityKind.TEMPLE:
+      case serverV1Types.World_Field_EntityKind.TEMPLE:
         return 'Temple'
 
       default:
@@ -109,7 +109,7 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
     }
   })
 
-  function Info({ cell }: { cell: serverV1Types.World_Cell }) {
+  function Info({ field }: { field: serverV1Types.World_Field }) {
     async function attack() {
       try {
         const { Village: village } = await server.getVillage({ id: 1 }) // TODO: Get current village
@@ -117,20 +117,20 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
         await server.attack({
           attack: new serverV1Types.Attack({
             villageId: village!.id,
-            targetCoords: cell.coords,
+            targetCoords: field.coords,
             troopQuantity: village!.troopQuantity,
           }),
         })
 
         navigate(0)
       } catch (err) {
-        alert(`Failed to attack world cell (coords: ${cell.coords}): ${err}`)
+        alert(`Failed to attack world field (coords: ${field.coords}): ${err}`)
       }
     }
 
     function Actions() {
-      switch (cell.entityKind) {
-        case serverV1Types.World_Cell_EntityKind.UNSPECIFIED:
+      switch (field.entityKind) {
+        case serverV1Types.World_Field_EntityKind.UNSPECIFIED:
           return <button onClick={attack}>Attack</button>
 
         default:
@@ -142,12 +142,12 @@ function CellInfo({ selectedCell }: { selectedCell: Signal<serverV1Types.World_C
 
     return (<>
       <h2>{entityKindName}</h2>
-      <p><span>Coords</span> {cell.coords!.x}, {cell.coords!.y}</p>
+      <p><span>Coords</span> {field.coords!.x}, {field.coords!.y}</p>
       <Actions />
     </>)
   }
 
   return <div>
-    {selectedCell.value ? <Info cell={selectedCell.value} /> : <h2>No field selected</h2>}
+    {selectedField.value ? <Info field={selectedField.value} /> : <h2>No field selected</h2>}
   </div>
 }

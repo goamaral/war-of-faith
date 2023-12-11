@@ -57,11 +57,11 @@ message Troop {
 message World {
   uint32 width = 1;
   uint32 height = 2;
-  repeated World.Cell cells = 3;
+  repeated World.Field fields = 3;
 
-  message Cell {
+  message Field {
     Coords coords = 1;
-    World.Cell.EntityKind entity_kind = 2;
+    World.Field.EntityKind entity_kind = 2;
     uint32 entity_id = 3;
 
     enum EntityKind {
@@ -139,7 +139,7 @@ message GetTroopsResponse {
 /* WORLD */
 // GetWorld
 message GetWorldRequest {
-  bool load_cells = 1;
+  bool load_fields = 1;
 }
 message GetWorldResponse {
   World world = 1;

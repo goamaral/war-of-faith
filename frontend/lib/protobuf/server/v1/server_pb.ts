@@ -379,9 +379,9 @@ export class World extends Message<World> {
   height = 0;
 
   /**
-   * @generated from field: repeated server.v1.World.Cell cells = 3;
+   * @generated from field: repeated server.v1.World.Field fields = 3;
    */
-  cells: World_Cell[] = [];
+  fields: World_Field[] = [];
 
   constructor(data?: PartialMessage<World>) {
     super();
@@ -393,7 +393,7 @@ export class World extends Message<World> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "width", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "height", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "cells", kind: "message", T: World_Cell, repeated: true },
+    { no: 3, name: "fields", kind: "message", T: World_Field, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World {
@@ -414,58 +414,58 @@ export class World extends Message<World> {
 }
 
 /**
- * @generated from message server.v1.World.Cell
+ * @generated from message server.v1.World.Field
  */
-export class World_Cell extends Message<World_Cell> {
+export class World_Field extends Message<World_Field> {
   /**
    * @generated from field: server.v1.Coords coords = 1;
    */
   coords?: Coords;
 
   /**
-   * @generated from field: server.v1.World.Cell.EntityKind entity_kind = 2;
+   * @generated from field: server.v1.World.Field.EntityKind entity_kind = 2;
    */
-  entityKind = World_Cell_EntityKind.UNSPECIFIED;
+  entityKind = World_Field_EntityKind.UNSPECIFIED;
 
   /**
    * @generated from field: uint32 entity_id = 3;
    */
   entityId = 0;
 
-  constructor(data?: PartialMessage<World_Cell>) {
+  constructor(data?: PartialMessage<World_Field>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.World.Cell";
+  static readonly typeName = "server.v1.World.Field";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "coords", kind: "message", T: Coords },
-    { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Cell_EntityKind) },
+    { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
     { no: 3, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Cell {
-    return new World_Cell().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field {
+    return new World_Field().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Cell {
-    return new World_Cell().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Field {
+    return new World_Field().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Cell {
-    return new World_Cell().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Field {
+    return new World_Field().fromJsonString(jsonString, options);
   }
 
-  static equals(a: World_Cell | PlainMessage<World_Cell> | undefined, b: World_Cell | PlainMessage<World_Cell> | undefined): boolean {
-    return proto3.util.equals(World_Cell, a, b);
+  static equals(a: World_Field | PlainMessage<World_Field> | undefined, b: World_Field | PlainMessage<World_Field> | undefined): boolean {
+    return proto3.util.equals(World_Field, a, b);
   }
 }
 
 /**
- * @generated from enum server.v1.World.Cell.EntityKind
+ * @generated from enum server.v1.World.Field.EntityKind
  */
-export enum World_Cell_EntityKind {
+export enum World_Field_EntityKind {
   /**
    * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
    */
@@ -481,8 +481,8 @@ export enum World_Cell_EntityKind {
    */
   TEMPLE = 2,
 }
-// Retrieve enum metadata with: proto3.getEnumType(World_Cell_EntityKind)
-proto3.util.setEnumType(World_Cell_EntityKind, "server.v1.World.Cell.EntityKind", [
+// Retrieve enum metadata with: proto3.getEnumType(World_Field_EntityKind)
+proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKind", [
   { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
   { no: 1, name: "ENTITY_KIND_VILLAGE" },
   { no: 2, name: "ENTITY_KIND_TEMPLE" },
@@ -1088,9 +1088,9 @@ export class GetTroopsResponse extends Message<GetTroopsResponse> {
  */
 export class GetWorldRequest extends Message<GetWorldRequest> {
   /**
-   * @generated from field: bool load_cells = 1;
+   * @generated from field: bool load_fields = 1;
    */
-  loadCells = false;
+  loadFields = false;
 
   constructor(data?: PartialMessage<GetWorldRequest>) {
     super();
@@ -1100,7 +1100,7 @@ export class GetWorldRequest extends Message<GetWorldRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.GetWorldRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "load_cells", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "load_fields", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetWorldRequest {

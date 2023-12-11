@@ -6,22 +6,22 @@ import (
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 )
 
-const WorldCellsTableName = "world_cells"
+const WorldFieldsTableName = "world_fields"
 
-func CreateWorldCell(ctx context.Context, x uint32, y uint32, entityKind serverv1.World_Cell_EntityKind, entityId uint32) (WorldCell, error) {
-	cell := WorldCell{
+func CreateWorldField(ctx context.Context, x uint32, y uint32, entityKind serverv1.World_Field_EntityKind, entityId uint32) (WorldField, error) {
+	field := WorldField{
 		X:          x,
 		Y:          y,
 		EntityKind: entityKind,
 		EntityId:   entityId,
 	}
-	return cell, db.Insert(ctx, WorldCellsTableName, &cell)
+	return field, db.Insert(ctx, WorldFieldsTableName, &field)
 }
 
-func GetWorldCells(ctx context.Context, opts ...db.QueryOption) ([]WorldCell, error) {
-	return db.Find[WorldCell](ctx, WorldCellsTableName, opts...)
+func GetWorldFields(ctx context.Context, opts ...db.QueryOption) ([]WorldField, error) {
+	return db.Find[WorldField](ctx, WorldFieldsTableName, opts...)
 }
 
-func GetWorldCell(ctx context.Context, opts ...db.QueryOption) (WorldCell, bool, error) {
-	return db.FindOne[WorldCell](ctx, WorldCellsTableName, opts...)
+func GetWorldField(ctx context.Context, opts ...db.QueryOption) (WorldField, bool, error) {
+	return db.FindOne[WorldField](ctx, WorldFieldsTableName, opts...)
 }

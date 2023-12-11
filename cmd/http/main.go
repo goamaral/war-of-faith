@@ -238,7 +238,7 @@ func (s *Server) GetTroops(ctx context.Context, req *connect.Request[serverv1.Ge
 func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.GetWorldRequest]) (*connect.Response[serverv1.GetWorldResponse], error) {
 	world := model.GetWorld(ctx)
 
-	pWorld, err := world.ToProtobuf(ctx, req.Msg.LoadCells)
+	pWorld, err := world.ToProtobuf(ctx, req.Msg.LoadFields)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert world to protobuf: %w", err)
 	}
@@ -247,12 +247,12 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 }
 
 func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.AttackRequest]) (*connect.Response[serverv1.AttackResponse], error) {
-	_, found, err := model.GetWorldCell(ctx, sq.Eq{"x": req.Msg.Attack.TargetCoords.X, "y": req.Msg.Attack.TargetCoords.Y})
+	_, found, err := model.GetWorldField(ctx, sq.Eq{"x": req.Msg.Attack.TargetCoords.X, "y": req.Msg.Attack.TargetCoords.Y})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get world cell: %w", err)
+		return nil, fmt.Errorf("failed to get world field: %w", err)
 	}
 	if found {
-		return nil, status.Error(codes.AlreadyExists, "cell already exists")
+		return nil, status.Error(codes.AlreadyExists, "field already exists")
 	}
 
 	_, err = model.CreateVillage(context.Background(), req.Msg.Attack.TargetCoords.X, req.Msg.Attack.TargetCoords.Y)
@@ -444,9 +444,9 @@ func CreateDB() error {
 			time_left INTEGER NOT NULL,
 
 			building_id INTEGER NOT NULL,
-			village_id INTEGER NOT NULL, -- TODO: Remove when joins are implemented
+			village_id INTEGER NOT NULL,
 			FOREIGN KEY(building_id) REFERENCES buildings(id),
-			FOREIGN KEY(village_id) REFERENCES villages(id) -- TODO: Remove when joins are implemented
+			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 
 		CREATE TABLE troop_training_orders (
@@ -459,13 +459,13 @@ func CreateDB() error {
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 
-		CREATE TABLE world_cells (
+		CREATE TABLE world_fields (
 			x INTEGER NOT NULL,
 			y INTEGER NOT NULL,
 			entity_kind INTERGER NOT NULL,
 			entity_id INTEGER NOT NULL
 		);
-		CREATE UNIQUE INDEX unq_x_y ON world_cells(x, y);
+		CREATE UNIQUE INDEX unq_x_y ON world_fields(x, y);
 
 		CREATE TABLE temples (
 			id INTEGER PRIMARY KEY
@@ -506,7 +506,7 @@ func SeedDB() error {
 func DropDB() error {
 	_, err := db.DB.Exec(`
 		DROP TABLE temples;
-		DROP TABLE world_cells;
+		DROP TABLE world_fields;
 		DROP TABLE troop_training_orders;
 		DROP TABLE building_upgrade_orders;
 		DROP TABLE buildings;
