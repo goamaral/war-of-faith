@@ -99,6 +99,14 @@ message GetVillageResponse {
   Village Village = 1;
 }
 
+// GetVillages
+message GetVillagesRequest {
+  uint32 player_id = 1;
+}
+message GetVillagesResponse {
+  repeated Village villages = 1;
+}
+
 /* ORDERS */
 // IssueBuildingUpgradeOrder
 message IssueBuildingUpgradeOrderRequest {
@@ -157,6 +165,7 @@ message AttackResponse {
 service Service {
   /* VILLAGES */
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
+  rpc GetVillages(GetVillagesRequest) returns (GetVillagesResponse);
 
   /* ORDERS */
   rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);

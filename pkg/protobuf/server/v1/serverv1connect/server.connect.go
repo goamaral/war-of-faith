@@ -35,6 +35,8 @@ const (
 const (
 	// ServiceGetVillageProcedure is the fully-qualified name of the Service's GetVillage RPC.
 	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
+	// ServiceGetVillagesProcedure is the fully-qualified name of the Service's GetVillages RPC.
+	ServiceGetVillagesProcedure = "/server.v1.Service/GetVillages"
 	// ServiceIssueBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
 	// IssueBuildingUpgradeOrder RPC.
 	ServiceIssueBuildingUpgradeOrderProcedure = "/server.v1.Service/IssueBuildingUpgradeOrder"
@@ -59,6 +61,7 @@ const (
 type ServiceClient interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
+	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
 	// ORDERS
 	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
 	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
@@ -84,6 +87,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 		getVillage: connect_go.NewClient[v1.GetVillageRequest, v1.GetVillageResponse](
 			httpClient,
 			baseURL+ServiceGetVillageProcedure,
+			opts...,
+		),
+		getVillages: connect_go.NewClient[v1.GetVillagesRequest, v1.GetVillagesResponse](
+			httpClient,
+			baseURL+ServiceGetVillagesProcedure,
 			opts...,
 		),
 		issueBuildingUpgradeOrder: connect_go.NewClient[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse](
@@ -127,6 +135,7 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 // serviceClient implements ServiceClient.
 type serviceClient struct {
 	getVillage                 *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
+	getVillages                *connect_go.Client[v1.GetVillagesRequest, v1.GetVillagesResponse]
 	issueBuildingUpgradeOrder  *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
 	cancelBuildingUpgradeOrder *connect_go.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
 	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
@@ -139,6 +148,11 @@ type serviceClient struct {
 // GetVillage calls server.v1.Service.GetVillage.
 func (c *serviceClient) GetVillage(ctx context.Context, req *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
 	return c.getVillage.CallUnary(ctx, req)
+}
+
+// GetVillages calls server.v1.Service.GetVillages.
+func (c *serviceClient) GetVillages(ctx context.Context, req *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
+	return c.getVillages.CallUnary(ctx, req)
 }
 
 // IssueBuildingUpgradeOrder calls server.v1.Service.IssueBuildingUpgradeOrder.
@@ -180,6 +194,7 @@ func (c *serviceClient) Attack(ctx context.Context, req *connect_go.Request[v1.A
 type ServiceHandler interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
+	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
 	// ORDERS
 	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
 	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
@@ -201,6 +216,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 	serviceGetVillageHandler := connect_go.NewUnaryHandler(
 		ServiceGetVillageProcedure,
 		svc.GetVillage,
+		opts...,
+	)
+	serviceGetVillagesHandler := connect_go.NewUnaryHandler(
+		ServiceGetVillagesProcedure,
+		svc.GetVillages,
 		opts...,
 	)
 	serviceIssueBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
@@ -242,6 +262,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
 			serviceGetVillageHandler.ServeHTTP(w, r)
+		case ServiceGetVillagesProcedure:
+			serviceGetVillagesHandler.ServeHTTP(w, r)
 		case ServiceIssueBuildingUpgradeOrderProcedure:
 			serviceIssueBuildingUpgradeOrderHandler.ServeHTTP(w, r)
 		case ServiceCancelBuildingUpgradeOrderProcedure:
@@ -267,6 +289,10 @@ type UnimplementedServiceHandler struct{}
 
 func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillage is not implemented"))
+}
+
+func (UnimplementedServiceHandler) GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillages is not implemented"))
 }
 
 func (UnimplementedServiceHandler) IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {

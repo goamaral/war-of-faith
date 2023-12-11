@@ -1,13 +1,13 @@
 import { useParams } from 'react-router-dom'
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect } from 'preact/hooks'
+import { useSignal, useSignalEffect } from '@preact/signals'
 
 import * as entities from './entities'
 import server from './server'
-import { useSignal, useSignalEffect } from '@preact/signals'
 
 function useForceRender() {
-  const [state, setState] = useState(true)
-  return () => setState(!state)
+  const state = useSignal(true)
+  return () => state.value = !state.value
 }
 
 export default () => {
@@ -51,11 +51,11 @@ export default () => {
 const Village = ({ village, troops, forceRender }: { village: entities.Village, troops: entities.Troop[], forceRender: () => void }) => {
   return (
     <div>
-      <h1>Resources</h1>
+      <h1>Village {village.id}</h1>
+      <h2>Resources</h2>
       <ul>
         <li>{village?.gold} Gold</li>
       </ul>
-      <h1>Village</h1>
       <VillageBuildings village={village} forceRender={forceRender} />
       <VillageTroops village={village} troops={troops} forceRender={forceRender} />
     </div>

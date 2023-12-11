@@ -43,6 +43,24 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 	return connect.NewResponse(&serverv1.GetVillageResponse{Village: pVillage}), nil
 }
 
+func (s *Server) GetVillages(ctx context.Context, req *connect.Request[serverv1.GetVillagesRequest]) (*connect.Response[serverv1.GetVillagesResponse], error) {
+	villages, err := model.GetVillages(ctx, sq.Eq{"player_id": req.Msg.PlayerId})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get villages: %w", err)
+	}
+
+	pVillages := make([]*serverv1.Village, len(villages))
+	for i, v := range villages {
+		pVillage, err := v.ToProtobuf(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert village to protobuf: %w", err)
+		}
+		pVillages[i] = pVillage
+	}
+
+	return connect.NewResponse(&serverv1.GetVillagesResponse{Villages: pVillages}), nil
+}
+
 /* ORDERS */
 // TODO: Use mutexes and transaction
 func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.IssueBuildingUpgradeOrderResponse], error) {

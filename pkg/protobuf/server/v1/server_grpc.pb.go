@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ServiceClient interface {
 	// VILLAGES
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
+	GetVillages(ctx context.Context, in *GetVillagesRequest, opts ...grpc.CallOption) (*GetVillagesResponse, error)
 	// ORDERS
 	IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error)
 	CancelBuildingUpgradeOrder(ctx context.Context, in *CancelBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*CancelBuildingUpgradeOrderResponse, error)
@@ -47,6 +48,15 @@ func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 func (c *serviceClient) GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error) {
 	out := new(GetVillageResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/GetVillage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) GetVillages(ctx context.Context, in *GetVillagesRequest, opts ...grpc.CallOption) (*GetVillagesResponse, error) {
+	out := new(GetVillagesResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetVillages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +132,7 @@ func (c *serviceClient) Attack(ctx context.Context, in *AttackRequest, opts ...g
 type ServiceServer interface {
 	// VILLAGES
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
+	GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error)
 	// ORDERS
 	IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error)
 	CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error)
@@ -140,6 +151,9 @@ type UnimplementedServiceServer struct {
 
 func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVillage not implemented")
+}
+func (UnimplementedServiceServer) GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVillages not implemented")
 }
 func (UnimplementedServiceServer) IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueBuildingUpgradeOrder not implemented")
@@ -188,6 +202,24 @@ func _Service_GetVillage_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ServiceServer).GetVillage(ctx, req.(*GetVillageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_GetVillages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVillagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetVillages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetVillages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetVillages(ctx, req.(*GetVillagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -328,6 +360,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVillage",
 			Handler:    _Service_GetVillage_Handler,
+		},
+		{
+			MethodName: "GetVillages",
+			Handler:    _Service_GetVillages_Handler,
 		},
 		{
 			MethodName: "IssueBuildingUpgradeOrder",

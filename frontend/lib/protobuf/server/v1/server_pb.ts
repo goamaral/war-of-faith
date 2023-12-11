@@ -714,6 +714,82 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
 }
 
 /**
+ * GetVillages
+ *
+ * @generated from message server.v1.GetVillagesRequest
+ */
+export class GetVillagesRequest extends Message<GetVillagesRequest> {
+  /**
+   * @generated from field: uint32 player_id = 1;
+   */
+  playerId = 0;
+
+  constructor(data?: PartialMessage<GetVillagesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetVillagesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "player_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillagesRequest {
+    return new GetVillagesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetVillagesRequest {
+    return new GetVillagesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetVillagesRequest {
+    return new GetVillagesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetVillagesRequest | PlainMessage<GetVillagesRequest> | undefined, b: GetVillagesRequest | PlainMessage<GetVillagesRequest> | undefined): boolean {
+    return proto3.util.equals(GetVillagesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetVillagesResponse
+ */
+export class GetVillagesResponse extends Message<GetVillagesResponse> {
+  /**
+   * @generated from field: repeated server.v1.Village villages = 1;
+   */
+  villages: Village[] = [];
+
+  constructor(data?: PartialMessage<GetVillagesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetVillagesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "villages", kind: "message", T: Village, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillagesResponse {
+    return new GetVillagesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetVillagesResponse {
+    return new GetVillagesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetVillagesResponse {
+    return new GetVillagesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetVillagesResponse | PlainMessage<GetVillagesResponse> | undefined, b: GetVillagesResponse | PlainMessage<GetVillagesResponse> | undefined): boolean {
+    return proto3.util.equals(GetVillagesResponse, a, b);
+  }
+}
+
+/**
  * IssueBuildingUpgradeOrder
  *
  * @generated from message server.v1.IssueBuildingUpgradeOrderRequest
