@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"fmt"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	"github.com/samber/lo"
@@ -71,7 +72,17 @@ func (tq *Troop_Quantity) Scan(value any) error {
 	if value == nil {
 		return nil
 	}
-	return json.Unmarshal(value.([]byte), tq)
+
+	var valueBytes []byte
+	switch v := value.(type) {
+	case []byte:
+		valueBytes = v
+	case string:
+		valueBytes = []byte(v)
+	default:
+		return fmt.Errorf("invalid type %T for Troop_Quantity", value)
+	}
+	return json.Unmarshal(valueBytes, tq)
 }
 
 func (tq Troop_Quantity) Get(kind Troop_Kind) uint32 {

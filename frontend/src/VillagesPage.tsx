@@ -1,17 +1,17 @@
 import { useSignal, useSignalEffect } from '@preact/signals'
 import { Link } from "react-router-dom"
 
-import * as entities from './entities'
+import * as serverV1 from "../lib/protobuf/server/v1/server_pb"
 import server from './server'
 
 export default () => {
   const loading = useSignal(true)
-  const villages = useSignal<entities.Village[]>([])
+  const villages = useSignal<serverV1.Village[]>([])
 
   useSignalEffect(() => {
     server.getVillages({ playerId: 1 }) // TODO: Get player id from auth
       .then(res => {
-        villages.value = res.villages.map(v => new entities.Village(v))
+        villages.value = res.villages
         loading.value = false
       })
       .catch(err => alert(err))

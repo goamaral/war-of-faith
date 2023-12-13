@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"reflect"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -84,10 +85,10 @@ func FindOne[T any](ctx context.Context, table string, opts ...QueryOption) (T, 
 	return record, true, nil
 }
 
-func First[T any](ctx context.Context, table string, opts ...QueryOption) (T, error) {
+func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOption) (T, error) {
 	var record T
 
-	qry, err := applySelectQueryOptions(sq.Select("*").From(table), opts...)
+	qry, err := applySelectQueryOptions(builder, opts...)
 	if err != nil {
 		return record, fmt.Errorf("failed to apply query options: %w", err)
 	}
@@ -97,7 +98,12 @@ func First[T any](ctx context.Context, table string, opts ...QueryOption) (T, er
 		return record, fmt.Errorf("failed to build sql query: %w", err)
 	}
 
-	err = DB.QueryRowxContext(ctx, qrySql, args...).StructScan(&record)
+	row := DB.QueryRowxContext(ctx, qrySql, args...)
+	if reflect.TypeOf(record).Kind() == reflect.Struct {
+		err = row.StructScan(&record)
+	} else {
+		err = row.Scan(&record)
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, nil
@@ -148,6 +154,8 @@ func applySelectQueryOptions(qry sq.SelectBuilder, opts ...QueryOption) (sq.Sqli
 		switch o := opt.(type) {
 		case OrderQueryOption:
 			qry = qry.OrderByClause(o)
+		case joinQueryOption:
+			qry = qry.JoinClause(o)
 		case sq.Sqlizer:
 			qry = qry.Where(o)
 		default:

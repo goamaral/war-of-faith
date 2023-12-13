@@ -55,6 +55,8 @@ const (
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
 	// ServiceAttackProcedure is the fully-qualified name of the Service's Attack RPC.
 	ServiceAttackProcedure = "/server.v1.Service/Attack"
+	// ServiceGetPlayerProcedure is the fully-qualified name of the Service's GetPlayer RPC.
+	ServiceGetPlayerProcedure = "/server.v1.Service/GetPlayer"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
@@ -72,6 +74,8 @@ type ServiceClient interface {
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	// PLAYERS
+	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -129,6 +133,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceAttackProcedure,
 			opts...,
 		),
+		getPlayer: connect_go.NewClient[v1.GetPlayerRequest, v1.GetPlayerResponse](
+			httpClient,
+			baseURL+ServiceGetPlayerProcedure,
+			opts...,
+		),
 	}
 }
 
@@ -143,6 +152,7 @@ type serviceClient struct {
 	getTroops                  *connect_go.Client[v1.GetTroopsRequest, v1.GetTroopsResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
 	attack                     *connect_go.Client[v1.AttackRequest, v1.AttackResponse]
+	getPlayer                  *connect_go.Client[v1.GetPlayerRequest, v1.GetPlayerResponse]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -190,6 +200,11 @@ func (c *serviceClient) Attack(ctx context.Context, req *connect_go.Request[v1.A
 	return c.attack.CallUnary(ctx, req)
 }
 
+// GetPlayer calls server.v1.Service.GetPlayer.
+func (c *serviceClient) GetPlayer(ctx context.Context, req *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
+	return c.getPlayer.CallUnary(ctx, req)
+}
+
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
 	// VILLAGES
@@ -205,6 +220,8 @@ type ServiceHandler interface {
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	// PLAYERS
+	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -258,6 +275,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.Attack,
 		opts...,
 	)
+	serviceGetPlayerHandler := connect_go.NewUnaryHandler(
+		ServiceGetPlayerProcedure,
+		svc.GetPlayer,
+		opts...,
+	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServiceGetVillageProcedure:
@@ -278,6 +300,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceGetWorldHandler.ServeHTTP(w, r)
 		case ServiceAttackProcedure:
 			serviceAttackHandler.ServeHTTP(w, r)
+		case ServiceGetPlayerProcedure:
+			serviceGetPlayerHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -321,4 +345,8 @@ func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request
 
 func (UnimplementedServiceHandler) Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.Attack is not implemented"))
+}
+
+func (UnimplementedServiceHandler) GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetPlayer is not implemented"))
 }

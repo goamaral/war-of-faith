@@ -176,16 +176,11 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
 	if troopKind == model.Troop_Kind_LEADER {
-		nLeaders := village.TroopQuantity.Get(model.Troop_Kind_LEADER)
-		if nLeaders > 0 {
-			return nil, status.Error(codes.FailedPrecondition, "no more leaders can be trained")
-		}
-
-		orders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"troop_kind": troopKind})
+		trainableLeaders, err := model.GetPlayerTrainableLeaders(ctx, village.PlayerId)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get troop training orders: %w", err)
+			return nil, fmt.Errorf("failed to get player trainable leaders: %w", err)
 		}
-		if len(orders) > 0 {
+		if trainableLeaders <= 0 {
 			return nil, status.Error(codes.FailedPrecondition, "no more leaders can be trained")
 		}
 	}
@@ -280,6 +275,29 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 	}
 
 	return connect.NewResponse(&serverv1.AttackResponse{}), nil
+}
+
+/* PLAYERS */
+func (s *Server) GetPlayer(ctx context.Context, req *connect.Request[serverv1.GetPlayerRequest]) (*connect.Response[serverv1.GetPlayerResponse], error) {
+	id := req.Msg.Id.GetValue()
+	if req.Msg.Id == nil {
+		id = 1 // TODO: Get player from auth
+	}
+
+	player, found, err := model.GetPlayer(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get player: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "player not found")
+	}
+
+	pPlayer, err := player.ToProtobuf(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert player to protobuf: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.GetPlayerResponse{Player: pPlayer}), nil
 }
 
 func main() {

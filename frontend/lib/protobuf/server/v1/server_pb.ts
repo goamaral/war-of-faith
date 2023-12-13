@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import { Message, proto3, UInt32Value } from "@bufbuild/protobuf";
 
 /**
  * @generated from message server.v1.Village
@@ -681,9 +681,9 @@ export class GetVillageRequest extends Message<GetVillageRequest> {
  */
 export class GetVillageResponse extends Message<GetVillageResponse> {
   /**
-   * @generated from field: server.v1.Village Village = 1;
+   * @generated from field: server.v1.Village village = 1;
    */
-  Village?: Village;
+  village?: Village;
 
   constructor(data?: PartialMessage<GetVillageResponse>) {
     super();
@@ -693,7 +693,7 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.GetVillageResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "Village", kind: "message", T: Village },
+    { no: 1, name: "village", kind: "message", T: Village },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillageResponse {
@@ -1312,6 +1312,127 @@ export class AttackResponse extends Message<AttackResponse> {
 
   static equals(a: AttackResponse | PlainMessage<AttackResponse> | undefined, b: AttackResponse | PlainMessage<AttackResponse> | undefined): boolean {
     return proto3.util.equals(AttackResponse, a, b);
+  }
+}
+
+/**
+ * PLAYERS 
+ *
+ * @generated from message server.v1.Player
+ */
+export class Player extends Message<Player> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 trainable_leaders = 2;
+   */
+  trainableLeaders = 0;
+
+  constructor(data?: PartialMessage<Player>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Player";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "trainable_leaders", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Player {
+    return new Player().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Player {
+    return new Player().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Player {
+    return new Player().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Player | PlainMessage<Player> | undefined, b: Player | PlainMessage<Player> | undefined): boolean {
+    return proto3.util.equals(Player, a, b);
+  }
+}
+
+/**
+ * GetPlayer
+ *
+ * @generated from message server.v1.GetPlayerRequest
+ */
+export class GetPlayerRequest extends Message<GetPlayerRequest> {
+  /**
+   * @generated from field: google.protobuf.UInt32Value id = 1;
+   */
+  id?: number;
+
+  constructor(data?: PartialMessage<GetPlayerRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetPlayerRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "message", T: UInt32Value },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPlayerRequest {
+    return new GetPlayerRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPlayerRequest {
+    return new GetPlayerRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPlayerRequest {
+    return new GetPlayerRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetPlayerRequest | PlainMessage<GetPlayerRequest> | undefined, b: GetPlayerRequest | PlainMessage<GetPlayerRequest> | undefined): boolean {
+    return proto3.util.equals(GetPlayerRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetPlayerResponse
+ */
+export class GetPlayerResponse extends Message<GetPlayerResponse> {
+  /**
+   * @generated from field: server.v1.Player player = 1;
+   */
+  player?: Player;
+
+  constructor(data?: PartialMessage<GetPlayerResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetPlayerResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "player", kind: "message", T: Player },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPlayerResponse {
+    return new GetPlayerResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPlayerResponse {
+    return new GetPlayerResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPlayerResponse {
+    return new GetPlayerResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetPlayerResponse | PlainMessage<GetPlayerResponse> | undefined, b: GetPlayerResponse | PlainMessage<GetPlayerResponse> | undefined): boolean {
+    return proto3.util.equals(GetPlayerResponse, a, b);
   }
 }
 

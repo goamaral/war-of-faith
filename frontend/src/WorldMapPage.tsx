@@ -112,13 +112,13 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1Types.Worl
   function Info({ field }: { field: serverV1Types.World_Field }) {
     async function attack() {
       try {
-        const { Village: village } = await server.getVillage({ id: 1 }) // TODO: Get current village
+        const { village } = await server.getVillage({ id: 1 }) // TODO: Get current village
 
         await server.attack({
           attack: new serverV1Types.Attack({
             villageId: village!.id,
             targetCoords: field.coords,
-            troopQuantity: village!.troopQuantity,
+            troopQuantity: village!.troopQuantity, // TODO: Pick troops to attack
           }),
         })
 

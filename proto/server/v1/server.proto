@@ -4,7 +4,7 @@ package server.v1;
 
 option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
-// import "google/protobuf/wrappers.proto";
+import "google/protobuf/wrappers.proto";
 
 message Village {
   uint32 id = 1;
@@ -96,7 +96,7 @@ message GetVillageRequest {
   uint32 id = 1;
 }
 message GetVillageResponse {
-  Village Village = 1;
+  Village village = 1;
 }
 
 // GetVillages
@@ -162,6 +162,20 @@ message AttackResponse {
   Attack attack = 1;
 }
 
+/* PLAYERS */
+message Player {
+  uint32 id = 1;
+  uint32 trainable_leaders = 2;
+}
+
+// GetPlayer
+message GetPlayerRequest {
+  google.protobuf.UInt32Value id = 1;
+}
+message GetPlayerResponse {
+  Player player = 1;
+}
+
 service Service {
   /* VILLAGES */
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
@@ -179,4 +193,7 @@ service Service {
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
   rpc Attack(AttackRequest) returns (AttackResponse);
+
+  /* PLAYERS */
+  rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);
 }
