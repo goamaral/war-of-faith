@@ -1,82 +1,69 @@
 package model
 
 import (
-	"context"
-	"fmt"
+	"errors"
 	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
-	sq "github.com/Masterminds/squirrel"
+	"github.com/samber/lo"
 )
 
-// TODO: Define building upgrade costs
-const PlaceholderBuildingMaxLevel = 10
+const BuildingMaxLevel = 10
+
+var ErrUnknownBuildingKind = errors.New("unknown building kind")
+var BuildingKinds = []Building_Kind{
+	Building_Kind_HALL,
+	Building_Kind_GOLD_MINE,
+}
+
+type Building_Kind string
+
+const (
+	Building_Kind_HALL      Building_Kind = "hall"
+	Building_Kind_GOLD_MINE Building_Kind = "gold-mine"
+)
+
+func (tk Building_Kind) String() string {
+	return string(tk)
+}
+
+func (tk Building_Kind) Name() string {
+	switch tk {
+	case Building_Kind_HALL:
+		return "Village Hall"
+	case Building_Kind_GOLD_MINE:
+		return "Gold Mine"
+	}
+	// TODO: Log warning
+	return "Unknown"
+}
 
 // TODO: Define building upgrade costs
 // TODO: Apply hall bonus
-func CalculateBuildingUpgradeCost(level uint32) Resources {
-	return Resources{Time: 10, Gold: 10}
+func (bl Building_Kind) CalculateUpgradeCost(level uint32, hallLevel uint32) Resources {
+	return (Resources{Time: 10, Gold: 10})
 }
 
-type Building struct {
-	Id    uint32                 `db:"id"`
-	Kind  serverv1.Building_Kind `db:"kind"`
-	Level uint32                 `db:"level"`
-
-	VillageId     uint32 `db:"village_id"`
-	village       *Village
-	upgradeOrders *[]BuildingUpgradeOrder
-}
-
-func (b Building) ToProtobuf(ctx context.Context) (*serverv1.Building, error) {
+func (bk Building_Kind) ToBuildingProtobuf() *serverv1.Building {
 	return &serverv1.Building{
-		Id:    b.Id,
-		Kind:  b.Kind,
-		Name:  b.Name(),
-		Level: b.Level,
-	}, nil
-}
-
-func (b *Building) Village(ctx context.Context) (Village, error) {
-	if b.village == nil {
-		village, found, err := GetVillage(ctx, b.VillageId)
-		if err != nil {
-			return Village{}, err
-		}
-		if !found {
-			return Village{}, db.ErrNotFound
-		}
-		b.village = &village
-	}
-	return *b.village, nil
-}
-
-func (b Building) Name() string {
-	switch b.Kind {
-	case serverv1.Building_KIND_HALL:
-		return "Village Hall"
-	case serverv1.Building_KIND_GOLD_MINE:
-		return "Gold Mine"
-	default:
-		return "Unknown"
+		Kind: bk.String(),
+		Name: bk.Name(),
 	}
 }
 
-func (b *Building) UpgradeOrders(ctx context.Context) ([]BuildingUpgradeOrder, error) {
-	if b.upgradeOrders == nil {
-		upgradeOrders, err := GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": b.Id})
-		if err != nil {
-			return nil, err
-		}
-		b.upgradeOrders = &upgradeOrders
+func Building_KindFromProtobuf(pBuildingKind string) (Building_Kind, error) {
+	if lo.Contains(BuildingKinds, Building_Kind(pBuildingKind)) {
+		return Building_Kind(pBuildingKind), nil
 	}
-	return *b.upgradeOrders, nil
+	return "", ErrUnknownBuildingKind
 }
 
-func (b *Building) NextUpgradeLevel(ctx context.Context) (uint32, error) {
-	upgradeOrders, err := b.UpgradeOrders(ctx)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get building (id: %d) upgrade orders: %w", b.Id, err)
-	}
-	return b.Level + uint32(len(upgradeOrders)) + 1, nil
+/* BUILDING LEVEL  */
+type Building_Level struct {
+	db.JsonMap[Building_Kind, uint32]
+}
+
+func (bl *Building_Level) Increment(kind Building_Kind) uint32 {
+	bl.JsonMap[kind] += 1
+	return bl.JsonMap[kind]
 }

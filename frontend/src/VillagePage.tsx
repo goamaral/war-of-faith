@@ -1,25 +1,34 @@
 import { useParams } from 'react-router-dom'
-import { useEffect, useState } from 'preact/hooks'
-import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { useContext, useEffect } from 'preact/hooks'
+import { useComputed, useSignal, useSignalEffect, signal } from '@preact/signals'
 
 import * as serverV1 from "../lib/protobuf/server/v1/server_pb"
 import * as entities from './entities'
 import server from './server'
+import { createContext } from 'preact'
 
-function useForceRender() {
-  const [state, setState] = useState(true)
-  return () => setState(!state)
+function createVillageState() {
+  const village = signal<entities.Village>(new entities.Village(new serverV1.Village()))
+  const buildings = signal<entities.Building[]>([])
+  const troops = signal<entities.Troop[]>([])
+  const trainableLeaders = signal<number>(0)
+
+  return { village, buildings, troops, trainableLeaders }
 }
 
+const VillageContext = createContext(createVillageState())
+
 export default () => {
+  return <VillageContext.Provider value={createVillageState()}>
+    <VillageLoader />
+  </VillageContext.Provider>
+}
+
+const VillageLoader = () => {
   const { id } = useParams() as { id: string }
 
   const loading = useSignal(true)
-  // TODO: Create Context with village, troops, trainableLeaders
-  const village = useSignal<entities.Village>(new entities.Village(new serverV1.Village()))
-  const troops = useSignal<entities.Troop[]>([])
-  const trainableLeaders = useSignal<number>(0)
-  const forceRender = useForceRender() // TODO: Try to remove this by using village signal
+  const { village, buildings, troops, trainableLeaders } = useContext(VillageContext)
 
   async function updateVillage() {
     const res = await server.getVillage({ id: +id })
@@ -35,6 +44,7 @@ export default () => {
     Promise.all([
       updateVillage(),
       updatePlayer(),
+      server.getBuildings({}).then(res => buildings.value = res.buildings.map(b => new entities.Building(b))),
       server.getTroops({}).then(res => troops.value = res.troops.map(t => new entities.Troop(t))),
     ])
       .then(() => loading.value = false)
@@ -60,59 +70,59 @@ export default () => {
   if (loading.value) {
     return <div>Loading...</div>
   } else {
-    return <Village village={village} troops={troops} trainableLeaders={trainableLeaders} forceRender={forceRender} />
+    return <Village />
   }
 }
 
-type VillageProps = {
-  village: Signal<entities.Village>,
-  troops: Signal<entities.Troop[]>,
-  trainableLeaders: Signal<number>,
-  forceRender: () => void,
-}
-const Village = ({ village, troops, trainableLeaders, forceRender }: VillageProps) => {
+const Village = () => {
+  const { village } = useContext(VillageContext)
+
   return (
     <div>
       <h1>Village {village.value.id}</h1>
       <h2>Resources</h2>
       <ul>
-        <li>{village.value.gold} Gold</li>
+        <li>{village.value.resources!.gold} Gold</li>
       </ul>
-      <VillageBuildings village={village} forceRender={forceRender} />
-      <VillageTroops village={village} troops={troops} trainableLeaders={trainableLeaders} forceRender={forceRender} />
+      <VillageBuildings />
+      <VillageTroops />
     </div>
   )
 }
 
-const VillageBuildings = ({ village, forceRender }: { village: Signal<entities.Village>, forceRender: () => void }) => {
-  async function cancelBuildingUpgradeOrder(order: entities.BuildingUpgradeOrder) {
+const VillageBuildings = () => {
+  async function cancelBuildingUpgradeOrder(order: serverV1.Building_UpgradeOrder) {
     try {
+      const v = village.peek()
       await server.cancelBuildingUpgradeOrder({ id: order.id })
-      village.peek().removeBuildingUpgradeOrder(order.id)
-      village.peek().addGold(order.building.upgradeCost().gold)
-      forceRender()
+      v.removeBuildingUpgradeOrder(order.id)
+      v.addGold(order.cost!.gold)
+      village.value = new entities.Village(v)
     } catch (err) {
       alert(`Failed to cancel building upgrade order (id: ${order.id}): ${err}`)
     }
   }
 
-  function orderCancelable(order: entities.BuildingUpgradeOrder): boolean {
-    const orders = order.building.upgradeOrders
+  function orderCancelable(order: serverV1.Building_UpgradeOrder): boolean {
+    const orders = village.peek().buildingUpgradeOrders
     const index = orders.findIndex(o => o.id === order.id)
     return index == orders.length - 1
   }
+
+  const { village, buildings } = useContext(VillageContext)
 
   return (
     <div>
       <h2>Buildings</h2>
       <ul>
-        {village.value.buildings.map(building => <VillageBuilding village={village.value} building={building} forceRender={forceRender} />)}
+        {buildings.value.map(building => <VillageBuilding building={building} />)}
       </ul>
       <h4>Orders</h4>
       <ul>
         {village.value.buildingUpgradeOrders.map(order => {
+          const building = buildings.peek().find(b => b.kind == order.buildingKind)!
           return (<li>
-            {order.building.name} (lvl {order.level}) - {order.timeLeft}s {
+            {building.name} (lvl {order.level}) - {order.timeLeft}s {
               orderCancelable(order) ? <button onClick={() => cancelBuildingUpgradeOrder(order)}>cancel</button> : <></>
             }
           </li>)
@@ -122,24 +132,31 @@ const VillageBuildings = ({ village, forceRender }: { village: Signal<entities.V
   )
 }
 
-function VillageBuilding({ village, building, forceRender }: { village: entities.Village, building: entities.Building, forceRender: () => void }) {
+function VillageBuilding({ building }: { building: entities.Building }) {
   async function issueUpgradeOrder(building: entities.Building) {
     try {
-      const { order } = await server.issueBuildingUpgradeOrder({ buildingId: building.id })
-      village.addBuildingUpgradeOrder(new entities.BuildingUpgradeOrder(order!, village))
-      village.addGold(-order?.cost?.gold!)
-      forceRender()
+      const v = village.peek()
+      const { order } = await server.issueBuildingUpgradeOrder({ buildingKind: building.kind, villageId: v.id })
+      v.addBuildingUpgradeOrder(order!)
+      v.addGold(-order!.cost!.gold!)
+      village.value = new entities.Village(v)
     } catch (err) {
-      alert(`Failed to issue building upgrade order for ${building.name} (level: ${building.nextLevel}): ${err}`)
+      alert(`Failed to issue building upgrade order for ${building.name}: ${err}`)
     }
   }
+
+  const { village } = useContext(VillageContext)
+  const level = useComputed(() => village.value.buildingLevel[building.kind])
   
-  const upgradeCost = building.upgradeCost()
+  const nextLevel = useComputed(() => village.value.getBuildingNextLevel(building.kind))
+  const upgradeCost = useComputed(() => building.upgradeCost(nextLevel.value))
+  const upgradeStatus = useComputed(() => village.value.getBuildingUpgradeStatus(building))
+
   const children = []
-  switch (building.upgradeStatus()) {
+  switch (upgradeStatus.value) {
     case entities.BuildingUpgradeStatus.UPGRADABLE:
       children.push(
-        <button onClick={() => issueUpgradeOrder(building)}>upgrade (lvl {building.nextLevel}, {upgradeCost.time}s, {upgradeCost.gold} gold)</button>
+        <button onClick={() => issueUpgradeOrder(building)}>upgrade (lvl {nextLevel}, {upgradeCost.value.time}s, {upgradeCost.value.gold} gold)</button>
       )
       break
 
@@ -148,48 +165,48 @@ function VillageBuilding({ village, building, forceRender }: { village: entities
 
     case entities.BuildingUpgradeStatus.INSUFFICIENT_RESOURCES:
       children.push(
-        <button disabled={true}>upgrade (lvl {building.nextLevel}, {upgradeCost.time}s, {upgradeCost.gold} gold)</button>
+        <button disabled={true}>upgrade (lvl {nextLevel}, {upgradeCost.value.time}s, {upgradeCost.value.gold} gold)</button>
       )
       break
 
     default:
-      throw new Error(`Unknown building upgrade status: ${building.upgradeStatus().toString()}`)
+      throw new Error(`Unknown building upgrade status: ${upgradeStatus.peek()}`)
   }
 
   return <li>
-    {building.name} - lvl {building.level}
+    {building.name} - lvl {level}
     {children}
   </li>
 }
 
-const VillageTroops = ({ village, troops, trainableLeaders, forceRender }: { village: Signal<entities.Village>, troops: Signal<entities.Troop[]>, trainableLeaders: Signal<number>, forceRender: () => void }) => {
-  function getTroop(kind: entities.TroopKind) {
-    return troops.peek().find(t => t.kind == kind)!
-  }
-
-  async function cancelTrainingOrder(order: entities.TroopTrainingOrder, troop: entities.Troop) {
+const VillageTroops = () => {
+  async function cancelTrainingOrder(order: serverV1.Troop_TrainingOrder) {
     try {
+      const v = village.peek()
       await server.cancelTroopTrainingOrder({ id: order.id })
-      village.peek().removeTroopTrainingOrder(order.id)
-      village.peek().addGold(troop.trainCost(order.quantity).gold)
-      forceRender()
+      v.removeTroopTrainingOrder(order.id)
+      v.addGold(order.cost!.gold)
+      village.value = new entities.Village(v)
+      if (order.troopKind == entities.TroopKind.LEADER) trainableLeaders.value += 1
     } catch (err) {
       alert(`Failed to cancel troop training order (id: ${order.id}): ${err}`)
     }
   }
 
+  const { village, troops, trainableLeaders } = useContext(VillageContext)
+
   return (
     <div>
       <h2>Troops</h2>
       <ul>
-        {troops.value.map(troop => <VillageTroop village={village} troop={troop} trainableLeaders={trainableLeaders} forceRender={forceRender} />)}
+        {troops.value.map(troop => <VillageTroop troop={troop} />)}
       </ul>
       <h4>Orders</h4>
       <ul>
         {village.value.troopTrainingOrders.map(order => {
-          const troop = getTroop(order.troopKind)
+          const troop = troops.peek().find(t => t.kind == order.troopKind)!
           return (<li>
-            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTrainingOrder(order, troop)}>cancel</button>
+            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTrainingOrder(order)}>cancel</button>
           </li>)
         })}
       </ul>
@@ -197,13 +214,15 @@ const VillageTroops = ({ village, troops, trainableLeaders, forceRender }: { vil
   )
 }
 
-function VillageTroop({ village, troop, trainableLeaders, forceRender }: { village: Signal<entities.Village>, troop: entities.Troop, trainableLeaders: Signal<number>, forceRender: () => void }) {
+function VillageTroop({ troop }: { troop: entities.Troop }) {
   async function issueTrainingOrder(troopKind: entities.TroopKind, quantity: number) {
     try {
-      const { order } = await server.issueTroopTrainingOrder({ troopKind, quantity, villageId: village.peek().id })
-      village.peek().addTroopTrainingOrder(new entities.TroopTrainingOrder(order!, village.peek()))
-      village.peek().addGold(-order?.cost?.gold!)
-      forceRender()
+      const v = village.peek()
+      const { order } = await server.issueTroopTrainingOrder({ troopKind, quantity, villageId: v.id })
+      v.addTroopTrainingOrder(order!)
+      v.addGold(-order?.cost?.gold!)
+      village.value = new entities.Village(v)
+      if (troopKind == entities.TroopKind.LEADER) trainableLeaders.value -= 1
     } catch (err) {
       alert(`Failed to issue troop training order (troopKind: ${troopKind}, quantity: ${quantity}): ${err}`)
     }
@@ -211,25 +230,26 @@ function VillageTroop({ village, troop, trainableLeaders, forceRender }: { villa
 
   const quantityToTrain = useSignal(1)
 
+  const { village, trainableLeaders } = useContext(VillageContext)
   const quantity = useComputed(() => village.value.troopQuantity[troop.kind] ?? 0)
-  const max = useComputed(() => troop.kind == entities.TroopKind.LEADER ? trainableLeaders.value : undefined)
   const quantityInTraining = useComputed(() => village.value.troopTrainingOrders.reduce((acc, order) => {
     return acc + (troop.kind == troop.kind ? order.quantity : 0)
   }, 0))
   const trainableTroops = useComputed(() => troop.kind == entities.TroopKind.LEADER ? trainableLeaders.value : undefined)
+  const trainingStatus = useComputed(() => village.value.getTroopTrainingStatus(troop, quantityToTrain.value, trainableTroops.value))
 
   const children = []
-  switch (village.value.troopTrainingStatus(troop, quantity.value, trainableTroops.value)) {
+  switch (trainingStatus.value) {
     case entities.TroopTrainingStatus.TRAINABLE:
       children.push(
-        <input type="number" value={quantityToTrain} min={0} max={max.value} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
-        <button onClick={() => issueTrainingOrder(troop.kind, quantityToTrain.value)}>train ({troop.trainCost(quantityToTrain.value).time}s, {troop.trainCost(quantityToTrain.value).gold} gold)</button>
+        <input type="number" value={quantityToTrain} min={0} max={trainableTroops.value} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
+        <button onClick={() => issueTrainingOrder(troop.kind as entities.TroopKind, quantityToTrain.value)}>train ({troop.trainCost(quantityToTrain.value).time}s, {troop.trainCost(quantityToTrain.value).gold} gold)</button>
       )
       break
 
     case entities.TroopTrainingStatus.INSUFFICIENT_RESOURCES:
       children.push(
-        <input type="number" value={quantityToTrain} min={0} max={max.value} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
+        <input type="number" value={quantityToTrain} min={0} max={trainableTroops.value} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
         <button disabled={true}>train ({troop.trainCost(quantityToTrain.value).time}s, {troop.trainCost(quantityToTrain.value).gold} gold)</button>
       )
       break
@@ -238,7 +258,7 @@ function VillageTroop({ village, troop, trainableLeaders, forceRender }: { villa
       break
 
     default:
-      throw new Error(`Unknown village troop train status: ${village.peek().troopTrainingStatus(troop, quantity.peek())}`)
+      throw new Error(`Unknown village troop train status: ${trainingStatus.peek()}`)
   }
 
   return <li>

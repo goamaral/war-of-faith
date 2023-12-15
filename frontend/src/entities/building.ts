@@ -1,7 +1,4 @@
-import { BuildingUpgradeOrder, Village } from "."
-import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
-
-import Resources from "./resources"
+import * as serverV1 from "../../lib/protobuf/server/v1/server_pb"
 
 export enum BuildingUpgradeStatus {
   UPGRADABLE = 1,
@@ -9,46 +6,16 @@ export enum BuildingUpgradeStatus {
   INSUFFICIENT_RESOURCES = 3,
 }
 
-export default class Building {
-  id: number
-  kind: serverV1Types.Building_Kind
-  name: string
-  level: number
+export enum BuildingKind {
+  HALL = "hall",
+  GOLD_MINE = "gold-mine",
+}
 
-  village: Village
-
-  constructor(building: serverV1Types.Building, village: Village) {
-    this.id = building.id
-    this.kind = building.kind
-    this.name = building.name
-    this.level = building.level
-
-    this.village = village
-  }
-
-  // TODO: Should come from the server
-  upgradeCost(/* level: number */): Resources {
-    return new Resources({ time: 10, gold: 10 }) 
-  }
-
-  // TODO: Should come from the server
-  get maxLevel(): number {
-    return 10
-  }
-
-  get nextLevel(): number {
-    return this.level + this.upgradeOrders.length + 1
-  }
-
-  // TODO: Move to village
-  get upgradeOrders(): BuildingUpgradeOrder[] {
-    return this.village.buildingUpgradeOrders.filter(o => o.buildingId === this.id)
-  }
-
-  // TODO: Move to village
-  upgradeStatus(): BuildingUpgradeStatus {
-    if (this.nextLevel > this.maxLevel) return BuildingUpgradeStatus.MAX_LEVEL
-    if (!this.village.canAfford(this.upgradeCost())) return BuildingUpgradeStatus.INSUFFICIENT_RESOURCES
-    return BuildingUpgradeStatus.UPGRADABLE
+export default class Building extends serverV1.Building {
+  maxLevel: number = 10 // TODO: Should come from the server
+  cost: serverV1.Resources = new serverV1.Resources({ time: 10, gold: 10 }) // TODO: Should come from the server
+  
+  upgradeCost(_level: number): serverV1.Resources {
+    return this.cost
   }
 }

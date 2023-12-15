@@ -12,12 +12,13 @@ type Village struct {
 	Id uint32 `db:"id"`
 
 	Gold          uint32         `db:"gold"`
+	BuildingLevel Building_Level `db:"building_level"`
 	TroopQuantity Troop_Quantity `db:"troop_quantity"`
 
 	PlayerId uint32 `db:"player_id"`
 
-	buildings           *[]Building
-	troopTrainingOrders *[]TroopTrainingOrder
+	buildingUpgradeOrders *[]BuildingUpgradeOrder
+	troopTrainingOrders   *[]TroopTrainingOrder
 }
 
 func (v Village) CanAfford(resources Resources) bool {
@@ -32,16 +33,24 @@ func (v *Village) EarnResources(resources Resources) {
 	v.Gold += resources.Gold
 }
 
+func (v *Village) NextBuildingUpgradeLevel(ctx context.Context, kind Building_Kind) (uint32, error) {
+	upgradeOrders, err := GetBuildingUpgradeOrders(ctx, sq.Eq{"village_id": v.Id, "building_kind": kind})
+	if err != nil {
+		return 0, fmt.Errorf("failed to get building upgrade orders: %w", err)
+	}
+	return v.BuildingLevel.Get(kind) + uint32(len(upgradeOrders)) + 1, nil
+}
+
 // Associations
-func (v *Village) Buildings(ctx context.Context) ([]Building, error) {
-	if v.buildings == nil {
-		buildings, err := GetBuildings(ctx, sq.Eq{"village_id": v.Id})
+func (v *Village) BuildingUpgradeOrders(ctx context.Context) ([]BuildingUpgradeOrder, error) {
+	if v.buildingUpgradeOrders == nil {
+		orders, err := GetBuildingUpgradeOrders(ctx, sq.Eq{"village_id": v.Id})
 		if err != nil {
 			return nil, err
 		}
-		v.buildings = &buildings
+		v.buildingUpgradeOrders = &orders
 	}
-	return *v.buildings, nil
+	return *v.buildingUpgradeOrders, nil
 }
 
 func (v *Village) TroopTrainingOrders(ctx context.Context) ([]TroopTrainingOrder, error) {
@@ -57,19 +66,7 @@ func (v *Village) TroopTrainingOrders(ctx context.Context) ([]TroopTrainingOrder
 
 /* PROTOBUF */
 func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
-	buildings, err := v.Buildings(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get buildings: %w", err)
-	}
-	pBuildings := make([]*serverv1.Building, len(buildings))
-	for i, b := range buildings {
-		pBuildings[i], err = b.ToProtobuf(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert building to protobuf: %w", err)
-		}
-	}
-
-	buildingUpgradeOrders, err := GetBuildingUpgradeOrders(ctx, sq.Eq{"village_id": v.Id})
+	buildingUpgradeOrders, err := v.BuildingUpgradeOrders(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village building upgrade orders: %w", err)
 	}
@@ -81,7 +78,7 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		}
 	}
 
-	troopTrainingOrders, err := GetTroopTrainingOrders(ctx, sq.Eq{"village_id": v.Id})
+	troopTrainingOrders, err := v.TroopTrainingOrders(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village troop training orders: %w", err)
 	}
@@ -98,7 +95,7 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		Resources: &serverv1.Resources{
 			Gold: v.Gold,
 		},
-		Buildings:             pBuildings,
+		BuildingLevel:         v.BuildingLevel.ToProtobuf(),
 		BuildingUpgradeOrders: pBuildingUpgradeOrders,
 		TroopQuantity:         v.TroopQuantity.ToProtobuf(),
 		TroopTrainingOrders:   pTroopTrainingOrders,

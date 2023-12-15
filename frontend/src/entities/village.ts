@@ -1,52 +1,30 @@
 import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
-import { Building, Troop, Resources, TroopTrainingOrder, BuildingUpgradeOrder } from "."
+import { Building, BuildingUpgradeStatus, Troop, TroopTrainingStatus } from "."
 
-export enum TroopTrainingStatus {
-  TRAINABLE = 0,
-  INSUFFICIENT_RESOURCES = 1,
-  MAX_TRAINABLE = 2,
-}
-
-interface TroopQuantity {
-  [key: string]: number
-}
-
-export default class Village {
-  id: number
-  gold: number
-
-  buildings: Building[]
-  buildingUpgradeOrders: BuildingUpgradeOrder[]
-  troopQuantity: TroopQuantity
-  troopTrainingOrders: TroopTrainingOrder[]
-
-  constructor(village: serverV1Types.Village) {
-    this.id = village.id
-    this.gold = village.resources?.gold!
-    this.buildings = village.buildings.map(b => new Building(b, this))
-    this.buildingUpgradeOrders = village.buildingUpgradeOrders.map(o => new BuildingUpgradeOrder(o, this))
-    this.troopQuantity = village.troopQuantity
-    this.troopTrainingOrders = village.troopTrainingOrders.map(o => new TroopTrainingOrder(o, this))
-  }
-
-  get hall(): Building | undefined {
-    return this.buildings.find(b => b.kind === serverV1Types.Building_Kind.HALL)
-  }
-
-  get goldMine(): Building | undefined {
-    return this.buildings.find(b => b.kind === serverV1Types.Building_Kind.GOLD_MINE)
-  }
-  
-  canAfford(cost: Resources) {
-    if (cost.gold > this.gold) return false
+export default class Village extends serverV1Types.Village {
+  canAfford(cost: serverV1Types.Resources) {
+    if (cost.gold > this.resources!.gold) return false
     return true
   }
 
   addGold(quantity: number) {
-    this.gold += quantity
+    this.resources!.gold += quantity
   }
 
-  addBuildingUpgradeOrder(order: BuildingUpgradeOrder) {
+  /* BUILDINGS */
+  getBuildingUpgradeStatus(building: Building): BuildingUpgradeStatus {
+    const nextLevel = this.getBuildingNextLevel(building.kind)
+    if (nextLevel > building.maxLevel) return BuildingUpgradeStatus.MAX_LEVEL
+    if (!this.canAfford(building.upgradeCost(nextLevel))) return BuildingUpgradeStatus.INSUFFICIENT_RESOURCES
+    return BuildingUpgradeStatus.UPGRADABLE
+  }
+
+  getBuildingNextLevel(buildingKind: string): number {
+    const orders = this.buildingUpgradeOrders.filter(o => o.buildingKind == buildingKind)
+    return this.buildingLevel[buildingKind] + orders.length + 1
+  }
+
+  addBuildingUpgradeOrder(order: serverV1Types.Building_UpgradeOrder) {
     this.buildingUpgradeOrders.push(order)
   }
 
@@ -54,13 +32,14 @@ export default class Village {
     this.buildingUpgradeOrders = this.buildingUpgradeOrders.filter(o => o.id !== id)
   }
 
-  troopTrainingStatus(troop: Troop, quantity: number, trainableTroops?: number): TroopTrainingStatus {
+  /* TROOPS */
+  getTroopTrainingStatus(troop: Troop, quantity: number, trainableTroops?: number): TroopTrainingStatus {
     if (trainableTroops == 0) return TroopTrainingStatus.MAX_TRAINABLE
     if (!this.canAfford(troop.trainCost(quantity))) return TroopTrainingStatus.INSUFFICIENT_RESOURCES
     return TroopTrainingStatus.TRAINABLE
   }
 
-  addTroopTrainingOrder(order: TroopTrainingOrder) {
+  addTroopTrainingOrder(order: serverV1Types.Troop_TrainingOrder) {
     this.troopTrainingOrders.push(order)
   }
 

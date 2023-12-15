@@ -25,13 +25,14 @@ type ServiceClient interface {
 	// VILLAGES
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
 	GetVillages(ctx context.Context, in *GetVillagesRequest, opts ...grpc.CallOption) (*GetVillagesResponse, error)
-	// ORDERS
+	// BUILDINGS
+	GetBuildings(ctx context.Context, in *GetBuildingsRequest, opts ...grpc.CallOption) (*GetBuildingsResponse, error)
 	IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error)
 	CancelBuildingUpgradeOrder(ctx context.Context, in *CancelBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*CancelBuildingUpgradeOrderResponse, error)
-	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
-	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
 	// TROOPS
 	GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error)
+	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
+	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
 	Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error)
@@ -65,6 +66,15 @@ func (c *serviceClient) GetVillages(ctx context.Context, in *GetVillagesRequest,
 	return out, nil
 }
 
+func (c *serviceClient) GetBuildings(ctx context.Context, in *GetBuildingsRequest, opts ...grpc.CallOption) (*GetBuildingsResponse, error) {
+	out := new(GetBuildingsResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetBuildings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error) {
 	out := new(IssueBuildingUpgradeOrderResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueBuildingUpgradeOrder", in, out, opts...)
@@ -83,6 +93,15 @@ func (c *serviceClient) CancelBuildingUpgradeOrder(ctx context.Context, in *Canc
 	return out, nil
 }
 
+func (c *serviceClient) GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error) {
+	out := new(GetTroopsResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetTroops", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error) {
 	out := new(IssueTroopTrainingOrderResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueTroopTrainingOrder", in, out, opts...)
@@ -95,15 +114,6 @@ func (c *serviceClient) IssueTroopTrainingOrder(ctx context.Context, in *IssueTr
 func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error) {
 	out := new(CancelTroopTrainingOrderResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/CancelTroopTrainingOrder", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *serviceClient) GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error) {
-	out := new(GetTroopsResponse)
-	err := c.cc.Invoke(ctx, "/server.v1.Service/GetTroops", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -144,13 +154,14 @@ type ServiceServer interface {
 	// VILLAGES
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
 	GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error)
-	// ORDERS
+	// BUILDINGS
+	GetBuildings(context.Context, *GetBuildingsRequest) (*GetBuildingsResponse, error)
 	IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error)
 	CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error)
-	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
-	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
 	// TROOPS
 	GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error)
+	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
+	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
 	Attack(context.Context, *AttackRequest) (*AttackResponse, error)
@@ -168,20 +179,23 @@ func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest
 func (UnimplementedServiceServer) GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVillages not implemented")
 }
+func (UnimplementedServiceServer) GetBuildings(context.Context, *GetBuildingsRequest) (*GetBuildingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBuildings not implemented")
+}
 func (UnimplementedServiceServer) IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueBuildingUpgradeOrder not implemented")
 }
 func (UnimplementedServiceServer) CancelBuildingUpgradeOrder(context.Context, *CancelBuildingUpgradeOrderRequest) (*CancelBuildingUpgradeOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelBuildingUpgradeOrder not implemented")
 }
+func (UnimplementedServiceServer) GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTroops not implemented")
+}
 func (UnimplementedServiceServer) IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueTroopTrainingOrder not implemented")
 }
 func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelTroopTrainingOrder not implemented")
-}
-func (UnimplementedServiceServer) GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTroops not implemented")
 }
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
@@ -240,6 +254,24 @@ func _Service_GetVillages_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetBuildings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBuildingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetBuildings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetBuildings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetBuildings(ctx, req.(*GetBuildingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_IssueBuildingUpgradeOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IssueBuildingUpgradeOrderRequest)
 	if err := dec(in); err != nil {
@@ -276,6 +308,24 @@ func _Service_CancelBuildingUpgradeOrder_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetTroops_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTroopsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetTroops(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetTroops",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetTroops(ctx, req.(*GetTroopsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_IssueTroopTrainingOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IssueTroopTrainingOrderRequest)
 	if err := dec(in); err != nil {
@@ -308,24 +358,6 @@ func _Service_CancelTroopTrainingOrder_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ServiceServer).CancelTroopTrainingOrder(ctx, req.(*CancelTroopTrainingOrderRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Service_GetTroops_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTroopsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ServiceServer).GetTroops(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.v1.Service/GetTroops",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).GetTroops(ctx, req.(*GetTroopsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -400,6 +432,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_GetVillages_Handler,
 		},
 		{
+			MethodName: "GetBuildings",
+			Handler:    _Service_GetBuildings_Handler,
+		},
+		{
 			MethodName: "IssueBuildingUpgradeOrder",
 			Handler:    _Service_IssueBuildingUpgradeOrder_Handler,
 		},
@@ -408,16 +444,16 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_CancelBuildingUpgradeOrder_Handler,
 		},
 		{
+			MethodName: "GetTroops",
+			Handler:    _Service_GetTroops_Handler,
+		},
+		{
 			MethodName: "IssueTroopTrainingOrder",
 			Handler:    _Service_IssueTroopTrainingOrder_Handler,
 		},
 		{
 			MethodName: "CancelTroopTrainingOrder",
 			Handler:    _Service_CancelTroopTrainingOrder_Handler,
-		},
-		{
-			MethodName: "GetTroops",
-			Handler:    _Service_GetTroops_Handler,
 		},
 		{
 			MethodName: "GetWorld",

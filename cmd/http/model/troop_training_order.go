@@ -21,8 +21,8 @@ func (o *TroopTrainingOrder) ToProtobuf(ctx context.Context) (*serverv1.Troop_Tr
 		Id:        o.Id,
 		Quantity:  o.Quantity,
 		TimeLeft:  o.TimeLeft,
-		Cost:      o.TroopKind.CalculateTrainingCost(o.Quantity, 0).ToProtobuf(),
-		TroopKind: string(o.TroopKind),
+		Cost:      o.TroopKind.CalculateTrainingCost(o.Quantity, 0).ToProtobuf(), // TODO: Pass barracks level
+		TroopKind: o.TroopKind.String(),
 	}, nil
 }
 

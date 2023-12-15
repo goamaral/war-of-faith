@@ -61,30 +61,36 @@ func (s *Server) GetVillages(ctx context.Context, req *connect.Request[serverv1.
 	return connect.NewResponse(&serverv1.GetVillagesResponse{Villages: pVillages}), nil
 }
 
-/* ORDERS */
-// TODO: Use mutexes and transaction
+/* BUILDINGS */
+func (s *Server) GetBuildings(ctx context.Context, req *connect.Request[serverv1.GetBuildingsRequest]) (*connect.Response[serverv1.GetBuildingsResponse], error) {
+	return connect.NewResponse(&serverv1.GetBuildingsResponse{
+		Buildings: lo.Map(model.BuildingKinds, func(t model.Building_Kind, _ int) *serverv1.Building { return t.ToBuildingProtobuf() }),
+	}), nil
+}
+
 func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.IssueBuildingUpgradeOrderResponse], error) {
-	building, found, err := model.GetBuilding(ctx, req.Msg.BuildingId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get building: %w", err)
-	}
-	if !found {
-		return nil, status.Error(codes.NotFound, "building not found")
-	}
-
-	nextUpgradeLevel, err := building.NextUpgradeLevel(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get building (id: %d) next upgrade level: %w", building.Id, err)
-	}
-	if nextUpgradeLevel > model.PlaceholderBuildingMaxLevel {
-		return nil, status.Error(codes.FailedPrecondition, "building is already at max level")
-	}
-
-	village, err := building.Village(ctx)
+	village, found, err := model.GetVillage(ctx, req.Msg.VillageId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
-	cost := model.CalculateBuildingUpgradeCost(nextUpgradeLevel)
+	if !found {
+		return nil, status.Error(codes.NotFound, "village not found")
+	}
+
+	buildingKind, err := model.Building_KindFromProtobuf(req.Msg.BuildingKind)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert building kind to protobuf: %w", err)
+	}
+
+	nextUpgradeLevel, err := village.NextBuildingUpgradeLevel(ctx, buildingKind)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building (kind: %s) next upgrade level: %w", buildingKind, err)
+	}
+	if nextUpgradeLevel > model.BuildingMaxLevel {
+		return nil, status.Error(codes.FailedPrecondition, "building is already at max level")
+	}
+
+	cost := buildingKind.CalculateUpgradeCost(nextUpgradeLevel, village.BuildingLevel.Get(model.Building_Kind_HALL))
 	if !village.CanAfford(cost) {
 		return nil, status.Error(codes.FailedPrecondition, "not enough resources")
 	}
@@ -96,10 +102,10 @@ func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Req
 	}
 
 	order, err := model.CreateBuildingUpgradeOrder(ctx, &model.BuildingUpgradeOrder{
-		Level:      nextUpgradeLevel,
-		TimeLeft:   cost.Time,
-		BuildingId: building.Id,
-		VillageId:  village.Id, // TODO: Remove when joins are implemented
+		Level:        nextUpgradeLevel,
+		TimeLeft:     cost.Time,
+		BuildingKind: buildingKind,
+		VillageId:    village.Id,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create building upgrade order: %w", err)
@@ -113,7 +119,6 @@ func (s *Server) IssueBuildingUpgradeOrder(ctx context.Context, req *connect.Req
 	return connect.NewResponse(&serverv1.IssueBuildingUpgradeOrderResponse{Order: pOrder}), nil
 }
 
-// TODO: Use mutexes and transaction
 func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Request[serverv1.CancelBuildingUpgradeOrderRequest]) (*connect.Response[serverv1.CancelBuildingUpgradeOrderResponse], error) {
 	order, found, err := model.GetBuildingUpgradeOrder(ctx, req.Msg.Id)
 	if err != nil {
@@ -123,25 +128,23 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 		return nil, status.Error(codes.NotFound, "building upgrade order not found")
 	}
 
-	orders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": order.BuildingId}, db.OrderQueryOption{Column: "level", Desc: true})
+	village, found, err := model.GetVillage(ctx, order.VillageId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get building (id: %d) upgrade orders: %w", order.BuildingId, err)
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "village not found")
+	}
+
+	orders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_kind": order.BuildingKind}, db.OrderQueryOption{Column: "level", Desc: true})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get building (kind: %s) upgrade orders: %w", order.BuildingKind, err)
 	}
 	if order.Id != orders[0].Id {
 		return nil, status.Error(codes.FailedPrecondition, "building upgrade order is not the latest order")
 	}
 
-	building, err := order.Building(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get building (id: %d): %w", order.BuildingId, err)
-	}
-
-	village, err := building.Village(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get village: %w", err)
-	}
-
-	cost := model.CalculateBuildingUpgradeCost(order.Level)
+	cost := order.BuildingKind.CalculateUpgradeCost(order.Level, village.BuildingLevel.Get(model.Building_Kind_HALL))
 	village.EarnResources(cost)
 	err = model.UpdateVillage(ctx, village.Id, village)
 	if err != nil {
@@ -156,7 +159,13 @@ func (s *Server) CancelBuildingUpgradeOrder(ctx context.Context, req *connect.Re
 	return connect.NewResponse(&serverv1.CancelBuildingUpgradeOrderResponse{}), nil
 }
 
-// TODO: Use mutexes and transaction
+/* TROOPS */
+func (s *Server) GetTroops(ctx context.Context, req *connect.Request[serverv1.GetTroopsRequest]) (*connect.Response[serverv1.GetTroopsResponse], error) {
+	return connect.NewResponse(&serverv1.GetTroopsResponse{
+		Troops: lo.Map(model.TroopKinds, func(t model.Troop_Kind, _ int) *serverv1.Troop { return t.ToTroopProtobuf() }),
+	}), nil
+}
+
 func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.IssueTroopTrainingOrderRequest]) (*connect.Response[serverv1.IssueTroopTrainingOrderResponse], error) {
 	village, found, err := model.GetVillage(ctx, req.Msg.VillageId)
 	if err != nil {
@@ -209,7 +218,6 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 	return connect.NewResponse(&serverv1.IssueTroopTrainingOrderResponse{Order: pOrder}), nil
 }
 
-// TODO: Use mutexes and transaction
 func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Request[serverv1.CancelTroopTrainingOrderRequest]) (*connect.Response[serverv1.CancelTroopTrainingOrderResponse], error) {
 	order, found, err := model.GetTroopTrainingOrder(ctx, req.Msg.Id)
 	if err != nil {
@@ -237,14 +245,6 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 	}
 
 	return connect.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
-}
-
-/* TROOPS */
-// GetTroops
-func (s *Server) GetTroops(ctx context.Context, req *connect.Request[serverv1.GetTroopsRequest]) (*connect.Response[serverv1.GetTroopsResponse], error) {
-	return connect.NewResponse(&serverv1.GetTroopsResponse{
-		Troops: lo.Map(model.Troops, func(t model.Troop, _ int) *serverv1.Troop { return t.ToProtobuf() }),
-	}), nil
 }
 
 /* WORLD */
@@ -346,15 +346,9 @@ func main() {
 		}
 		for _, village := range villages {
 			// TODO: Use transaction
-			buildings, err := model.GetBuildings(ctx, sq.Eq{"village_id": village.Id})
+			buildingUpgradeOrders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"village_id": village.Id})
 			if err != nil {
-				log.Printf("failed to get buildings (village_id: %d): %v", village.Id, err)
-				continue
-			}
-			buildingIds := lo.Map(buildings, func(b model.Building, _ int) uint32 { return b.Id })
-			buildingUpgradeOrders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"building_id": buildingIds})
-			if err != nil {
-				log.Printf("failed to get building (ids: %+v) upgrade orders: %v", buildingIds, err)
+				log.Printf("failed to get building upgrade orders (village_id: %d): %v", village.Id, err)
 				continue
 			}
 			for _, order := range buildingUpgradeOrders {
@@ -365,22 +359,7 @@ func main() {
 						log.Printf("failed to delete building upgrade order (id: %d): %v", order.Id, err)
 						continue
 					}
-					building, found, err := model.GetBuilding(ctx, order.BuildingId)
-					if err != nil {
-						log.Printf("failed to get building (id: %d): %v", order.BuildingId, err)
-						continue
-					}
-					if !found {
-						log.Printf("building not found (id: %d)", order.BuildingId)
-						continue
-					}
-
-					building.Level = order.Level
-					err = model.UpdateBuilding(ctx, building.Id, building)
-					if err != nil {
-						log.Printf("failed to update building (id: %d): %v", building.Id, err)
-						continue
-					}
+					village.BuildingLevel.Increment(order.BuildingKind)
 				} else {
 					err := model.UpdateBuildingUpgradeOrder(ctx, order.Id, order)
 					if err != nil {
@@ -403,7 +382,6 @@ func main() {
 						log.Printf("failed to delete troop training order (id: %d): %v", order.Id, err)
 						continue
 					}
-
 					village.TroopQuantity.Increment(order.TroopKind, order.Quantity)
 				} else {
 					err := model.UpdateTroopTrainingOrder(ctx, order.Id, order)
@@ -467,29 +445,20 @@ func CreateDB() error {
 		CREATE TABLE villages (
 			id INTEGER PRIMARY KEY,
 			gold INTERGER NOT NULL,
+			building_level TEXT NOT NULL,
 			troop_quantity TEXT NOT NULL,
 
 			player_id INTEGER NOT NULL,
 			FOREIGN KEY(player_id) REFERENCES villages(id)
 		);
 
-		CREATE TABLE buildings (
-			id INTEGER PRIMARY KEY,
-			kind INTERGER NOT NULL,
-			level INTERGER NOT NULL,
-
-			village_id INTEGER NOT NULL,
-			FOREIGN KEY(village_id) REFERENCES villages(id)
-		);
-
 		CREATE TABLE building_upgrade_orders (
 			id INTEGER PRIMARY KEY,
 			level INTEGER NOT NULL,
 			time_left INTEGER NOT NULL,
+			building_kind VARCHAR(255) NOT NULL,
 
-			building_id INTEGER NOT NULL,
 			village_id INTEGER NOT NULL,
-			FOREIGN KEY(building_id) REFERENCES buildings(id),
 			FOREIGN KEY(village_id) REFERENCES villages(id)
 		);
 
@@ -549,12 +518,11 @@ func SeedDB() error {
 
 func DropDB() error {
 	_, err := db.DB.Exec(`
-		DROP TABLE temples;
-		DROP TABLE world_fields;
 		DROP TABLE troop_training_orders;
 		DROP TABLE building_upgrade_orders;
-		DROP TABLE buildings;
 		DROP TABLE villages;
+		DROP TABLE temples;
+		DROP TABLE world_fields;
 		DROP TABLE players;
 	`)
 	return err

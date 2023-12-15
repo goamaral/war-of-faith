@@ -7,81 +7,6 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3, UInt32Value } from "@bufbuild/protobuf";
 
 /**
- * @generated from message server.v1.Village
- */
-export class Village extends Message<Village> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  /**
-   * @generated from field: server.v1.Resources resources = 2;
-   */
-  resources?: Resources;
-
-  /**
-   * @generated from field: repeated server.v1.Building buildings = 3;
-   */
-  buildings: Building[] = [];
-
-  /**
-   * @generated from field: repeated server.v1.Building.UpgradeOrder building_upgrade_orders = 4;
-   */
-  buildingUpgradeOrders: Building_UpgradeOrder[] = [];
-
-  /**
-   * <troop_kind, quantity>
-   *
-   * @generated from field: map<string, uint32> troop_quantity = 5;
-   */
-  troopQuantity: { [key: string]: number } = {};
-
-  /**
-   * @generated from field: repeated server.v1.Troop.TrainingOrder troop_training_orders = 6;
-   */
-  troopTrainingOrders: Troop_TrainingOrder[] = [];
-
-  /**
-   * @generated from field: uint32 player_id = 7;
-   */
-  playerId = 0;
-
-  constructor(data?: PartialMessage<Village>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Village";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "resources", kind: "message", T: Resources },
-    { no: 3, name: "buildings", kind: "message", T: Building, repeated: true },
-    { no: 4, name: "building_upgrade_orders", kind: "message", T: Building_UpgradeOrder, repeated: true },
-    { no: 5, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
-    { no: 6, name: "troop_training_orders", kind: "message", T: Troop_TrainingOrder, repeated: true },
-    { no: 7, name: "player_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village {
-    return new Village().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village {
-    return new Village().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village {
-    return new Village().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Village | PlainMessage<Village> | undefined, b: Village | PlainMessage<Village> | undefined): boolean {
-    return proto3.util.equals(Village, a, b);
-  }
-}
-
-/**
  * @generated from message server.v1.Resources
  */
 export class Resources extends Message<Resources> {
@@ -125,376 +50,6 @@ export class Resources extends Message<Resources> {
 }
 
 /**
- * @generated from message server.v1.Building
- */
-export class Building extends Message<Building> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  /**
-   * @generated from field: server.v1.Building.Kind kind = 2;
-   */
-  kind = Building_Kind.UNSPECIFIED;
-
-  /**
-   * @generated from field: string name = 3;
-   */
-  name = "";
-
-  /**
-   * @generated from field: uint32 level = 4;
-   */
-  level = 0;
-
-  constructor(data?: PartialMessage<Building>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Building";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "kind", kind: "enum", T: proto3.getEnumType(Building_Kind) },
-    { no: 3, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
-    return new Building().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building {
-    return new Building().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building {
-    return new Building().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Building | PlainMessage<Building> | undefined, b: Building | PlainMessage<Building> | undefined): boolean {
-    return proto3.util.equals(Building, a, b);
-  }
-}
-
-/**
- * @generated from enum server.v1.Building.Kind
- */
-export enum Building_Kind {
-  /**
-   * @generated from enum value: KIND_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: KIND_HALL = 1;
-   */
-  HALL = 1,
-
-  /**
-   * @generated from enum value: KIND_GOLD_MINE = 2;
-   */
-  GOLD_MINE = 2,
-}
-// Retrieve enum metadata with: proto3.getEnumType(Building_Kind)
-proto3.util.setEnumType(Building_Kind, "server.v1.Building.Kind", [
-  { no: 0, name: "KIND_UNSPECIFIED" },
-  { no: 1, name: "KIND_HALL" },
-  { no: 2, name: "KIND_GOLD_MINE" },
-]);
-
-/**
- * @generated from message server.v1.Building.UpgradeOrder
- */
-export class Building_UpgradeOrder extends Message<Building_UpgradeOrder> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  /**
-   * @generated from field: uint32 level = 2;
-   */
-  level = 0;
-
-  /**
-   * @generated from field: uint32 time_left = 3;
-   */
-  timeLeft = 0;
-
-  /**
-   * @generated from field: server.v1.Resources cost = 4;
-   */
-  cost?: Resources;
-
-  /**
-   * @generated from field: uint32 building_id = 5;
-   */
-  buildingId = 0;
-
-  constructor(data?: PartialMessage<Building_UpgradeOrder>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Building.UpgradeOrder";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "cost", kind: "message", T: Resources },
-    { no: 5, name: "building_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building_UpgradeOrder {
-    return new Building_UpgradeOrder().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
-    return new Building_UpgradeOrder().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
-    return new Building_UpgradeOrder().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined, b: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined): boolean {
-    return proto3.util.equals(Building_UpgradeOrder, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.Troop
- */
-export class Troop extends Message<Troop> {
-  /**
-   * @generated from field: string kind = 1;
-   */
-  kind = "";
-
-  /**
-   * @generated from field: string name = 2;
-   */
-  name = "";
-
-  constructor(data?: PartialMessage<Troop>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Troop";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop {
-    return new Troop().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Troop {
-    return new Troop().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Troop {
-    return new Troop().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Troop | PlainMessage<Troop> | undefined, b: Troop | PlainMessage<Troop> | undefined): boolean {
-    return proto3.util.equals(Troop, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.Troop.TrainingOrder
- */
-export class Troop_TrainingOrder extends Message<Troop_TrainingOrder> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  /**
-   * @generated from field: uint32 quantity = 3;
-   */
-  quantity = 0;
-
-  /**
-   * @generated from field: uint32 time_left = 4;
-   */
-  timeLeft = 0;
-
-  /**
-   * @generated from field: server.v1.Resources cost = 5;
-   */
-  cost?: Resources;
-
-  /**
-   * @generated from field: string troop_kind = 6;
-   */
-  troopKind = "";
-
-  constructor(data?: PartialMessage<Troop_TrainingOrder>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Troop.TrainingOrder";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "quantity", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "cost", kind: "message", T: Resources },
-    { no: 6, name: "troop_kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop_TrainingOrder {
-    return new Troop_TrainingOrder().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Troop_TrainingOrder {
-    return new Troop_TrainingOrder().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Troop_TrainingOrder {
-    return new Troop_TrainingOrder().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Troop_TrainingOrder | PlainMessage<Troop_TrainingOrder> | undefined, b: Troop_TrainingOrder | PlainMessage<Troop_TrainingOrder> | undefined): boolean {
-    return proto3.util.equals(Troop_TrainingOrder, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.World
- */
-export class World extends Message<World> {
-  /**
-   * @generated from field: uint32 width = 1;
-   */
-  width = 0;
-
-  /**
-   * @generated from field: uint32 height = 2;
-   */
-  height = 0;
-
-  /**
-   * @generated from field: repeated server.v1.World.Field fields = 3;
-   */
-  fields: World_Field[] = [];
-
-  constructor(data?: PartialMessage<World>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.World";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "width", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "height", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "fields", kind: "message", T: World_Field, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World {
-    return new World().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World {
-    return new World().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World {
-    return new World().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: World | PlainMessage<World> | undefined, b: World | PlainMessage<World> | undefined): boolean {
-    return proto3.util.equals(World, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.World.Field
- */
-export class World_Field extends Message<World_Field> {
-  /**
-   * @generated from field: server.v1.Coords coords = 1;
-   */
-  coords?: Coords;
-
-  /**
-   * @generated from field: server.v1.World.Field.EntityKind entity_kind = 2;
-   */
-  entityKind = World_Field_EntityKind.UNSPECIFIED;
-
-  /**
-   * @generated from field: uint32 entity_id = 3;
-   */
-  entityId = 0;
-
-  constructor(data?: PartialMessage<World_Field>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.World.Field";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "coords", kind: "message", T: Coords },
-    { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
-    { no: 3, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field {
-    return new World_Field().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Field {
-    return new World_Field().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Field {
-    return new World_Field().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: World_Field | PlainMessage<World_Field> | undefined, b: World_Field | PlainMessage<World_Field> | undefined): boolean {
-    return proto3.util.equals(World_Field, a, b);
-  }
-}
-
-/**
- * @generated from enum server.v1.World.Field.EntityKind
- */
-export enum World_Field_EntityKind {
-  /**
-   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: ENTITY_KIND_VILLAGE = 1;
-   */
-  VILLAGE = 1,
-
-  /**
-   * @generated from enum value: ENTITY_KIND_TEMPLE = 2;
-   */
-  TEMPLE = 2,
-}
-// Retrieve enum metadata with: proto3.getEnumType(World_Field_EntityKind)
-proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKind", [
-  { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
-  { no: 1, name: "ENTITY_KIND_VILLAGE" },
-  { no: 2, name: "ENTITY_KIND_TEMPLE" },
-]);
-
-/**
  * @generated from message server.v1.Temple
  */
 export class Temple extends Message<Temple> {
@@ -532,108 +87,81 @@ export class Temple extends Message<Temple> {
 }
 
 /**
- * @generated from message server.v1.Attack
+ * VILLAGES 
+ *
+ * @generated from message server.v1.Village
  */
-export class Attack extends Message<Attack> {
+export class Village extends Message<Village> {
   /**
    * @generated from field: uint32 id = 1;
    */
   id = 0;
 
   /**
-   * @generated from field: uint32 village_id = 2;
+   * @generated from field: server.v1.Resources resources = 2;
    */
-  villageId = 0;
+  resources?: Resources;
 
   /**
-   * @generated from field: server.v1.Coords target_coords = 3;
+   * <building_kind, level>
+   *
+   * @generated from field: map<string, uint32> building_level = 3;
    */
-  targetCoords?: Coords;
+  buildingLevel: { [key: string]: number } = {};
+
+  /**
+   * @generated from field: repeated server.v1.Building.UpgradeOrder building_upgrade_orders = 4;
+   */
+  buildingUpgradeOrders: Building_UpgradeOrder[] = [];
 
   /**
    * <troop_kind, quantity>
    *
-   * @generated from field: map<string, uint32> troop_quantity = 4;
+   * @generated from field: map<string, uint32> troop_quantity = 5;
    */
   troopQuantity: { [key: string]: number } = {};
 
   /**
-   * @generated from field: uint32 time_left = 5;
+   * @generated from field: repeated server.v1.Troop.TrainingOrder troop_training_orders = 6;
    */
-  timeLeft = 0;
+  troopTrainingOrders: Troop_TrainingOrder[] = [];
 
-  constructor(data?: PartialMessage<Attack>) {
+  /**
+   * @generated from field: uint32 player_id = 7;
+   */
+  playerId = 0;
+
+  constructor(data?: PartialMessage<Village>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Attack";
+  static readonly typeName = "server.v1.Village";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "target_coords", kind: "message", T: Coords },
-    { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
-    { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "resources", kind: "message", T: Resources },
+    { no: 3, name: "building_level", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
+    { no: 4, name: "building_upgrade_orders", kind: "message", T: Building_UpgradeOrder, repeated: true },
+    { no: 5, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
+    { no: 6, name: "troop_training_orders", kind: "message", T: Troop_TrainingOrder, repeated: true },
+    { no: 7, name: "player_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attack {
-    return new Attack().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village {
+    return new Village().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Attack {
-    return new Attack().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village {
+    return new Village().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Attack {
-    return new Attack().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village {
+    return new Village().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Attack | PlainMessage<Attack> | undefined, b: Attack | PlainMessage<Attack> | undefined): boolean {
-    return proto3.util.equals(Attack, a, b);
-  }
-}
-
-/**
- * @generated from message server.v1.Coords
- */
-export class Coords extends Message<Coords> {
-  /**
-   * @generated from field: uint32 x = 1;
-   */
-  x = 0;
-
-  /**
-   * @generated from field: uint32 y = 2;
-   */
-  y = 0;
-
-  constructor(data?: PartialMessage<Coords>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Coords";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "x", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "y", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Coords {
-    return new Coords().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Coords {
-    return new Coords().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Coords {
-    return new Coords().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Coords | PlainMessage<Coords> | undefined, b: Coords | PlainMessage<Coords> | undefined): boolean {
-    return proto3.util.equals(Coords, a, b);
+  static equals(a: Village | PlainMessage<Village> | undefined, b: Village | PlainMessage<Village> | undefined): boolean {
+    return proto3.util.equals(Village, a, b);
   }
 }
 
@@ -790,15 +318,196 @@ export class GetVillagesResponse extends Message<GetVillagesResponse> {
 }
 
 /**
+ * BUILDINGS 
+ *
+ * @generated from message server.v1.Building
+ */
+export class Building extends Message<Building> {
+  /**
+   * @generated from field: string kind = 1;
+   */
+  kind = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<Building>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Building";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building {
+    return new Building().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building {
+    return new Building().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building {
+    return new Building().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Building | PlainMessage<Building> | undefined, b: Building | PlainMessage<Building> | undefined): boolean {
+    return proto3.util.equals(Building, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Building.UpgradeOrder
+ */
+export class Building_UpgradeOrder extends Message<Building_UpgradeOrder> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 level = 2;
+   */
+  level = 0;
+
+  /**
+   * @generated from field: uint32 time_left = 3;
+   */
+  timeLeft = 0;
+
+  /**
+   * @generated from field: server.v1.Resources cost = 4;
+   */
+  cost?: Resources;
+
+  /**
+   * @generated from field: string building_kind = 5;
+   */
+  buildingKind = "";
+
+  constructor(data?: PartialMessage<Building_UpgradeOrder>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Building.UpgradeOrder";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "level", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "cost", kind: "message", T: Resources },
+    { no: 5, name: "building_kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Building_UpgradeOrder {
+    return new Building_UpgradeOrder().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined, b: Building_UpgradeOrder | PlainMessage<Building_UpgradeOrder> | undefined): boolean {
+    return proto3.util.equals(Building_UpgradeOrder, a, b);
+  }
+}
+
+/**
+ * GetBuildings
+ *
+ * @generated from message server.v1.GetBuildingsRequest
+ */
+export class GetBuildingsRequest extends Message<GetBuildingsRequest> {
+  constructor(data?: PartialMessage<GetBuildingsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetBuildingsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetBuildingsRequest {
+    return new GetBuildingsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetBuildingsRequest {
+    return new GetBuildingsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetBuildingsRequest {
+    return new GetBuildingsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetBuildingsRequest | PlainMessage<GetBuildingsRequest> | undefined, b: GetBuildingsRequest | PlainMessage<GetBuildingsRequest> | undefined): boolean {
+    return proto3.util.equals(GetBuildingsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetBuildingsResponse
+ */
+export class GetBuildingsResponse extends Message<GetBuildingsResponse> {
+  /**
+   * @generated from field: repeated server.v1.Building buildings = 1;
+   */
+  buildings: Building[] = [];
+
+  constructor(data?: PartialMessage<GetBuildingsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetBuildingsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "buildings", kind: "message", T: Building, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetBuildingsResponse {
+    return new GetBuildingsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetBuildingsResponse {
+    return new GetBuildingsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetBuildingsResponse {
+    return new GetBuildingsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetBuildingsResponse | PlainMessage<GetBuildingsResponse> | undefined, b: GetBuildingsResponse | PlainMessage<GetBuildingsResponse> | undefined): boolean {
+    return proto3.util.equals(GetBuildingsResponse, a, b);
+  }
+}
+
+/**
  * IssueBuildingUpgradeOrder
  *
  * @generated from message server.v1.IssueBuildingUpgradeOrderRequest
  */
 export class IssueBuildingUpgradeOrderRequest extends Message<IssueBuildingUpgradeOrderRequest> {
   /**
-   * @generated from field: uint32 building_id = 1;
+   * @generated from field: string building_kind = 1;
    */
-  buildingId = 0;
+  buildingKind = "";
+
+  /**
+   * @generated from field: uint32 village_id = 2;
+   */
+  villageId = 0;
 
   constructor(data?: PartialMessage<IssueBuildingUpgradeOrderRequest>) {
     super();
@@ -808,7 +517,8 @@ export class IssueBuildingUpgradeOrderRequest extends Message<IssueBuildingUpgra
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.IssueBuildingUpgradeOrderRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "building_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: "building_kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueBuildingUpgradeOrderRequest {
@@ -932,6 +642,182 @@ export class CancelBuildingUpgradeOrderResponse extends Message<CancelBuildingUp
 
   static equals(a: CancelBuildingUpgradeOrderResponse | PlainMessage<CancelBuildingUpgradeOrderResponse> | undefined, b: CancelBuildingUpgradeOrderResponse | PlainMessage<CancelBuildingUpgradeOrderResponse> | undefined): boolean {
     return proto3.util.equals(CancelBuildingUpgradeOrderResponse, a, b);
+  }
+}
+
+/**
+ * TROOPS 
+ *
+ * @generated from message server.v1.Troop
+ */
+export class Troop extends Message<Troop> {
+  /**
+   * @generated from field: string kind = 1;
+   */
+  kind = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<Troop>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Troop";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop {
+    return new Troop().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Troop {
+    return new Troop().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Troop {
+    return new Troop().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Troop | PlainMessage<Troop> | undefined, b: Troop | PlainMessage<Troop> | undefined): boolean {
+    return proto3.util.equals(Troop, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Troop.TrainingOrder
+ */
+export class Troop_TrainingOrder extends Message<Troop_TrainingOrder> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 quantity = 3;
+   */
+  quantity = 0;
+
+  /**
+   * @generated from field: uint32 time_left = 4;
+   */
+  timeLeft = 0;
+
+  /**
+   * @generated from field: server.v1.Resources cost = 5;
+   */
+  cost?: Resources;
+
+  /**
+   * @generated from field: string troop_kind = 6;
+   */
+  troopKind = "";
+
+  constructor(data?: PartialMessage<Troop_TrainingOrder>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Troop.TrainingOrder";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "quantity", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "cost", kind: "message", T: Resources },
+    { no: 6, name: "troop_kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Troop_TrainingOrder {
+    return new Troop_TrainingOrder().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Troop_TrainingOrder {
+    return new Troop_TrainingOrder().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Troop_TrainingOrder {
+    return new Troop_TrainingOrder().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Troop_TrainingOrder | PlainMessage<Troop_TrainingOrder> | undefined, b: Troop_TrainingOrder | PlainMessage<Troop_TrainingOrder> | undefined): boolean {
+    return proto3.util.equals(Troop_TrainingOrder, a, b);
+  }
+}
+
+/**
+ * GetTroops
+ *
+ * @generated from message server.v1.GetTroopsRequest
+ */
+export class GetTroopsRequest extends Message<GetTroopsRequest> {
+  constructor(data?: PartialMessage<GetTroopsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetTroopsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTroopsRequest {
+    return new GetTroopsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTroopsRequest {
+    return new GetTroopsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTroopsRequest {
+    return new GetTroopsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetTroopsRequest | PlainMessage<GetTroopsRequest> | undefined, b: GetTroopsRequest | PlainMessage<GetTroopsRequest> | undefined): boolean {
+    return proto3.util.equals(GetTroopsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetTroopsResponse
+ */
+export class GetTroopsResponse extends Message<GetTroopsResponse> {
+  /**
+   * @generated from field: repeated server.v1.Troop troops = 1;
+   */
+  troops: Troop[] = [];
+
+  constructor(data?: PartialMessage<GetTroopsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetTroopsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "troops", kind: "message", T: Troop, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTroopsResponse {
+    return new GetTroopsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTroopsResponse {
+    return new GetTroopsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTroopsResponse {
+    return new GetTroopsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetTroopsResponse | PlainMessage<GetTroopsResponse> | undefined, b: GetTroopsResponse | PlainMessage<GetTroopsResponse> | undefined): boolean {
+    return proto3.util.equals(GetTroopsResponse, a, b);
   }
 }
 
@@ -1094,72 +980,234 @@ export class CancelTroopTrainingOrderResponse extends Message<CancelTroopTrainin
 }
 
 /**
- * GetTroops
+ * WORLD 
  *
- * @generated from message server.v1.GetTroopsRequest
+ * @generated from message server.v1.World
  */
-export class GetTroopsRequest extends Message<GetTroopsRequest> {
-  constructor(data?: PartialMessage<GetTroopsRequest>) {
+export class World extends Message<World> {
+  /**
+   * @generated from field: uint32 width = 1;
+   */
+  width = 0;
+
+  /**
+   * @generated from field: uint32 height = 2;
+   */
+  height = 0;
+
+  /**
+   * @generated from field: repeated server.v1.World.Field fields = 3;
+   */
+  fields: World_Field[] = [];
+
+  constructor(data?: PartialMessage<World>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.GetTroopsRequest";
+  static readonly typeName = "server.v1.World";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "width", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "height", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "fields", kind: "message", T: World_Field, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTroopsRequest {
-    return new GetTroopsRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World {
+    return new World().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTroopsRequest {
-    return new GetTroopsRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World {
+    return new World().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTroopsRequest {
-    return new GetTroopsRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World {
+    return new World().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetTroopsRequest | PlainMessage<GetTroopsRequest> | undefined, b: GetTroopsRequest | PlainMessage<GetTroopsRequest> | undefined): boolean {
-    return proto3.util.equals(GetTroopsRequest, a, b);
+  static equals(a: World | PlainMessage<World> | undefined, b: World | PlainMessage<World> | undefined): boolean {
+    return proto3.util.equals(World, a, b);
   }
 }
 
 /**
- * @generated from message server.v1.GetTroopsResponse
+ * @generated from message server.v1.World.Field
  */
-export class GetTroopsResponse extends Message<GetTroopsResponse> {
+export class World_Field extends Message<World_Field> {
   /**
-   * @generated from field: repeated server.v1.Troop troops = 1;
+   * @generated from field: server.v1.World.Field.Coords coords = 1;
    */
-  troops: Troop[] = [];
+  coords?: World_Field_Coords;
 
-  constructor(data?: PartialMessage<GetTroopsResponse>) {
+  /**
+   * @generated from field: server.v1.World.Field.EntityKind entity_kind = 2;
+   */
+  entityKind = World_Field_EntityKind.UNSPECIFIED;
+
+  /**
+   * @generated from field: uint32 entity_id = 3;
+   */
+  entityId = 0;
+
+  constructor(data?: PartialMessage<World_Field>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.GetTroopsResponse";
+  static readonly typeName = "server.v1.World.Field";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "troops", kind: "message", T: Troop, repeated: true },
+    { no: 1, name: "coords", kind: "message", T: World_Field_Coords },
+    { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
+    { no: 3, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTroopsResponse {
-    return new GetTroopsResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field {
+    return new World_Field().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTroopsResponse {
-    return new GetTroopsResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Field {
+    return new World_Field().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTroopsResponse {
-    return new GetTroopsResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Field {
+    return new World_Field().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetTroopsResponse | PlainMessage<GetTroopsResponse> | undefined, b: GetTroopsResponse | PlainMessage<GetTroopsResponse> | undefined): boolean {
-    return proto3.util.equals(GetTroopsResponse, a, b);
+  static equals(a: World_Field | PlainMessage<World_Field> | undefined, b: World_Field | PlainMessage<World_Field> | undefined): boolean {
+    return proto3.util.equals(World_Field, a, b);
+  }
+}
+
+/**
+ * @generated from enum server.v1.World.Field.EntityKind
+ */
+export enum World_Field_EntityKind {
+  /**
+   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_VILLAGE = 1;
+   */
+  VILLAGE = 1,
+
+  /**
+   * @generated from enum value: ENTITY_KIND_TEMPLE = 2;
+   */
+  TEMPLE = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(World_Field_EntityKind)
+proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKind", [
+  { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
+  { no: 1, name: "ENTITY_KIND_VILLAGE" },
+  { no: 2, name: "ENTITY_KIND_TEMPLE" },
+]);
+
+/**
+ * @generated from message server.v1.World.Field.Coords
+ */
+export class World_Field_Coords extends Message<World_Field_Coords> {
+  /**
+   * @generated from field: uint32 x = 1;
+   */
+  x = 0;
+
+  /**
+   * @generated from field: uint32 y = 2;
+   */
+  y = 0;
+
+  constructor(data?: PartialMessage<World_Field_Coords>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.World.Field.Coords";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "x", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "y", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field_Coords {
+    return new World_Field_Coords().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Field_Coords {
+    return new World_Field_Coords().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Field_Coords {
+    return new World_Field_Coords().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: World_Field_Coords | PlainMessage<World_Field_Coords> | undefined, b: World_Field_Coords | PlainMessage<World_Field_Coords> | undefined): boolean {
+    return proto3.util.equals(World_Field_Coords, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Attack
+ */
+export class Attack extends Message<Attack> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 village_id = 2;
+   */
+  villageId = 0;
+
+  /**
+   * @generated from field: server.v1.World.Field.Coords target_coords = 3;
+   */
+  targetCoords?: World_Field_Coords;
+
+  /**
+   * <troop_kind, quantity>
+   *
+   * @generated from field: map<string, uint32> troop_quantity = 4;
+   */
+  troopQuantity: { [key: string]: number } = {};
+
+  /**
+   * @generated from field: uint32 time_left = 5;
+   */
+  timeLeft = 0;
+
+  constructor(data?: PartialMessage<Attack>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Attack";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "target_coords", kind: "message", T: World_Field_Coords },
+    { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
+    { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attack {
+    return new Attack().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Attack {
+    return new Attack().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Attack {
+    return new Attack().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Attack | PlainMessage<Attack> | undefined, b: Attack | PlainMessage<Attack> | undefined): boolean {
+    return proto3.util.equals(Attack, a, b);
   }
 }
 

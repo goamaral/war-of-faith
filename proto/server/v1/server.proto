@@ -6,91 +6,26 @@ option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
 import "google/protobuf/wrappers.proto";
 
-message Village {
-  uint32 id = 1;
-  Resources resources = 2;
-  repeated Building buildings = 3;
-  repeated Building.UpgradeOrder building_upgrade_orders = 4;
-  map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
-  repeated Troop.TrainingOrder troop_training_orders = 6;
-  uint32 player_id = 7;
-}
-
 message Resources {
   uint32 time = 1;
   uint32 gold = 2;
-}
-
-message Building {
-  uint32 id = 1;
-  Building.Kind kind = 2;
-  string name = 3;
-  uint32 level = 4;
-
-  enum Kind {
-    KIND_UNSPECIFIED = 0;
-    KIND_HALL = 1;
-    KIND_GOLD_MINE = 2;
-  }
-
-  message UpgradeOrder {
-    uint32 id = 1;
-    uint32 level = 2;
-    uint32 time_left = 3;
-    Resources cost = 4;
-    uint32 building_id = 5;
-  }
-}
-
-message Troop {
-  string kind = 1;
-  string name = 2;
-
-  message TrainingOrder {
-    uint32 id = 1;
-    uint32 quantity = 3;
-    uint32 time_left = 4;
-    Resources cost = 5;
-    string troop_kind = 6;
-  }
-}
-
-message World {
-  uint32 width = 1;
-  uint32 height = 2;
-  repeated World.Field fields = 3;
-
-  message Field {
-    Coords coords = 1;
-    World.Field.EntityKind entity_kind = 2;
-    uint32 entity_id = 3;
-
-    enum EntityKind {
-      ENTITY_KIND_UNSPECIFIED = 0;
-      ENTITY_KIND_VILLAGE = 1;
-      ENTITY_KIND_TEMPLE = 2;
-    }
-  }
 }
 
 message Temple {
   uint32 id = 1;
 }
 
-message Attack {
-  uint32 id = 1;
-  uint32 village_id = 2;
-  Coords target_coords = 3;
-  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
-  uint32 time_left = 5;
-}
-
-message Coords {
-  uint32 x = 1;
-  uint32 y = 2;
-}
-
 /* VILLAGES */
+message Village {
+  uint32 id = 1;
+  Resources resources = 2;
+  map<string, uint32> building_level = 3; // <building_kind, level>
+  repeated Building.UpgradeOrder building_upgrade_orders = 4;
+  map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
+  repeated Troop.TrainingOrder troop_training_orders = 6;
+  uint32 player_id = 7;
+}
+
 // GetVillage
 message GetVillageRequest {
   uint32 id = 1;
@@ -107,10 +42,30 @@ message GetVillagesResponse {
   repeated Village villages = 1;
 }
 
-/* ORDERS */
+/* BUILDINGS */
+message Building {
+  string kind = 1;
+  string name = 2;
+
+  message UpgradeOrder {
+    uint32 id = 1;
+    uint32 level = 2;
+    uint32 time_left = 3;
+    Resources cost = 4;
+    string building_kind = 5;
+  }
+}
+
+// GetBuildings
+message GetBuildingsRequest {}
+message GetBuildingsResponse {
+  repeated Building buildings = 1;
+}
+
 // IssueBuildingUpgradeOrder
 message IssueBuildingUpgradeOrderRequest {
-  uint32 building_id = 1;
+  string building_kind = 1;
+  uint32 village_id = 2;
 }
 message IssueBuildingUpgradeOrderResponse {
   Building.UpgradeOrder order = 1;
@@ -121,6 +76,26 @@ message CancelBuildingUpgradeOrderRequest {
   uint32 id = 1;
 }
 message CancelBuildingUpgradeOrderResponse {}
+
+/* TROOPS */
+message Troop {
+  string kind = 1;
+  string name = 2;
+
+  message TrainingOrder {
+    uint32 id = 1;
+    uint32 quantity = 3;
+    uint32 time_left = 4;
+    Resources cost = 5;
+    string troop_kind = 6;
+  }
+}
+
+// GetTroops
+message GetTroopsRequest {}
+message GetTroopsResponse {
+  repeated Troop troops = 1;
+}
 
 // IssueTroopTrainingOrder
 message IssueTroopTrainingOrderRequest {
@@ -138,14 +113,38 @@ message CancelTroopTrainingOrderRequest {
 }
 message CancelTroopTrainingOrderResponse {}
 
-/* TROOPS */
-// GetTroops
-message GetTroopsRequest {}
-message GetTroopsResponse {
-  repeated Troop troops = 1;
+/* WORLD */
+message World {
+  uint32 width = 1;
+  uint32 height = 2;
+  repeated World.Field fields = 3;
+
+  message Field {
+    World.Field.Coords coords = 1;
+    World.Field.EntityKind entity_kind = 2;
+    uint32 entity_id = 3;
+
+    enum EntityKind {
+      ENTITY_KIND_UNSPECIFIED = 0;
+      ENTITY_KIND_VILLAGE = 1;
+      ENTITY_KIND_TEMPLE = 2;
+    }
+
+    message Coords {
+      uint32 x = 1;
+      uint32 y = 2;
+    }
+  }
 }
 
-/* WORLD */
+message Attack {
+  uint32 id = 1;
+  uint32 village_id = 2;
+  World.Field.Coords target_coords = 3;
+  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
+  uint32 time_left = 5;
+}
+
 // GetWorld
 message GetWorldRequest {
   bool load_fields = 1;
@@ -181,14 +180,15 @@ service Service {
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
   rpc GetVillages(GetVillagesRequest) returns (GetVillagesResponse);
 
-  /* ORDERS */
+  /* BUILDINGS */
+  rpc GetBuildings(GetBuildingsRequest) returns (GetBuildingsResponse);
   rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
   rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
-  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
-  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
 
   /* TROOPS */
   rpc GetTroops(GetTroopsRequest) returns (GetTroopsResponse);
+  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
+  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
 
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);

@@ -13,7 +13,7 @@ type WorldField struct {
 
 func (wc WorldField) ToProtobuf() (*serverv1.World_Field, error) {
 	return &serverv1.World_Field{
-		Coords:     &serverv1.Coords{X: wc.X, Y: wc.Y},
+		Coords:     &serverv1.World_Field_Coords{X: wc.X, Y: wc.Y},
 		EntityKind: wc.EntityKind,
 		EntityId:   wc.EntityId,
 	}, nil

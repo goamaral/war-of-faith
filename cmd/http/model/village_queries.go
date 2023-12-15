@@ -14,9 +14,16 @@ const VillagesTableName = "villages"
 
 func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Village, error) {
 	village := Village{
-		buildings: &[]Building{},
+		BuildingLevel: Building_Level{
+			JsonMap: db.JsonMap[Building_Kind, uint32]{
+				Building_Kind_HALL:      1,
+				Building_Kind_GOLD_MINE: 1,
+			},
+		},
 		TroopQuantity: Troop_Quantity{
-			Troop_Kind_LEADER: 0,
+			JsonMap: db.JsonMap[Troop_Kind, uint32]{
+				Troop_Kind_LEADER: 0,
+			},
 		},
 		PlayerId: playerId,
 	}
@@ -29,21 +36,6 @@ func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Vi
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village world field: %w", err)
 	}
-
-	/* BUILDINGS */
-	// Hall
-	hall, err := CreateBuilding(ctx, serverv1.Building_KIND_HALL, village.Id)
-	if err != nil {
-		return Village{}, fmt.Errorf("failed to create hall building: %w", err)
-	}
-	*village.buildings = append(*village.buildings, hall)
-
-	// Gold mine
-	goldMine, err := CreateBuilding(ctx, serverv1.Building_KIND_GOLD_MINE, village.Id)
-	if err != nil {
-		return Village{}, fmt.Errorf("failed to create gold mine building: %w", err)
-	}
-	*village.buildings = append(*village.buildings, goldMine)
 
 	return village, nil
 }
