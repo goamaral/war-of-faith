@@ -2,6 +2,11 @@ import * as serverV1Types from "../../lib/protobuf/server/v1/server_pb"
 import { Building, BuildingUpgradeStatus, Troop, TroopTrainingStatus } from "."
 
 export default class Village extends serverV1Types.Village {
+  // TODO: Come from the server
+  get name() {
+    return `Village ${this.id}`
+  }
+
   canAfford(cost: serverV1Types.Resources) {
     if (cost.gold > this.resources!.gold) return false
     return true

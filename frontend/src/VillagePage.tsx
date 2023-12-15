@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom'
 import { useContext, useEffect } from 'preact/hooks'
 import { useComputed, useSignal, useSignalEffect, signal } from '@preact/signals'
+import { createContext } from 'preact'
 
 import * as serverV1 from "../lib/protobuf/server/v1/server_pb"
 import * as entities from './entities'
 import server from './server'
-import { createContext } from 'preact'
 
 function createVillageState() {
   const village = signal<entities.Village>(new entities.Village(new serverV1.Village()))
@@ -79,7 +79,7 @@ const Village = () => {
 
   return (
     <div>
-      <h1>Village {village.value.id}</h1>
+      <h1>{village.value.name}</h1>
       <h2>Resources</h2>
       <ul>
         <li>{village.value.resources!.gold} Gold</li>
