@@ -18,7 +18,7 @@ func GetTroopTrainingOrder(ctx context.Context, id uint32) (TroopTrainingOrder, 
 }
 
 func GetTroopTrainingOrders(ctx context.Context, opts ...db.QueryOption) ([]TroopTrainingOrder, error) {
-	return db.Find[TroopTrainingOrder](ctx, TroopTrainingOrdersTableName, opts...)
+	return db.Find[TroopTrainingOrder](ctx, sq.Select("*").From(TroopTrainingOrdersTableName), opts...)
 }
 
 func UpdateTroopTrainingOrder(ctx context.Context, id uint32, order TroopTrainingOrder) error {

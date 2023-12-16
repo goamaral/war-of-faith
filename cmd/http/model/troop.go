@@ -55,7 +55,6 @@ type Troop_Quantity struct {
 	db.JsonMap[Troop_Kind, uint32]
 }
 
-func (tq *Troop_Quantity) Increment(kind Troop_Kind, quantity uint32) uint32 {
-	tq.JsonMap[kind] += quantity
-	return tq.JsonMap[kind]
+func (tq *Troop_Quantity) Increment(kind Troop_Kind, quantity uint32) {
+	tq.Set(kind, tq.Get(kind)+quantity)
 }

@@ -12,7 +12,7 @@ import (
 
 const VillagesTableName = "villages"
 
-func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Village, error) {
+func CreateVillage(ctx context.Context, coords Coords, playerId uint32) (Village, error) {
 	village := Village{
 		BuildingLevel: Building_Level{
 			JsonMap: db.JsonMap[Building_Kind, uint32]{
@@ -32,7 +32,7 @@ func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Vi
 		return Village{}, fmt.Errorf("failed to create village: %w", err)
 	}
 
-	_, err = CreateWorldField(ctx, x, y, serverv1.World_Field_ENTITY_KIND_VILLAGE, village.Id)
+	_, err = CreateWorldField(ctx, coords, serverv1.World_Field_ENTITY_KIND_VILLAGE, village.Id)
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village world field: %w", err)
 	}
@@ -41,7 +41,7 @@ func CreateVillage(ctx context.Context, x uint32, y uint32, playerId uint32) (Vi
 }
 
 func GetVillages(ctx context.Context, opts ...db.QueryOption) ([]Village, error) {
-	return db.Find[Village](ctx, VillagesTableName, opts...)
+	return db.Find[Village](ctx, sq.Select("*").From(VillagesTableName), opts...)
 }
 
 func GetVillage(ctx context.Context, id uint32) (Village, bool, error) {

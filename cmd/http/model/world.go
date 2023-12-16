@@ -24,7 +24,7 @@ func (w *World) ToProtobuf(ctx context.Context, loadFields bool) (*serverv1.Worl
 		for _, field := range fields {
 			pField, err := field.ToProtobuf()
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert field (x: %d, y: %d) to protobuf: %w", field.X, field.Y, err)
+				return nil, fmt.Errorf("failed to convert field (coords: %s) to protobuf: %w", field.Coords, err)
 			}
 			pFields = append(pFields, pField)
 		}

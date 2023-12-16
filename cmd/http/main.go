@@ -260,18 +260,68 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 }
 
 func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.AttackRequest]) (*connect.Response[serverv1.AttackResponse], error) {
-	_, found, err := model.GetWorldField(ctx, sq.Eq{"x": req.Msg.Attack.TargetCoords.X, "y": req.Msg.Attack.TargetCoords.Y})
+	// TODO: Wrap in transaction
+	// TODO: Use auth player
+	villagesIds, err := model.GetPlayerVilageIds(ctx, 1)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get world field: %w", err)
+		return nil, fmt.Errorf("failed to get player village ids: %w", err)
 	}
-	if found {
-		return nil, status.Error(codes.AlreadyExists, "field already exists")
+	if !lo.Contains(villagesIds, req.Msg.Attack.VillageId) {
+		return nil, status.Error(codes.PermissionDenied, "village does not belong to you")
 	}
 
-	// TODO: Get player from auth
-	_, err = model.CreateVillage(context.Background(), req.Msg.Attack.TargetCoords.X, req.Msg.Attack.TargetCoords.Y, 1)
+	village, found, err := model.GetVillage(ctx, req.Msg.Attack.VillageId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create village: %w", err)
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "village not found")
+	}
+
+	var attackSize uint32
+	var troopQuantity model.Troop_Quantity
+	for pKind, quantity := range req.Msg.Attack.TroopQuantity {
+		kind, err := model.Troop_KindFromProtobuf(pKind)
+		if err != nil {
+			return nil, fmt.Errorf("invalid troop kind %s: %w", pKind, err)
+		}
+
+		available := village.TroopQuantity.Get(kind)
+		if quantity > available {
+			return nil, status.Error(codes.InvalidArgument, "not enough troops")
+		}
+
+		troopQuantity.Increment(kind, quantity)
+		attackSize += quantity
+	}
+	if attackSize == 0 {
+		return nil, status.Error(codes.InvalidArgument, "no troops to attack")
+	}
+
+	// TODO: Check if coords inside the world
+
+	targetCoords, err := model.CoordsFromProtobuf(req.Msg.Attack.TargetCoords)
+	if err != nil {
+		return nil, fmt.Errorf("invalid target coords: %w", err)
+	}
+	err = db.Insert(ctx, model.AttacksTableName, &model.Attack{
+		TargetCoords:  targetCoords,
+		TroopQuantity: troopQuantity,
+		TimeLeft:      10, // TODO: Define time based on distance and troop types
+		VillageId:     village.Id,
+		PlayerId:      village.PlayerId,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create attack: %w", err)
+	}
+
+	// FUTURE: Move this to the loop above when this method is inside a transaction
+	for kind, quantity := range troopQuantity.Iter() {
+		village.TroopQuantity.Increment(kind, -quantity)
+	}
+	err = db.Update(ctx, model.VillagesTableName, village, sq.Eq{"id": village.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
 	return connect.NewResponse(&serverv1.AttackResponse{}), nil
@@ -339,14 +389,83 @@ func main() {
 	for range ticker.C {
 		ctx := context.Background()
 
+		attacks, err := db.Find[model.Attack](ctx, sq.Select("*").From(model.AttacksTableName))
+		if err != nil {
+			log.Printf("failed to get attacks: %v", err)
+			continue
+		}
+		for _, attack := range attacks {
+			attack.TimeLeft--
+			if attack.TimeLeft == 0 {
+				err := db.Delete(ctx, model.AttacksTableName, sq.Eq{"id": attack.Id})
+				if err != nil {
+					log.Printf("failed to delete attack (id: %d): %v", attack.Id, err)
+					continue
+				}
+
+				field, found, err := db.FindOne[model.WorldField](ctx, model.WorldFieldsTableName, sq.Eq{"coords": attack.TargetCoords})
+				if err != nil {
+					log.Printf("failed to find field (coords: %s): %v", attack.TargetCoords, err)
+					continue
+				}
+				if !found {
+					_, err = model.CreateVillage(context.Background(), attack.TargetCoords, attack.PlayerId)
+					if err != nil {
+						log.Printf("failed to create new village: %v", err)
+						continue
+					}
+				} else {
+					switch field.EntityKind {
+					case serverv1.World_Field_ENTITY_KIND_VILLAGE:
+						targetVillage, err := db.First[model.Village](ctx, sq.Select("*").From(model.VillagesTableName), sq.Eq{"id": field.EntityId})
+						if err != nil {
+							log.Printf("failed to find target village (id: %d): %v", field.EntityId, err)
+							continue
+						}
+						if targetVillage.PlayerId == attack.VillageId {
+							// TODO: Add attack troop quantity to target village
+						} else {
+							// TODO: Combat
+
+							var hasLeader bool
+							for kind, quantity := range attack.TroopQuantity.Iter() {
+								if kind == model.Troop_Kind_LEADER && quantity > 0 {
+									hasLeader = true
+									break
+								}
+							}
+							if hasLeader {
+								targetVillage.PlayerId = attack.PlayerId
+								err = db.Update(ctx, model.VillagesTableName, targetVillage, sq.Eq{"id": targetVillage.Id})
+								if err != nil {
+									log.Printf("failed to update village (id: %d) owner: %v", targetVillage.Id, err)
+									continue
+								}
+							}
+						}
+
+					case serverv1.World_Field_ENTITY_KIND_TEMPLE:
+						log.Printf("don't know how to attack temple") // TODO: Rethink this
+					}
+				}
+			} else {
+				err := db.Update(ctx, model.AttacksTableName, attack, sq.Eq{"id": attack.Id})
+				if err != nil {
+					log.Printf("failed to update attack (id: %d): %v", attack.Id, err)
+					continue
+				}
+			}
+		}
+
 		villages, err := model.GetVillages(ctx)
 		if err != nil {
 			log.Printf("failed to get villages: %v", err)
 			continue
 		}
 		for _, village := range villages {
-			// TODO: Use transaction
-			buildingUpgradeOrders, err := model.GetBuildingUpgradeOrders(ctx, sq.Eq{"village_id": village.Id})
+			// TODO: Wrap in transaction
+			/* BUILDINGS */
+			buildingUpgradeOrders, err := village.BuildingUpgradeOrders(ctx)
 			if err != nil {
 				log.Printf("failed to get building upgrade orders (village_id: %d): %v", village.Id, err)
 				continue
@@ -369,7 +488,8 @@ func main() {
 				}
 			}
 
-			troopTrainingOrders, err := model.GetTroopTrainingOrders(ctx, sq.Eq{"village_id": village.Id})
+			/* TROOPS */
+			troopTrainingOrders, err := village.TroopTrainingOrders(ctx)
 			if err != nil {
 				log.Printf("failed to get troop training orders (village_id: %d): %v", village.Id, err)
 				continue
@@ -444,18 +564,18 @@ func CreateDB() error {
 
 		CREATE TABLE villages (
 			id INTEGER PRIMARY KEY,
-			gold INTERGER NOT NULL,
+			gold UNSIGNED INTERGER NOT NULL,
 			building_level TEXT NOT NULL,
 			troop_quantity TEXT NOT NULL,
 
 			player_id INTEGER NOT NULL,
-			FOREIGN KEY(player_id) REFERENCES villages(id)
+			FOREIGN KEY(player_id) REFERENCES players(id)
 		);
 
 		CREATE TABLE building_upgrade_orders (
 			id INTEGER PRIMARY KEY,
-			level INTEGER NOT NULL,
-			time_left INTEGER NOT NULL,
+			level UNSIGNED INTEGER NOT NULL,
+			time_left UNSIGNED INTEGER NOT NULL,
 			building_kind VARCHAR(255) NOT NULL,
 
 			village_id INTEGER NOT NULL,
@@ -464,8 +584,8 @@ func CreateDB() error {
 
 		CREATE TABLE troop_training_orders (
 			id INTEGER PRIMARY KEY,
-			quantity INTEGER NOT NULL,
-			time_left INTEGER NOT NULL,
+			quantity UNSIGNED INTEGER NOT NULL,
+			time_left UNSIGNED INTEGER NOT NULL,
 			troop_kind VARCHAR(255) NOT NULL,
 
 			village_id INTEGER NOT NULL,
@@ -473,15 +593,25 @@ func CreateDB() error {
 		);
 
 		CREATE TABLE world_fields (
-			x INTEGER NOT NULL,
-			y INTEGER NOT NULL,
+			coords VARCHAR(255) PRIMARY KEY,
 			entity_kind INTERGER NOT NULL,
 			entity_id INTEGER NOT NULL
 		);
-		CREATE UNIQUE INDEX unq_x_y ON world_fields(x, y);
 
 		CREATE TABLE temples (
 			id INTEGER PRIMARY KEY
+		);
+
+		CREATE TABLE attacks (
+			id INTEGER PRIMARY KEY,
+			target_coords VARCHAR(255) NOT NULL,
+			troop_quantity TEXT NOT NULL,
+			time_left UNSIGNED INTEGER NOT NULL,
+
+			village_id INTEGER NOT NULL,
+			player_id INTEGER NOT NULL,
+			FOREIGN KEY(village_id) REFERENCES villages(id),
+			FOREIGN KEY(player_id) REFERENCES players(id)
 		);
 	`)
 	if err != nil {
@@ -492,32 +622,32 @@ func CreateDB() error {
 }
 
 func SeedDB() error {
-	_, err := model.CreatePlayer(context.Background(), 3, 4)
+	_, err := model.CreatePlayer(context.Background(), model.Coords{X: 3, Y: 4})
 	if err != nil {
 		return fmt.Errorf("failed to create player: %w", err)
 	}
-	_, err = model.CreateTemple(context.Background(), 1, 1)
+	_, err = model.CreateTemple(context.Background(), model.Coords{X: 1, Y: 1})
 	if err != nil {
 		return fmt.Errorf("failed to create temple (1,1): %w", err)
 	}
-	_, err = model.CreateTemple(context.Background(), 8, 1)
+	_, err = model.CreateTemple(context.Background(), model.Coords{X: 8, Y: 1})
 	if err != nil {
 		return fmt.Errorf("failed to create temple (8,1): %w", err)
 	}
-	_, err = model.CreateTemple(context.Background(), 8, 8)
+	_, err = model.CreateTemple(context.Background(), model.Coords{X: 8, Y: 8})
 	if err != nil {
 		return fmt.Errorf("failed to create temple (8,8): %w", err)
 	}
-	_, err = model.CreateTemple(context.Background(), 1, 8)
+	_, err = model.CreateTemple(context.Background(), model.Coords{X: 1, Y: 8})
 	if err != nil {
 		return fmt.Errorf("failed to create temple (1,8): %w", err)
 	}
-
 	return nil
 }
 
 func DropDB() error {
 	_, err := db.DB.Exec(`
+		DROP TABLE attacks;
 		DROP TABLE troop_training_orders;
 		DROP TABLE building_upgrade_orders;
 		DROP TABLE villages;

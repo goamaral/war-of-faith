@@ -50,6 +50,49 @@ export class Resources extends Message<Resources> {
 }
 
 /**
+ * @generated from message server.v1.Coords
+ */
+export class Coords extends Message<Coords> {
+  /**
+   * @generated from field: uint32 x = 1;
+   */
+  x = 0;
+
+  /**
+   * @generated from field: uint32 y = 2;
+   */
+  y = 0;
+
+  constructor(data?: PartialMessage<Coords>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Coords";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "x", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "y", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Coords {
+    return new Coords().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Coords {
+    return new Coords().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Coords {
+    return new Coords().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Coords | PlainMessage<Coords> | undefined, b: Coords | PlainMessage<Coords> | undefined): boolean {
+    return proto3.util.equals(Coords, a, b);
+  }
+}
+
+/**
  * @generated from message server.v1.Temple
  */
 export class Temple extends Message<Temple> {
@@ -1035,9 +1078,9 @@ export class World extends Message<World> {
  */
 export class World_Field extends Message<World_Field> {
   /**
-   * @generated from field: server.v1.World.Field.Coords coords = 1;
+   * @generated from field: server.v1.Coords coords = 1;
    */
-  coords?: World_Field_Coords;
+  coords?: Coords;
 
   /**
    * @generated from field: server.v1.World.Field.EntityKind entity_kind = 2;
@@ -1057,7 +1100,7 @@ export class World_Field extends Message<World_Field> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.World.Field";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "coords", kind: "message", T: World_Field_Coords },
+    { no: 1, name: "coords", kind: "message", T: Coords },
     { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
     { no: 3, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
@@ -1106,49 +1149,6 @@ proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKin
 ]);
 
 /**
- * @generated from message server.v1.World.Field.Coords
- */
-export class World_Field_Coords extends Message<World_Field_Coords> {
-  /**
-   * @generated from field: uint32 x = 1;
-   */
-  x = 0;
-
-  /**
-   * @generated from field: uint32 y = 2;
-   */
-  y = 0;
-
-  constructor(data?: PartialMessage<World_Field_Coords>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.World.Field.Coords";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "x", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "y", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field_Coords {
-    return new World_Field_Coords().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): World_Field_Coords {
-    return new World_Field_Coords().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): World_Field_Coords {
-    return new World_Field_Coords().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: World_Field_Coords | PlainMessage<World_Field_Coords> | undefined, b: World_Field_Coords | PlainMessage<World_Field_Coords> | undefined): boolean {
-    return proto3.util.equals(World_Field_Coords, a, b);
-  }
-}
-
-/**
  * @generated from message server.v1.Attack
  */
 export class Attack extends Message<Attack> {
@@ -1163,9 +1163,9 @@ export class Attack extends Message<Attack> {
   villageId = 0;
 
   /**
-   * @generated from field: server.v1.World.Field.Coords target_coords = 3;
+   * @generated from field: server.v1.Coords target_coords = 3;
    */
-  targetCoords?: World_Field_Coords;
+  targetCoords?: Coords;
 
   /**
    * <troop_kind, quantity>
@@ -1189,7 +1189,7 @@ export class Attack extends Message<Attack> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "target_coords", kind: "message", T: World_Field_Coords },
+    { no: 3, name: "target_coords", kind: "message", T: Coords },
     { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
     { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);

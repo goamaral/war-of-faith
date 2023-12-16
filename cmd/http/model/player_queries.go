@@ -10,14 +10,14 @@ import (
 
 const PlayersTableName = "players"
 
-func CreatePlayer(ctx context.Context, x, y uint32) (Player, error) {
+func CreatePlayer(ctx context.Context, coords Coords) (Player, error) {
 	var player Player
 	err := db.Insert[Player](ctx, PlayersTableName, &player)
 	if err != nil {
 		return Player{}, fmt.Errorf("failed to create player: %w", err)
 	}
 
-	_, err = CreateVillage(context.Background(), x, y, player.Id)
+	_, err = CreateVillage(context.Background(), coords, player.Id)
 	if err != nil {
 		return Player{}, fmt.Errorf("failed to create village: %w", err)
 	}
@@ -54,4 +54,11 @@ func GetPlayerTrainableLeaders(ctx context.Context, playerId uint32) (uint32, er
 		return 0, fmt.Errorf("failed to get player village count: %w", err)
 	}
 	return nVillages - (nLeaders + nLeadersInTraining), nil
+}
+
+func GetPlayerVilageIds(ctx context.Context, playerId uint32) ([]uint32, error) {
+	return db.Find[uint32](ctx,
+		sq.Select("id").From(VillagesTableName),
+		sq.Eq{"player_id": playerId},
+	)
 }

@@ -10,6 +10,7 @@ export default () => {
   const [loading, setLoading] = useState(true)
   const [world, setWorld] = useState<serverV1.World>(new serverV1.World())
   const [villages, setVillages] = useState<entities.Village[]>([])
+  const [troops, setTroops] = useState<entities.Troop[]>([])
 
   useEffect(() => {
     Promise.all([
@@ -17,6 +18,8 @@ export default () => {
         .then(({ world }) => setWorld(world!)),
       server.getVillages({ playerId: 1 })
         .then(({ villages }) => setVillages(villages!.map(village => new entities.Village(village)))), // TODO: Use auth player
+      server.getTroops({})
+        .then(({ troops }) => setTroops(troops!.map(troop => new entities.Troop(troop)))),
     ]).then(() => setLoading(false))
   }, [])
 
@@ -26,13 +29,13 @@ export default () => {
     return (
       <div>
         <h1>World Map</h1>
-        <World world={world} villages={villages} />
+        <World world={world} villages={villages} troops={troops} />
       </div>
     )
   }
 }
 
-function World({ world, villages }: { world: serverV1.World, villages: entities.Village[] }) {
+function World({ world, villages, troops }: { world: serverV1.World, villages: entities.Village[], troops: entities.Troop[] }) {
   const selectedField = useSignal<serverV1.World_Field | undefined>(undefined)
 
   const gridStyle = {
@@ -54,7 +57,7 @@ function World({ world, villages }: { world: serverV1.World, villages: entities.
 
   return <div style={{ display: 'flex' }}>
     <div style={gridStyle}>{fields.flat().map(field => <Field field={field} selectedField={selectedField} />)}</div>
-    <FieldInfo selectedField={selectedField} villages={villages} />
+    <FieldInfo selectedField={selectedField} villages={villages} troops={troops} />
   </div>
 }
 
@@ -99,7 +102,7 @@ function Field({ field, selectedField }: { field: serverV1.World_Field, selected
   )
 }
 
-function FieldInfo({ selectedField, villages }: { selectedField: Signal<serverV1.World_Field | undefined>, villages: entities.Village[] }) {
+function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<serverV1.World_Field | undefined>, villages: entities.Village[], troops: entities.Troop[] }) {
   const entityKindName = useComputed(() => {
     switch (selectedField.value?.entityKind) {
       case serverV1.World_Field_EntityKind.VILLAGE:
@@ -113,16 +116,20 @@ function FieldInfo({ selectedField, villages }: { selectedField: Signal<serverV1
     }
   })
 
-  function Info({ field, villages }: { field: serverV1.World_Field, villages: entities.Village[] }) {
+  function Info({ field }: { field: serverV1.World_Field }) {
     async function attack() {
       try {
-        const { village } = await server.getVillage({ id: selectedVillageId.value })
+        const totalTroops = Object.values(selectedTroopQuantity.value).reduce((acc, q) => acc + q, 0)
+        if (totalTroops == 0) {
+          alert("No troops to attack")
+          return
+        }
 
         await server.attack({
           attack: new serverV1.Attack({
-            villageId: village!.id,
+            villageId: selectedVillage.peek().id,
             targetCoords: field.coords,
-            troopQuantity: village!.troopQuantity, // TODO: Pick troops to attack
+            troopQuantity: selectedTroopQuantity.peek(),
           }),
         })
 
@@ -133,15 +140,35 @@ function FieldInfo({ selectedField, villages }: { selectedField: Signal<serverV1
     }
 
     const navigate = useNavigate()
-    const selectedVillageId = useSignal<number>(villages[0].id)
+    const selectedVillage = useSignal(villages[0])
+    const selectedTroopQuantity = useSignal<{[key: string]: number}>(Object.fromEntries(troops.map(t => ([t.kind, 0]))))
+    function updateSelectedTroopQuantity(kind: string, quantity: number) {
+      selectedTroopQuantity.value = {  ...selectedTroopQuantity.value, [kind]: quantity }
+    }
 
     function Actions() {
       switch (field.entityKind) {
         case serverV1.World_Field_EntityKind.UNSPECIFIED:
           return <div>
-            <select value={selectedVillageId.value} onChange={ev => selectedVillageId.value = +ev.currentTarget.value}>
+            <label>Village</label>
+            <select value={selectedVillage.value.id} onChange={ev => selectedVillage.value = villages.find(v => v.id == +ev.currentTarget.value)!}>
               {villages.map(v => (<option value={v.id}>{v.name}</option>))}
             </select>
+
+            <label>Troops</label>
+            <div>
+              {troops.map(t => {
+                const maxQuantity = selectedVillage.value.troopQuantity[t.kind]
+                return (<div key={t.kind}>
+                  <span>{t.name} ({maxQuantity})</span>
+                  <input type="number" min={0} max={maxQuantity}
+                    value={selectedTroopQuantity.value[t.kind]}
+                    onChange={ev => updateSelectedTroopQuantity(t.kind, +ev.currentTarget.value)}
+                  />
+                </div>)
+              })}
+            </div>
+
             <button onClick={attack}>Attack</button>
           </div>
 
@@ -158,6 +185,6 @@ function FieldInfo({ selectedField, villages }: { selectedField: Signal<serverV1
   }
 
   return <div>
-    {selectedField.value ? <Info field={selectedField.value} villages={villages} /> : <h2>No field selected</h2>}
+    {selectedField.value ? <Info field={selectedField.value} /> : <h2>No field selected</h2>}
   </div>
 }

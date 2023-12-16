@@ -18,7 +18,7 @@ func GetBuildingUpgradeOrder(ctx context.Context, id uint32) (BuildingUpgradeOrd
 }
 
 func GetBuildingUpgradeOrders(ctx context.Context, opts ...db.QueryOption) ([]BuildingUpgradeOrder, error) {
-	return db.Find[BuildingUpgradeOrder](ctx, BuildingUpgradeOrdersTableName, opts...)
+	return db.Find[BuildingUpgradeOrder](ctx, sq.Select("*").From(BuildingUpgradeOrdersTableName), opts...)
 }
 
 func UpdateBuildingUpgradeOrder(ctx context.Context, id uint32, order BuildingUpgradeOrder) error {

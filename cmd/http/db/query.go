@@ -29,9 +29,10 @@ func Insert[T any](ctx context.Context, table string, record *T) error {
 	return DB.QueryRowxContext(ctx, qrySql, args...).StructScan(record)
 }
 
-func Find[T any](ctx context.Context, table string, opts ...QueryOption) ([]T, error) {
+func Find[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOption) ([]T, error) {
 	var records []T
-	qry, err := applySelectQueryOptions(sq.Select("*").From(table), opts...)
+
+	qry, err := applySelectQueryOptions(builder, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to apply query options: %w", err)
 	}
@@ -48,7 +49,7 @@ func Find[T any](ctx context.Context, table string, opts ...QueryOption) ([]T, e
 
 	for rows.Next() {
 		var record T
-		err = rows.StructScan(&record)
+		err = rowScan(rows, &record)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
@@ -98,12 +99,7 @@ func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOp
 		return record, fmt.Errorf("failed to build sql query: %w", err)
 	}
 
-	row := DB.QueryRowxContext(ctx, qrySql, args...)
-	if reflect.TypeOf(record).Kind() == reflect.Struct {
-		err = row.StructScan(&record)
-	} else {
-		err = row.Scan(&record)
-	}
+	err = rowScan(DB.QueryRowxContext(ctx, qrySql, args...), &record)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, nil
@@ -114,7 +110,9 @@ func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOp
 	return record, nil
 }
 
-func Update(ctx context.Context, table string, record any, opts ...QueryOption) error {
+func Update(ctx context.Context, table string, record any, opt QueryOption, opts ...QueryOption) error {
+	opts = append([]QueryOption{opt}, opts...)
+
 	recordMap, err := recordToMap(record)
 	if err != nil {
 		return fmt.Errorf("failed to convert record to map: %w", err)
@@ -187,4 +185,17 @@ func applyDeleteQueryOptions(qry sq.DeleteBuilder, opts ...QueryOption) (sq.Sqli
 		}
 	}
 	return qry, nil
+}
+
+type Row interface {
+	Scan(dest ...interface{}) error
+	StructScan(dest interface{}) error
+}
+
+func rowScan[T any](row Row, record *T) error {
+	if reflect.TypeOf(*record).Kind() == reflect.Struct {
+		return row.StructScan(record)
+	} else {
+		return row.Scan(record)
+	}
 }

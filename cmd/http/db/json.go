@@ -35,13 +35,8 @@ type JsonMapKey interface {
 
 type JsonMap[K JsonMapKey, V any] map[K]V
 
-func (jm JsonMap[K, V]) Value() (driver.Value, error) {
-	return JsonValue(jm)
-}
-
-func (jm *JsonMap[K, V]) Scan(value any) error {
-	return JsonScan(jm, value)
-}
+func (jm JsonMap[K, V]) Value() (driver.Value, error) { return JsonValue(jm) }
+func (jm *JsonMap[K, V]) Scan(value any) error        { return JsonScan(jm, value) }
 
 func (jm JsonMap[K, V]) Get(k K) V {
 	if jm == nil {
@@ -49,6 +44,20 @@ func (jm JsonMap[K, V]) Get(k K) V {
 		return v
 	}
 	return jm[k]
+}
+
+func (jm *JsonMap[K, V]) Set(k K, v V) {
+	if *jm == nil {
+		*jm = map[K]V{}
+	}
+	(*jm)[k] = v
+}
+
+func (jm *JsonMap[K, V]) Iter() map[K]V {
+	if *jm == nil {
+		*jm = make(map[K]V)
+	}
+	return *jm
 }
 
 func (jm JsonMap[K, V]) ToProtobuf() map[string]V {

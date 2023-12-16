@@ -11,14 +11,14 @@ import (
 
 const TemplesTableName = "temples"
 
-func CreateTemple(ctx context.Context, x uint32, y uint32) (Temple, error) {
+func CreateTemple(ctx context.Context, coords Coords) (Temple, error) {
 	temple := Temple{}
 	err := db.Insert(ctx, TemplesTableName, &temple)
 	if err != nil {
 		return Temple{}, fmt.Errorf("failed to create temple: %w", err)
 	}
 
-	_, err = CreateWorldField(ctx, x, y, serverv1.World_Field_ENTITY_KIND_TEMPLE, temple.Id)
+	_, err = CreateWorldField(ctx, coords, serverv1.World_Field_ENTITY_KIND_TEMPLE, temple.Id)
 	if err != nil {
 		return Temple{}, fmt.Errorf("failed to create temple world field: %w", err)
 	}
@@ -31,7 +31,7 @@ func GetTemple(ctx context.Context, id uint32) (Temple, bool, error) {
 }
 
 func GetTemples(ctx context.Context, opts ...db.QueryOption) ([]Temple, error) {
-	return db.Find[Temple](ctx, TemplesTableName, opts...)
+	return db.Find[Temple](ctx, sq.Select("*").From(TemplesTableName), opts...)
 }
 
 func UpdateTemple(ctx context.Context, id uint32, temple Temple) error {
