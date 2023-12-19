@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'preact/hooks'
-import { useSignal, Signal, useComputed } from '@preact/signals';
-import { useNavigate } from 'react-router-dom' 
+import { useSignal, Signal, useSignalEffect } from '@preact/signals';
+import { useNavigate } from 'react-router-dom'
+import { Link } from "react-router-dom"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import * as entities from './entities'
 import server from './server'
 
 export default () => {
+  async function updateWorld() {
+    const res = await server.getWorld({ loadFields: true })
+    setWorld(res.world!)
+  }
+
+  // TODO: Use signals
   const [loading, setLoading] = useState(true)
   const [world, setWorld] = useState<serverV1.World>(new serverV1.World())
   const [villages, setVillages] = useState<entities.Village[]>([])
@@ -14,14 +21,31 @@ export default () => {
 
   useEffect(() => {
     Promise.all([
-      server.getWorld({ loadFields: true })
-        .then(({ world }) => setWorld(world!)),
-      server.getVillages({ playerId: 1 })
-        .then(({ villages }) => setVillages(villages!.map(village => new entities.Village(village)))), // TODO: Use auth player
+      updateWorld(),
+      server.getVillages({ playerId: 1 }) // TODO: Use auth player
+        .then(({ villages }) => setVillages(villages!.map(village => new entities.Village(village)))),
       server.getTroops({})
         .then(({ troops }) => setTroops(troops!.map(troop => new entities.Troop(troop)))),
-    ]).then(() => setLoading(false))
+    ])
+      .then(() => setLoading(false))
+      .catch(err => alert(err))
   }, [])
+
+  // TODO: Replace with SSE
+  useEffect(() => {
+    const intervalId = loading ? 0 : setInterval(async () => {
+      updateWorld()
+        .catch(err => alert(err))
+    }, 1000)
+
+    return () => {
+      if (intervalId !== -1) clearInterval(intervalId)
+    }
+  }, [loading])
+
+  function getWorldFieldById(id: number): serverV1.World_Field|undefined {
+    return world.fields.find(f => f.id == id)
+  }
 
   if (loading) {
     return <div>Loading...</div>
@@ -30,6 +54,7 @@ export default () => {
       <div>
         <h1>World Map</h1>
         <World world={world} villages={villages} troops={troops} />
+        <Attacks getWorldFieldById={getWorldFieldById} />
       </div>
     )
   }
@@ -38,6 +63,7 @@ export default () => {
 function World({ world, villages, troops }: { world: serverV1.World, villages: entities.Village[], troops: entities.Troop[] }) {
   const selectedField = useSignal<serverV1.World_Field | undefined>(undefined)
 
+  // TODO: Convert to tailwind
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: `repeat(${world.width}, 20px)`,
@@ -55,12 +81,11 @@ function World({ world, villages, troops }: { world: serverV1.World, villages: e
     fields[field.coords!.y][field.coords!.x] = field
   })
 
-  return <div style={{ display: 'flex' }}>
+  return (<div class="flex">
     <div style={gridStyle}>{fields.flat().map(field => <Field field={field} selectedField={selectedField} />)}</div>
     <FieldInfo selectedField={selectedField} villages={villages} troops={troops} />
-  </div>
+  </div>)
 }
-
 
 function Field({ field, selectedField }: { field: serverV1.World_Field, selectedField: Signal<serverV1.World_Field | undefined> }) {
   function kindStyle() {
@@ -90,6 +115,7 @@ function Field({ field, selectedField }: { field: serverV1.World_Field, selected
 
   const navigate = useNavigate()
 
+  // TODO: Convert to tailwind
   const fieldStyle = {
     position: 'relative',
     borderTop: '1px solid black',
@@ -102,20 +128,7 @@ function Field({ field, selectedField }: { field: serverV1.World_Field, selected
   )
 }
 
-function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<serverV1.World_Field | undefined>, villages: entities.Village[], troops: entities.Troop[] }) {
-  const entityKindName = useComputed(() => {
-    switch (selectedField.value?.entityKind) {
-      case serverV1.World_Field_EntityKind.VILLAGE:
-        return 'Village'
-
-      case serverV1.World_Field_EntityKind.TEMPLE:
-        return 'Temple'
-
-      default:
-        return 'Wild Field'
-    }
-  })
-
+function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<serverV1.World_Field|undefined>, villages: entities.Village[], troops: entities.Troop[] }) {
   function Info({ field }: { field: serverV1.World_Field }) {
     async function attack() {
       try {
@@ -126,11 +139,9 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
         }
 
         await server.attack({
-          attack: new serverV1.Attack({
-            villageId: selectedVillage.peek().id,
-            targetCoords: field.coords,
-            troopQuantity: selectedTroopQuantity.peek(),
-          }),
+          villageId: selectedVillage.peek().id,
+          targetCoords: field.coords,
+          troopQuantity: selectedTroopQuantity.peek(),
         })
 
         navigate(0)
@@ -148,7 +159,7 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
 
     function Actions() {
       switch (field.entityKind) {
-        case serverV1.World_Field_EntityKind.UNSPECIFIED:
+        case serverV1.World_Field_EntityKind.WILD:
           return <div>
             <label>Village</label>
             <select value={selectedVillage.value.id} onChange={ev => selectedVillage.value = villages.find(v => v.id == +ev.currentTarget.value)!}>
@@ -178,7 +189,7 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
     }
 
     return (<>
-      <h2>{entityKindName}</h2>
+      <h2>{World_Field_EntityKindToString(field.entityKind)}</h2>
       <p><span>Coords</span> {field.coords!.x}, {field.coords!.y}</p>
       <Actions />
     </>)
@@ -187,4 +198,72 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
   return <div>
     {selectedField.value ? <Info field={selectedField.value} /> : <h2>No field selected</h2>}
   </div>
+}
+
+function Attacks({ getWorldFieldById }: { getWorldFieldById: (id: number) => serverV1.World_Field|undefined }) {
+  function AttackListBody({ loading, attacks }: { loading: boolean, attacks: serverV1.Attack[] }) {
+    if (loading) return (<p>Loading...</p>)
+    if (attacks.length == 0) return (<p>No attacks</p>)
+    return (<>{
+      attacks.map(attack => {
+        const worldField = getWorldFieldById(attack.worldFieldId)!
+        return (<div>
+          <Link to={`/world/fields/${worldField.id}`}>{World_Field_EntityKindToString(worldField.entityKind)}</Link>
+          <span>{`(${worldField.coords!.x}, ${worldField.coords!.y})`} - {attack.timeLeft}s</span>
+        </div>)
+      })
+    }</>)
+  }
+
+  async function updateAttacks() {
+    const res = await server.getAttacks({})
+    outgoingAttacks.value = res.outgoingAttacks
+  }
+  
+  const loading = useSignal(true)
+  const outgoingAttacks = useSignal<serverV1.Attack[]>([])
+
+
+  useEffect(() => {
+    updateAttacks()
+      .then(() => loading.value = false)
+      .catch(err => alert(err))
+  }, [])
+
+  // TODO: Replace with SSE
+  useSignalEffect(() => {
+    const intervalId = loading.value ? 0 : setInterval(async () => {
+      updateAttacks()
+        .catch(err => alert(err))
+    }, 1000)
+
+    return () => {
+      if (intervalId !== -1) clearInterval(intervalId)
+    }
+  })
+
+  return (
+    <div>
+      <h2>Attacks</h2>
+      <h3>Outgoing</h3>
+      <div>
+        <AttackListBody loading={loading.value} attacks={outgoingAttacks.value} />
+      </div>
+      <h3>Incoming</h3>
+      <p>TODO</p>
+    </div>
+  )
+}
+
+function World_Field_EntityKindToString(entityKind: serverV1.World_Field_EntityKind): string {
+  switch (entityKind) {
+    case serverV1.World_Field_EntityKind.VILLAGE:
+      return 'Village'
+
+    case serverV1.World_Field_EntityKind.TEMPLE:
+      return 'Temple'
+
+    default:
+      return 'Wild Field'
+  }
 }

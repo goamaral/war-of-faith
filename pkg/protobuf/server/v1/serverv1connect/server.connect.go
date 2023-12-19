@@ -57,6 +57,8 @@ const (
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
 	// ServiceAttackProcedure is the fully-qualified name of the Service's Attack RPC.
 	ServiceAttackProcedure = "/server.v1.Service/Attack"
+	// ServiceGetAttacksProcedure is the fully-qualified name of the Service's GetAttacks RPC.
+	ServiceGetAttacksProcedure = "/server.v1.Service/GetAttacks"
 	// ServiceGetPlayerProcedure is the fully-qualified name of the Service's GetPlayer RPC.
 	ServiceGetPlayerProcedure = "/server.v1.Service/GetPlayer"
 )
@@ -77,6 +79,7 @@ type ServiceClient interface {
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
 }
@@ -141,6 +144,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceAttackProcedure,
 			opts...,
 		),
+		getAttacks: connect_go.NewClient[v1.GetAttacksRequest, v1.GetAttacksResponse](
+			httpClient,
+			baseURL+ServiceGetAttacksProcedure,
+			opts...,
+		),
 		getPlayer: connect_go.NewClient[v1.GetPlayerRequest, v1.GetPlayerResponse](
 			httpClient,
 			baseURL+ServiceGetPlayerProcedure,
@@ -161,6 +169,7 @@ type serviceClient struct {
 	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
 	attack                     *connect_go.Client[v1.AttackRequest, v1.AttackResponse]
+	getAttacks                 *connect_go.Client[v1.GetAttacksRequest, v1.GetAttacksResponse]
 	getPlayer                  *connect_go.Client[v1.GetPlayerRequest, v1.GetPlayerResponse]
 }
 
@@ -214,6 +223,11 @@ func (c *serviceClient) Attack(ctx context.Context, req *connect_go.Request[v1.A
 	return c.attack.CallUnary(ctx, req)
 }
 
+// GetAttacks calls server.v1.Service.GetAttacks.
+func (c *serviceClient) GetAttacks(ctx context.Context, req *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error) {
+	return c.getAttacks.CallUnary(ctx, req)
+}
+
 // GetPlayer calls server.v1.Service.GetPlayer.
 func (c *serviceClient) GetPlayer(ctx context.Context, req *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
 	return c.getPlayer.CallUnary(ctx, req)
@@ -235,6 +249,7 @@ type ServiceHandler interface {
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
 }
@@ -295,6 +310,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.Attack,
 		opts...,
 	)
+	serviceGetAttacksHandler := connect_go.NewUnaryHandler(
+		ServiceGetAttacksProcedure,
+		svc.GetAttacks,
+		opts...,
+	)
 	serviceGetPlayerHandler := connect_go.NewUnaryHandler(
 		ServiceGetPlayerProcedure,
 		svc.GetPlayer,
@@ -322,6 +342,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceGetWorldHandler.ServeHTTP(w, r)
 		case ServiceAttackProcedure:
 			serviceAttackHandler.ServeHTTP(w, r)
+		case ServiceGetAttacksProcedure:
+			serviceGetAttacksHandler.ServeHTTP(w, r)
 		case ServiceGetPlayerProcedure:
 			serviceGetPlayerHandler.ServeHTTP(w, r)
 		default:
@@ -371,6 +393,10 @@ func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request
 
 func (UnimplementedServiceHandler) Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.Attack is not implemented"))
+}
+
+func (UnimplementedServiceHandler) GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetAttacks is not implemented"))
 }
 
 func (UnimplementedServiceHandler) GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {

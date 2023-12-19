@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AttackRequest, AttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
+import { AttackRequest, AttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -108,6 +108,15 @@ export const Service = {
       name: "Attack",
       I: AttackRequest,
       O: AttackResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.GetAttacks
+     */
+    getAttacks: {
+      name: "GetAttacks",
+      I: GetAttacksRequest,
+      O: GetAttacksResponse,
       kind: MethodKind.Unary,
     },
     /**

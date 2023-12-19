@@ -44,7 +44,12 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 }
 
 func (s *Server) GetVillages(ctx context.Context, req *connect.Request[serverv1.GetVillagesRequest]) (*connect.Response[serverv1.GetVillagesResponse], error) {
-	villages, err := model.GetVillages(ctx, sq.Eq{"player_id": req.Msg.PlayerId})
+	filters := []db.QueryOption{}
+	if req.Msg.PlayerId != nil {
+		filters = append(filters, sq.Eq{"player_id": req.Msg.PlayerId.Value})
+	}
+
+	villages, err := model.GetVillages(ctx, filters...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get villages: %w", err)
 	}
@@ -266,11 +271,11 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 	if err != nil {
 		return nil, fmt.Errorf("failed to get player village ids: %w", err)
 	}
-	if !lo.Contains(villagesIds, req.Msg.Attack.VillageId) {
+	if !lo.Contains(villagesIds, req.Msg.VillageId) {
 		return nil, status.Error(codes.PermissionDenied, "village does not belong to you")
 	}
 
-	village, found, err := model.GetVillage(ctx, req.Msg.Attack.VillageId)
+	village, found, err := model.GetVillage(ctx, req.Msg.VillageId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get village: %w", err)
 	}
@@ -280,7 +285,7 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 
 	var attackSize uint32
 	var troopQuantity model.Troop_Quantity
-	for pKind, quantity := range req.Msg.Attack.TroopQuantity {
+	for pKind, quantity := range req.Msg.TroopQuantity {
 		kind, err := model.Troop_KindFromProtobuf(pKind)
 		if err != nil {
 			return nil, fmt.Errorf("invalid troop kind %s: %w", pKind, err)
@@ -300,14 +305,26 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 
 	// TODO: Check if coords inside the world
 
-	targetCoords, err := model.CoordsFromProtobuf(req.Msg.Attack.TargetCoords)
+	targetCoords, err := model.CoordsFromProtobuf(req.Msg.TargetCoords)
 	if err != nil {
 		return nil, fmt.Errorf("invalid target coords: %w", err)
 	}
+	worldField, found, err := db.FindOne[model.WorldField](ctx, model.WorldFieldsTableName, sq.Eq{"coords": targetCoords})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get world field: %w", err)
+	}
+	if !found {
+		worldField = model.WorldField{Coords: targetCoords, EntityKind: serverv1.World_Field_ENTITY_KIND_WILD}
+		err = db.Insert(ctx, model.WorldFieldsTableName, &worldField)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create world field: %w", err)
+		}
+	}
+
 	err = db.Insert(ctx, model.AttacksTableName, &model.Attack{
-		TargetCoords:  targetCoords,
 		TroopQuantity: troopQuantity,
 		TimeLeft:      10, // TODO: Define time based on distance and troop types
+		WorldFieldId:  worldField.Id,
 		VillageId:     village.Id,
 		PlayerId:      village.PlayerId,
 	})
@@ -325,6 +342,27 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 	}
 
 	return connect.NewResponse(&serverv1.AttackResponse{}), nil
+}
+
+func (s *Server) GetAttacks(ctx context.Context, req *connect.Request[serverv1.GetAttacksRequest]) (*connect.Response[serverv1.GetAttacksResponse], error) {
+	outgoingAttacks, err := db.Find[model.Attack](ctx, sq.Select("*").From(model.AttacksTableName), sq.Eq{"player_id": 1}) // TODO: Use auth player
+	if err != nil {
+		return nil, fmt.Errorf("failed to get outgoing attacks: %w", err)
+	}
+
+	pOutgoingAttacks := []*serverv1.Attack{}
+	for _, attack := range outgoingAttacks {
+		pAttack, err := attack.ToProtobuf()
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert attack (id: %d) to protobuf: %w", attack.Id, err)
+		}
+		pOutgoingAttacks = append(pOutgoingAttacks, pAttack)
+
+	}
+
+	return connect.NewResponse(&serverv1.GetAttacksResponse{
+		OutgoingAttacks: pOutgoingAttacks,
+	}), nil
 }
 
 /* PLAYERS */
@@ -403,50 +441,62 @@ func main() {
 					continue
 				}
 
-				field, found, err := db.FindOne[model.WorldField](ctx, model.WorldFieldsTableName, sq.Eq{"coords": attack.TargetCoords})
+				worldField, err := attack.WorldField(ctx)
 				if err != nil {
-					log.Printf("failed to find field (coords: %s): %v", attack.TargetCoords, err)
+					log.Printf("failed to get attack (id: %d) world field: %v", attack.Id, err)
 					continue
 				}
-				if !found {
-					_, err = model.CreateVillage(context.Background(), attack.TargetCoords, attack.PlayerId)
+				switch worldField.EntityKind {
+				case serverv1.World_Field_ENTITY_KIND_WILD:
+					village := model.NewVillage(attack.PlayerId)
+					err = db.Insert(ctx, model.VillagesTableName, &village)
 					if err != nil {
 						log.Printf("failed to create new village: %v", err)
 						continue
 					}
-				} else {
-					switch field.EntityKind {
-					case serverv1.World_Field_ENTITY_KIND_VILLAGE:
-						targetVillage, err := db.First[model.Village](ctx, sq.Select("*").From(model.VillagesTableName), sq.Eq{"id": field.EntityId})
-						if err != nil {
-							log.Printf("failed to find target village (id: %d): %v", field.EntityId, err)
-							continue
-						}
-						if targetVillage.PlayerId == attack.VillageId {
-							// TODO: Add attack troop quantity to target village
-						} else {
-							// TODO: Combat
 
-							var hasLeader bool
-							for kind, quantity := range attack.TroopQuantity.Iter() {
-								if kind == model.Troop_Kind_LEADER && quantity > 0 {
-									hasLeader = true
-									break
-								}
-							}
-							if hasLeader {
-								targetVillage.PlayerId = attack.PlayerId
-								err = db.Update(ctx, model.VillagesTableName, targetVillage, sq.Eq{"id": targetVillage.Id})
-								if err != nil {
-									log.Printf("failed to update village (id: %d) owner: %v", targetVillage.Id, err)
-									continue
-								}
-							}
-						}
-
-					case serverv1.World_Field_ENTITY_KIND_TEMPLE:
-						log.Printf("don't know how to attack temple") // TODO: Rethink this
+					err = db.Update(ctx, model.WorldFieldsTableName,
+						map[string]any{
+							"entity_kind": serverv1.World_Field_ENTITY_KIND_VILLAGE,
+							"entity_id":   village.Id,
+						},
+						sq.Eq{"id": worldField.Id},
+					)
+					if err != nil {
+						log.Printf("failed to convert world field (id: %d) from wild to village: %v", worldField.Id, err)
+						continue
 					}
+
+				case serverv1.World_Field_ENTITY_KIND_VILLAGE:
+					targetVillage, err := db.First[model.Village](ctx, sq.Select("*").From(model.VillagesTableName), sq.Eq{"id": worldField.EntityId})
+					if err != nil {
+						log.Printf("failed to find target village (id: %d): %v", worldField.EntityId, err)
+						continue
+					}
+					if targetVillage.PlayerId == attack.VillageId {
+						// TODO: Add attack troop quantity to target village
+					} else {
+						// TODO: Combat
+
+						var hasLeader bool
+						for kind, quantity := range attack.TroopQuantity.Iter() {
+							if kind == model.Troop_Kind_LEADER && quantity > 0 {
+								hasLeader = true
+								break
+							}
+						}
+						if hasLeader {
+							targetVillage.PlayerId = attack.PlayerId
+							err = db.Update(ctx, model.VillagesTableName, targetVillage, sq.Eq{"id": targetVillage.Id})
+							if err != nil {
+								log.Printf("failed to update village (id: %d) owner: %v", targetVillage.Id, err)
+								continue
+							}
+						}
+					}
+
+				case serverv1.World_Field_ENTITY_KIND_TEMPLE:
+					log.Printf("don't know how to attack temple") // TODO: Rethink this
 				}
 			} else {
 				err := db.Update(ctx, model.AttacksTableName, attack, sq.Eq{"id": attack.Id})
@@ -593,7 +643,8 @@ func CreateDB() error {
 		);
 
 		CREATE TABLE world_fields (
-			coords VARCHAR(255) PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
+			coords VARCHAR(255) NOT NULL,
 			entity_kind INTERGER NOT NULL,
 			entity_id INTEGER NOT NULL
 		);
@@ -604,12 +655,13 @@ func CreateDB() error {
 
 		CREATE TABLE attacks (
 			id INTEGER PRIMARY KEY,
-			target_coords VARCHAR(255) NOT NULL,
 			troop_quantity TEXT NOT NULL,
 			time_left UNSIGNED INTEGER NOT NULL,
 
+			world_field_id INTEGER NOT NULL,
 			village_id INTEGER NOT NULL,
 			player_id INTEGER NOT NULL,
+			FOREIGN KEY(world_field_id) REFERENCES world_fields(id),
 			FOREIGN KEY(village_id) REFERENCES villages(id),
 			FOREIGN KEY(player_id) REFERENCES players(id)
 		);

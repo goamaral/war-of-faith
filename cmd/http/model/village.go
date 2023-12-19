@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"war-of-faith/cmd/http/db"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 
 	sq "github.com/Masterminds/squirrel"
@@ -19,6 +20,23 @@ type Village struct {
 
 	buildingUpgradeOrders *[]BuildingUpgradeOrder
 	troopTrainingOrders   *[]TroopTrainingOrder
+}
+
+func NewVillage(playerId uint32) Village {
+	return Village{
+		BuildingLevel: Building_Level{
+			JsonMap: db.JsonMap[Building_Kind, uint32]{
+				Building_Kind_HALL:      1,
+				Building_Kind_GOLD_MINE: 1,
+			},
+		},
+		TroopQuantity: Troop_Quantity{
+			JsonMap: db.JsonMap[Troop_Kind, uint32]{
+				Troop_Kind_LEADER: 0,
+			},
+		},
+		PlayerId: playerId,
+	}
 }
 
 func (v Village) CanAfford(resources Resources) bool {

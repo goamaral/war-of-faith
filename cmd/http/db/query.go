@@ -102,7 +102,7 @@ func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOp
 	err = rowScan(DB.QueryRowxContext(ctx, qrySql, args...), &record)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return record, nil
+			return record, ErrNotFound
 		}
 		return record, err
 	}
@@ -113,9 +113,20 @@ func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOp
 func Update(ctx context.Context, table string, record any, opt QueryOption, opts ...QueryOption) error {
 	opts = append([]QueryOption{opt}, opts...)
 
-	recordMap, err := recordToMap(record)
-	if err != nil {
-		return fmt.Errorf("failed to convert record to map: %w", err)
+	var recordMap map[string]any
+	var err error
+	switch k := reflect.TypeOf(record).Kind(); k {
+	case reflect.Struct:
+		recordMap, err = recordToMap(record)
+		if err != nil {
+			return fmt.Errorf("failed to convert record to map: %w", err)
+		}
+
+	case reflect.Map:
+		recordMap = record.(map[string]any)
+
+	default:
+		return fmt.Errorf("unsupported record type %s", k)
 	}
 
 	qry, err := applyUpdateQueryOptions(sq.Update(table).SetMap(recordMap), opts...)

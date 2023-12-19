@@ -36,6 +36,7 @@ type ServiceClient interface {
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
 	Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error)
+	GetAttacks(ctx context.Context, in *GetAttacksRequest, opts ...grpc.CallOption) (*GetAttacksResponse, error)
 	// PLAYERS
 	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
 }
@@ -138,6 +139,15 @@ func (c *serviceClient) Attack(ctx context.Context, in *AttackRequest, opts ...g
 	return out, nil
 }
 
+func (c *serviceClient) GetAttacks(ctx context.Context, in *GetAttacksRequest, opts ...grpc.CallOption) (*GetAttacksResponse, error) {
+	out := new(GetAttacksResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetAttacks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error) {
 	out := new(GetPlayerResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/GetPlayer", in, out, opts...)
@@ -165,6 +175,7 @@ type ServiceServer interface {
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
 	Attack(context.Context, *AttackRequest) (*AttackResponse, error)
+	GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error)
 	// PLAYERS
 	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
 }
@@ -202,6 +213,9 @@ func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*
 }
 func (UnimplementedServiceServer) Attack(context.Context, *AttackRequest) (*AttackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Attack not implemented")
+}
+func (UnimplementedServiceServer) GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttacks not implemented")
 }
 func (UnimplementedServiceServer) GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlayer not implemented")
@@ -398,6 +412,24 @@ func _Service_Attack_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetAttacks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAttacksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetAttacks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetAttacks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetAttacks(ctx, req.(*GetAttacksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetPlayerRequest)
 	if err := dec(in); err != nil {
@@ -462,6 +494,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Attack",
 			Handler:    _Service_Attack_Handler,
+		},
+		{
+			MethodName: "GetAttacks",
+			Handler:    _Service_GetAttacks_Handler,
 		},
 		{
 			MethodName: "GetPlayer",

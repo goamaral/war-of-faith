@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import VillagesPage from './VillagesPage'
 import VillagePage from './VillagePage'
-import WorldMapPage from './WorldMapPage'
+import WorldPage from './WorldPage'
 
 function App() {
   const router = createBrowserRouter([
@@ -17,8 +17,8 @@ function App() {
       element: <VillagePage />
     },
     {
-      path: "/world-map",
-      element: <WorldMapPage />
+      path: "/world",
+      element: <WorldPage />
     },
   ])
 

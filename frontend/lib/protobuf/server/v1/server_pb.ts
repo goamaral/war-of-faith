@@ -291,9 +291,9 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
  */
 export class GetVillagesRequest extends Message<GetVillagesRequest> {
   /**
-   * @generated from field: uint32 player_id = 1;
+   * @generated from field: google.protobuf.UInt32Value player_id = 1;
    */
-  playerId = 0;
+  playerId?: number;
 
   constructor(data?: PartialMessage<GetVillagesRequest>) {
     super();
@@ -303,7 +303,7 @@ export class GetVillagesRequest extends Message<GetVillagesRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.GetVillagesRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "player_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: "player_id", kind: "message", T: UInt32Value },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillagesRequest {
@@ -1078,17 +1078,22 @@ export class World extends Message<World> {
  */
 export class World_Field extends Message<World_Field> {
   /**
-   * @generated from field: server.v1.Coords coords = 1;
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: server.v1.Coords coords = 2;
    */
   coords?: Coords;
 
   /**
-   * @generated from field: server.v1.World.Field.EntityKind entity_kind = 2;
+   * @generated from field: server.v1.World.Field.EntityKind entity_kind = 3;
    */
-  entityKind = World_Field_EntityKind.UNSPECIFIED;
+  entityKind = World_Field_EntityKind.WILD;
 
   /**
-   * @generated from field: uint32 entity_id = 3;
+   * @generated from field: uint32 entity_id = 4;
    */
   entityId = 0;
 
@@ -1100,9 +1105,10 @@ export class World_Field extends Message<World_Field> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.World.Field";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "coords", kind: "message", T: Coords },
-    { no: 2, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
-    { no: 3, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "coords", kind: "message", T: Coords },
+    { no: 3, name: "entity_kind", kind: "enum", T: proto3.getEnumType(World_Field_EntityKind) },
+    { no: 4, name: "entity_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): World_Field {
@@ -1127,9 +1133,9 @@ export class World_Field extends Message<World_Field> {
  */
 export enum World_Field_EntityKind {
   /**
-   * @generated from enum value: ENTITY_KIND_UNSPECIFIED = 0;
+   * @generated from enum value: ENTITY_KIND_WILD = 0;
    */
-  UNSPECIFIED = 0,
+  WILD = 0,
 
   /**
    * @generated from enum value: ENTITY_KIND_VILLAGE = 1;
@@ -1143,7 +1149,7 @@ export enum World_Field_EntityKind {
 }
 // Retrieve enum metadata with: proto3.getEnumType(World_Field_EntityKind)
 proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKind", [
-  { no: 0, name: "ENTITY_KIND_UNSPECIFIED" },
+  { no: 0, name: "ENTITY_KIND_WILD" },
   { no: 1, name: "ENTITY_KIND_VILLAGE" },
   { no: 2, name: "ENTITY_KIND_TEMPLE" },
 ]);
@@ -1163,9 +1169,9 @@ export class Attack extends Message<Attack> {
   villageId = 0;
 
   /**
-   * @generated from field: server.v1.Coords target_coords = 3;
+   * @generated from field: uint32 world_field_id = 3;
    */
-  targetCoords?: Coords;
+  worldFieldId = 0;
 
   /**
    * <troop_kind, quantity>
@@ -1189,7 +1195,7 @@ export class Attack extends Message<Attack> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "target_coords", kind: "message", T: Coords },
+    { no: 3, name: "world_field_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
     { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
   ]);
@@ -1294,9 +1300,21 @@ export class GetWorldResponse extends Message<GetWorldResponse> {
  */
 export class AttackRequest extends Message<AttackRequest> {
   /**
-   * @generated from field: server.v1.Attack attack = 1;
+   * @generated from field: uint32 village_id = 1;
    */
-  attack?: Attack;
+  villageId = 0;
+
+  /**
+   * @generated from field: server.v1.Coords target_coords = 2;
+   */
+  targetCoords?: Coords;
+
+  /**
+   * <troop_kind, quantity>
+   *
+   * @generated from field: map<string, uint32> troop_quantity = 3;
+   */
+  troopQuantity: { [key: string]: number } = {};
 
   constructor(data?: PartialMessage<AttackRequest>) {
     super();
@@ -1306,7 +1324,9 @@ export class AttackRequest extends Message<AttackRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.AttackRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "attack", kind: "message", T: Attack },
+    { no: 1, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "target_coords", kind: "message", T: Coords },
+    { no: 3, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AttackRequest {
@@ -1360,6 +1380,76 @@ export class AttackResponse extends Message<AttackResponse> {
 
   static equals(a: AttackResponse | PlainMessage<AttackResponse> | undefined, b: AttackResponse | PlainMessage<AttackResponse> | undefined): boolean {
     return proto3.util.equals(AttackResponse, a, b);
+  }
+}
+
+/**
+ * GetAttacks
+ *
+ * @generated from message server.v1.GetAttacksRequest
+ */
+export class GetAttacksRequest extends Message<GetAttacksRequest> {
+  constructor(data?: PartialMessage<GetAttacksRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetAttacksRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetAttacksRequest {
+    return new GetAttacksRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetAttacksRequest {
+    return new GetAttacksRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetAttacksRequest {
+    return new GetAttacksRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetAttacksRequest | PlainMessage<GetAttacksRequest> | undefined, b: GetAttacksRequest | PlainMessage<GetAttacksRequest> | undefined): boolean {
+    return proto3.util.equals(GetAttacksRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetAttacksResponse
+ */
+export class GetAttacksResponse extends Message<GetAttacksResponse> {
+  /**
+   * @generated from field: repeated server.v1.Attack outgoing_attacks = 1;
+   */
+  outgoingAttacks: Attack[] = [];
+
+  constructor(data?: PartialMessage<GetAttacksResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetAttacksResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "outgoing_attacks", kind: "message", T: Attack, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetAttacksResponse {
+    return new GetAttacksResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetAttacksResponse {
+    return new GetAttacksResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetAttacksResponse {
+    return new GetAttacksResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetAttacksResponse | PlainMessage<GetAttacksResponse> | undefined, b: GetAttacksResponse | PlainMessage<GetAttacksResponse> | undefined): boolean {
+    return proto3.util.equals(GetAttacksResponse, a, b);
   }
 }
 

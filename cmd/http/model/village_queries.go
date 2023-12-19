@@ -12,21 +12,8 @@ import (
 
 const VillagesTableName = "villages"
 
-func CreateVillage(ctx context.Context, coords Coords, playerId uint32) (Village, error) {
-	village := Village{
-		BuildingLevel: Building_Level{
-			JsonMap: db.JsonMap[Building_Kind, uint32]{
-				Building_Kind_HALL:      1,
-				Building_Kind_GOLD_MINE: 1,
-			},
-		},
-		TroopQuantity: Troop_Quantity{
-			JsonMap: db.JsonMap[Troop_Kind, uint32]{
-				Troop_Kind_LEADER: 0,
-			},
-		},
-		PlayerId: playerId,
-	}
+func BootstrapVillage(ctx context.Context, coords Coords, playerId uint32) (Village, error) {
+	village := NewVillage(playerId)
 	err := db.Insert(ctx, VillagesTableName, &village)
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village: %w", err)

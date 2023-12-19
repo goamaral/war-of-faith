@@ -59,7 +59,6 @@ const VillageLoader = () => {
         updatePlayer(),
       ])
         .catch(err => alert(err))
-
     }, 1000)
 
     return () => {

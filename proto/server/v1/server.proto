@@ -41,7 +41,7 @@ message GetVillageResponse {
 
 // GetVillages
 message GetVillagesRequest {
-  uint32 player_id = 1;
+  google.protobuf.UInt32Value player_id = 1;
 }
 message GetVillagesResponse {
   repeated Village villages = 1;
@@ -125,12 +125,13 @@ message World {
   repeated World.Field fields = 3;
 
   message Field {
-    Coords coords = 1;
-    World.Field.EntityKind entity_kind = 2;
-    uint32 entity_id = 3;
+    uint32 id = 1;
+    Coords coords = 2;
+    World.Field.EntityKind entity_kind = 3;
+    uint32 entity_id = 4;
 
     enum EntityKind {
-      ENTITY_KIND_UNSPECIFIED = 0;
+      ENTITY_KIND_WILD = 0;
       ENTITY_KIND_VILLAGE = 1;
       ENTITY_KIND_TEMPLE = 2;
     }
@@ -140,7 +141,7 @@ message World {
 message Attack {
   uint32 id = 1;
   uint32 village_id = 2;
-  Coords target_coords = 3;
+  uint32 world_field_id = 3;
   map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
   uint32 time_left = 5;
 }
@@ -155,10 +156,18 @@ message GetWorldResponse {
 
 // Attack
 message AttackRequest {
-  Attack attack = 1;
+  uint32 village_id = 1;
+  Coords target_coords = 2;
+  map<string, uint32> troop_quantity = 3; // <troop_kind, quantity>
 }
 message AttackResponse {
   Attack attack = 1;
+}
+
+// GetAttacks
+message GetAttacksRequest {}
+message GetAttacksResponse {
+  repeated Attack outgoing_attacks = 1;
 }
 
 /* PLAYERS */
@@ -193,6 +202,7 @@ service Service {
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
   rpc Attack(AttackRequest) returns (AttackResponse);
+  rpc GetAttacks(GetAttacksRequest) returns (GetAttacksResponse);
 
   /* PLAYERS */
   rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);

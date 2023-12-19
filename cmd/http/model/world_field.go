@@ -6,7 +6,8 @@ import (
 )
 
 type WorldField struct {
-	Coords     Coords                          `db:"coords"`
+	Id         uint32                          `db:"id"`
+	Coords     Coords                          `db:"coords"`      // TODO: Create unique index
 	EntityKind serverv1.World_Field_EntityKind `db:"entity_kind"` // TODO: Convert to string enum
 	EntityId   uint32                          `db:"entity_id"`
 }
@@ -18,6 +19,7 @@ func (wc WorldField) ToProtobuf() (*serverv1.World_Field, error) {
 	}
 
 	return &serverv1.World_Field{
+		Id:         wc.Id,
 		Coords:     pCoords,
 		EntityKind: wc.EntityKind,
 		EntityId:   wc.EntityId,

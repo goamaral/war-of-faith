@@ -17,7 +17,7 @@ func CreatePlayer(ctx context.Context, coords Coords) (Player, error) {
 		return Player{}, fmt.Errorf("failed to create player: %w", err)
 	}
 
-	_, err = CreateVillage(context.Background(), coords, player.Id)
+	_, err = BootstrapVillage(context.Background(), coords, player.Id)
 	if err != nil {
 		return Player{}, fmt.Errorf("failed to create village: %w", err)
 	}
@@ -46,6 +46,7 @@ func GetPlayerTrainableLeaders(ctx context.Context, playerId uint32) (uint32, er
 	if err != nil {
 		return 0, fmt.Errorf("failed to get leaders in training: %w", err)
 	}
+	// TODO: Get leaders in attacks
 	nVillages, err := db.First[uint32](ctx,
 		sq.Select("COUNT(*)").From(VillagesTableName),
 		sq.Eq{"player_id": playerId},
