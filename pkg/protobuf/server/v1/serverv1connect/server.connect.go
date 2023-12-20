@@ -55,8 +55,10 @@ const (
 	ServiceCancelTroopTrainingOrderProcedure = "/server.v1.Service/CancelTroopTrainingOrder"
 	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
-	// ServiceAttackProcedure is the fully-qualified name of the Service's Attack RPC.
-	ServiceAttackProcedure = "/server.v1.Service/Attack"
+	// ServiceIssueAttackProcedure is the fully-qualified name of the Service's IssueAttack RPC.
+	ServiceIssueAttackProcedure = "/server.v1.Service/IssueAttack"
+	// ServiceCancelAttackProcedure is the fully-qualified name of the Service's CancelAttack RPC.
+	ServiceCancelAttackProcedure = "/server.v1.Service/CancelAttack"
 	// ServiceGetAttacksProcedure is the fully-qualified name of the Service's GetAttacks RPC.
 	ServiceGetAttacksProcedure = "/server.v1.Service/GetAttacks"
 	// ServiceGetPlayerProcedure is the fully-qualified name of the Service's GetPlayer RPC.
@@ -78,7 +80,8 @@ type ServiceClient interface {
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
-	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
+	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
@@ -139,9 +142,14 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceGetWorldProcedure,
 			opts...,
 		),
-		attack: connect_go.NewClient[v1.AttackRequest, v1.AttackResponse](
+		issueAttack: connect_go.NewClient[v1.IssueAttackRequest, v1.IssueAttackResponse](
 			httpClient,
-			baseURL+ServiceAttackProcedure,
+			baseURL+ServiceIssueAttackProcedure,
+			opts...,
+		),
+		cancelAttack: connect_go.NewClient[v1.CancelAttackRequest, v1.CancelAttackResponse](
+			httpClient,
+			baseURL+ServiceCancelAttackProcedure,
 			opts...,
 		),
 		getAttacks: connect_go.NewClient[v1.GetAttacksRequest, v1.GetAttacksResponse](
@@ -168,7 +176,8 @@ type serviceClient struct {
 	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
 	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
-	attack                     *connect_go.Client[v1.AttackRequest, v1.AttackResponse]
+	issueAttack                *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
+	cancelAttack               *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
 	getAttacks                 *connect_go.Client[v1.GetAttacksRequest, v1.GetAttacksResponse]
 	getPlayer                  *connect_go.Client[v1.GetPlayerRequest, v1.GetPlayerResponse]
 }
@@ -218,9 +227,14 @@ func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1
 	return c.getWorld.CallUnary(ctx, req)
 }
 
-// Attack calls server.v1.Service.Attack.
-func (c *serviceClient) Attack(ctx context.Context, req *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
-	return c.attack.CallUnary(ctx, req)
+// IssueAttack calls server.v1.Service.IssueAttack.
+func (c *serviceClient) IssueAttack(ctx context.Context, req *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error) {
+	return c.issueAttack.CallUnary(ctx, req)
+}
+
+// CancelAttack calls server.v1.Service.CancelAttack.
+func (c *serviceClient) CancelAttack(ctx context.Context, req *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error) {
+	return c.cancelAttack.CallUnary(ctx, req)
 }
 
 // GetAttacks calls server.v1.Service.GetAttacks.
@@ -248,7 +262,8 @@ type ServiceHandler interface {
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
-	Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error)
+	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
+	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
@@ -305,9 +320,14 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.GetWorld,
 		opts...,
 	)
-	serviceAttackHandler := connect_go.NewUnaryHandler(
-		ServiceAttackProcedure,
-		svc.Attack,
+	serviceIssueAttackHandler := connect_go.NewUnaryHandler(
+		ServiceIssueAttackProcedure,
+		svc.IssueAttack,
+		opts...,
+	)
+	serviceCancelAttackHandler := connect_go.NewUnaryHandler(
+		ServiceCancelAttackProcedure,
+		svc.CancelAttack,
 		opts...,
 	)
 	serviceGetAttacksHandler := connect_go.NewUnaryHandler(
@@ -340,8 +360,10 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
 		case ServiceGetWorldProcedure:
 			serviceGetWorldHandler.ServeHTTP(w, r)
-		case ServiceAttackProcedure:
-			serviceAttackHandler.ServeHTTP(w, r)
+		case ServiceIssueAttackProcedure:
+			serviceIssueAttackHandler.ServeHTTP(w, r)
+		case ServiceCancelAttackProcedure:
+			serviceCancelAttackHandler.ServeHTTP(w, r)
 		case ServiceGetAttacksProcedure:
 			serviceGetAttacksHandler.ServeHTTP(w, r)
 		case ServiceGetPlayerProcedure:
@@ -391,8 +413,12 @@ func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetWorld is not implemented"))
 }
 
-func (UnimplementedServiceHandler) Attack(context.Context, *connect_go.Request[v1.AttackRequest]) (*connect_go.Response[v1.AttackResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.Attack is not implemented"))
+func (UnimplementedServiceHandler) IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueAttack is not implemented"))
+}
+
+func (UnimplementedServiceHandler) CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelAttack is not implemented"))
 }
 
 func (UnimplementedServiceHandler) GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error) {

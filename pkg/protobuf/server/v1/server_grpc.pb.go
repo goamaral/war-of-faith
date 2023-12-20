@@ -35,7 +35,8 @@ type ServiceClient interface {
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
-	Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error)
+	IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error)
+	CancelAttack(ctx context.Context, in *CancelAttackRequest, opts ...grpc.CallOption) (*CancelAttackResponse, error)
 	GetAttacks(ctx context.Context, in *GetAttacksRequest, opts ...grpc.CallOption) (*GetAttacksResponse, error)
 	// PLAYERS
 	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
@@ -130,9 +131,18 @@ func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts 
 	return out, nil
 }
 
-func (c *serviceClient) Attack(ctx context.Context, in *AttackRequest, opts ...grpc.CallOption) (*AttackResponse, error) {
-	out := new(AttackResponse)
-	err := c.cc.Invoke(ctx, "/server.v1.Service/Attack", in, out, opts...)
+func (c *serviceClient) IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error) {
+	out := new(IssueAttackResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueAttack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) CancelAttack(ctx context.Context, in *CancelAttackRequest, opts ...grpc.CallOption) (*CancelAttackResponse, error) {
+	out := new(CancelAttackResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/CancelAttack", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +184,8 @@ type ServiceServer interface {
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
-	Attack(context.Context, *AttackRequest) (*AttackResponse, error)
+	IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error)
+	CancelAttack(context.Context, *CancelAttackRequest) (*CancelAttackResponse, error)
 	GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error)
 	// PLAYERS
 	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
@@ -211,8 +222,11 @@ func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *Can
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
 }
-func (UnimplementedServiceServer) Attack(context.Context, *AttackRequest) (*AttackResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Attack not implemented")
+func (UnimplementedServiceServer) IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssueAttack not implemented")
+}
+func (UnimplementedServiceServer) CancelAttack(context.Context, *CancelAttackRequest) (*CancelAttackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelAttack not implemented")
 }
 func (UnimplementedServiceServer) GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttacks not implemented")
@@ -394,20 +408,38 @@ func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Service_Attack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AttackRequest)
+func _Service_IssueAttack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IssueAttackRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).Attack(ctx, in)
+		return srv.(ServiceServer).IssueAttack(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/server.v1.Service/Attack",
+		FullMethod: "/server.v1.Service/IssueAttack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).Attack(ctx, req.(*AttackRequest))
+		return srv.(ServiceServer).IssueAttack(ctx, req.(*IssueAttackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_CancelAttack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelAttackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).CancelAttack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/CancelAttack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).CancelAttack(ctx, req.(*CancelAttackRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -492,8 +524,12 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_GetWorld_Handler,
 		},
 		{
-			MethodName: "Attack",
-			Handler:    _Service_Attack_Handler,
+			MethodName: "IssueAttack",
+			Handler:    _Service_IssueAttack_Handler,
+		},
+		{
+			MethodName: "CancelAttack",
+			Handler:    _Service_CancelAttack_Handler,
 		},
 		{
 			MethodName: "GetAttacks",

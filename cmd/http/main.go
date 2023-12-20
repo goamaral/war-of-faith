@@ -264,7 +264,7 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 	return connect.NewResponse(&serverv1.GetWorldResponse{World: pWorld}), nil
 }
 
-func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.AttackRequest]) (*connect.Response[serverv1.AttackResponse], error) {
+func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.IssueAttackRequest]) (*connect.Response[serverv1.IssueAttackResponse], error) {
 	// TODO: Wrap in transaction
 	// TODO: Use auth player
 	villagesIds, err := model.GetPlayerVilageIds(ctx, 1)
@@ -341,7 +341,34 @@ func (s *Server) Attack(ctx context.Context, req *connect.Request[serverv1.Attac
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
 
-	return connect.NewResponse(&serverv1.AttackResponse{}), nil
+	return connect.NewResponse(&serverv1.IssueAttackResponse{}), nil
+}
+
+func (s *Server) CancelAttack(ctx context.Context, req *connect.Request[serverv1.CancelAttackRequest]) (*connect.Response[serverv1.CancelAttackResponse], error) {
+	attack, err := db.First[model.Attack](ctx, sq.Select("*").From(model.AttacksTableName), sq.Eq{"id": req.Msg.Id, "player_id": 1}) // TODO: Use auth player
+	if err != nil {
+		return nil, fmt.Errorf("failed to get attack: %w", err)
+	}
+
+	village, err := attack.Village(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village (id: %d): %w", attack.VillageId, err)
+	}
+
+	for kind, quantity := range attack.TroopQuantity.Iter() {
+		village.TroopQuantity.Increment(kind, quantity)
+	}
+	err = db.Update(ctx, model.VillagesTableName, village, sq.Eq{"id": village.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to return troops to village: %w", err)
+	}
+
+	err = db.Delete(ctx, model.AttacksTableName, sq.Eq{"id": attack.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete attack: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.CancelAttackResponse{}), nil
 }
 
 func (s *Server) GetAttacks(ctx context.Context, req *connect.Request[serverv1.GetAttacksRequest]) (*connect.Response[serverv1.GetAttacksResponse], error) {

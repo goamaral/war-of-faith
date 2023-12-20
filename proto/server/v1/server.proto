@@ -154,15 +154,21 @@ message GetWorldResponse {
   World world = 1;
 }
 
-// Attack
-message AttackRequest {
+// IssueAttack
+message IssueAttackRequest {
   uint32 village_id = 1;
   Coords target_coords = 2;
   map<string, uint32> troop_quantity = 3; // <troop_kind, quantity>
 }
-message AttackResponse {
+message IssueAttackResponse {
   Attack attack = 1;
 }
+
+// CancelAttack
+message CancelAttackRequest {
+  uint32 id = 1;
+}
+message CancelAttackResponse {}
 
 // GetAttacks
 message GetAttacksRequest {}
@@ -201,7 +207,8 @@ service Service {
 
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
-  rpc Attack(AttackRequest) returns (AttackResponse);
+  rpc IssueAttack(IssueAttackRequest) returns (IssueAttackResponse);
+  rpc CancelAttack(CancelAttackRequest) returns (CancelAttackResponse);
   rpc GetAttacks(GetAttacksRequest) returns (GetAttacksResponse);
 
   /* PLAYERS */

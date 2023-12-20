@@ -20,6 +20,7 @@ type Attack struct {
 	PlayerId     uint32 `db:"player_id"`
 
 	worldField *WorldField
+	village    *Village
 }
 
 /* PROTOBUF */
@@ -42,4 +43,15 @@ func (a *Attack) WorldField(ctx context.Context) (WorldField, error) {
 		a.worldField = &worldField
 	}
 	return *a.worldField, nil
+}
+
+func (a *Attack) Village(ctx context.Context) (Village, error) {
+	if a.village == nil {
+		village, err := db.First[Village](ctx, sq.Select("*").From(VillagesTableName), sq.Eq{"id": a.VillageId})
+		if err != nil {
+			return Village{}, err
+		}
+		a.village = &village
+	}
+	return *a.village, nil
 }

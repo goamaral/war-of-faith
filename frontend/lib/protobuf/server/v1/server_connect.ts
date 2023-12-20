@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AttackRequest, AttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
+import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -102,12 +102,21 @@ export const Service = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc server.v1.Service.Attack
+     * @generated from rpc server.v1.Service.IssueAttack
      */
-    attack: {
-      name: "Attack",
-      I: AttackRequest,
-      O: AttackResponse,
+    issueAttack: {
+      name: "IssueAttack",
+      I: IssueAttackRequest,
+      O: IssueAttackResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.CancelAttack
+     */
+    cancelAttack: {
+      name: "CancelAttack",
+      I: CancelAttackRequest,
+      O: CancelAttackResponse,
       kind: MethodKind.Unary,
     },
     /**

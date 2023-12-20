@@ -138,15 +138,15 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
           return
         }
 
-        await server.attack({
+        await server.issueAttack({
           villageId: selectedVillage.peek().id,
           targetCoords: field.coords,
           troopQuantity: selectedTroopQuantity.peek(),
         })
 
-        navigate(0)
+        navigate(0) // TODO: Add to attacks
       } catch (err) {
-        alert(`Failed to attack world field (coords: ${field.coords}): ${err}`)
+        alert(`Failed to issue attack (coords: ${field.coords}): ${err}`)
       }
     }
 
@@ -202,6 +202,15 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
 
 function Attacks({ getWorldFieldById }: { getWorldFieldById: (id: number) => serverV1.World_Field|undefined }) {
   function AttackListBody({ loading, attacks }: { loading: boolean, attacks: serverV1.Attack[] }) {
+    async function cancelAttack(id: number) {
+      try {
+        await server.cancelAttack({ id })
+        navigate(0) // TODO: Remove from attacks
+      } catch (err) {
+        alert(`Failed to cancel attack (id: ${id}): ${err}`)
+      }
+    }
+
     if (loading) return (<p>Loading...</p>)
     if (attacks.length == 0) return (<p>No attacks</p>)
     return (<>{
@@ -210,6 +219,7 @@ function Attacks({ getWorldFieldById }: { getWorldFieldById: (id: number) => ser
         return (<div>
           <Link to={`/world/fields/${worldField.id}`}>{World_Field_EntityKindToString(worldField.entityKind)}</Link>
           <span>{`(${worldField.coords!.x}, ${worldField.coords!.y})`} - {attack.timeLeft}s</span>
+          <button onClick={() => cancelAttack(attack.id)}>Cancel</button>
         </div>)
       })
     }</>)
@@ -220,9 +230,9 @@ function Attacks({ getWorldFieldById }: { getWorldFieldById: (id: number) => ser
     outgoingAttacks.value = res.outgoingAttacks
   }
   
+  const navigate = useNavigate()
   const loading = useSignal(true)
   const outgoingAttacks = useSignal<serverV1.Attack[]>([])
-
 
   useEffect(() => {
     updateAttacks()

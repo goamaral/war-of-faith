@@ -143,7 +143,9 @@ func Update(ctx context.Context, table string, record any, opt QueryOption, opts
 	return err
 }
 
-func Delete(ctx context.Context, table string, opts ...QueryOption) error {
+func Delete(ctx context.Context, table string, opt QueryOption, opts ...QueryOption) error {
+	opts = append([]QueryOption{opt}, opts...)
+
 	qry, err := applyDeleteQueryOptions(sq.Delete(table), opts...)
 	if err != nil {
 		return fmt.Errorf("failed to apply query options: %w", err)

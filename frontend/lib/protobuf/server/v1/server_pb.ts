@@ -1294,11 +1294,11 @@ export class GetWorldResponse extends Message<GetWorldResponse> {
 }
 
 /**
- * Attack
+ * IssueAttack
  *
- * @generated from message server.v1.AttackRequest
+ * @generated from message server.v1.IssueAttackRequest
  */
-export class AttackRequest extends Message<AttackRequest> {
+export class IssueAttackRequest extends Message<IssueAttackRequest> {
   /**
    * @generated from field: uint32 village_id = 1;
    */
@@ -1316,70 +1316,140 @@ export class AttackRequest extends Message<AttackRequest> {
    */
   troopQuantity: { [key: string]: number } = {};
 
-  constructor(data?: PartialMessage<AttackRequest>) {
+  constructor(data?: PartialMessage<IssueAttackRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.AttackRequest";
+  static readonly typeName = "server.v1.IssueAttackRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "target_coords", kind: "message", T: Coords },
     { no: 3, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AttackRequest {
-    return new AttackRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueAttackRequest {
+    return new IssueAttackRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AttackRequest {
-    return new AttackRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueAttackRequest {
+    return new IssueAttackRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AttackRequest {
-    return new AttackRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueAttackRequest {
+    return new IssueAttackRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AttackRequest | PlainMessage<AttackRequest> | undefined, b: AttackRequest | PlainMessage<AttackRequest> | undefined): boolean {
-    return proto3.util.equals(AttackRequest, a, b);
+  static equals(a: IssueAttackRequest | PlainMessage<IssueAttackRequest> | undefined, b: IssueAttackRequest | PlainMessage<IssueAttackRequest> | undefined): boolean {
+    return proto3.util.equals(IssueAttackRequest, a, b);
   }
 }
 
 /**
- * @generated from message server.v1.AttackResponse
+ * @generated from message server.v1.IssueAttackResponse
  */
-export class AttackResponse extends Message<AttackResponse> {
+export class IssueAttackResponse extends Message<IssueAttackResponse> {
   /**
    * @generated from field: server.v1.Attack attack = 1;
    */
   attack?: Attack;
 
-  constructor(data?: PartialMessage<AttackResponse>) {
+  constructor(data?: PartialMessage<IssueAttackResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.AttackResponse";
+  static readonly typeName = "server.v1.IssueAttackResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "attack", kind: "message", T: Attack },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AttackResponse {
-    return new AttackResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueAttackResponse {
+    return new IssueAttackResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AttackResponse {
-    return new AttackResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueAttackResponse {
+    return new IssueAttackResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AttackResponse {
-    return new AttackResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueAttackResponse {
+    return new IssueAttackResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AttackResponse | PlainMessage<AttackResponse> | undefined, b: AttackResponse | PlainMessage<AttackResponse> | undefined): boolean {
-    return proto3.util.equals(AttackResponse, a, b);
+  static equals(a: IssueAttackResponse | PlainMessage<IssueAttackResponse> | undefined, b: IssueAttackResponse | PlainMessage<IssueAttackResponse> | undefined): boolean {
+    return proto3.util.equals(IssueAttackResponse, a, b);
+  }
+}
+
+/**
+ * CancelAttack
+ *
+ * @generated from message server.v1.CancelAttackRequest
+ */
+export class CancelAttackRequest extends Message<CancelAttackRequest> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<CancelAttackRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelAttackRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelAttackRequest {
+    return new CancelAttackRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelAttackRequest {
+    return new CancelAttackRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelAttackRequest {
+    return new CancelAttackRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelAttackRequest | PlainMessage<CancelAttackRequest> | undefined, b: CancelAttackRequest | PlainMessage<CancelAttackRequest> | undefined): boolean {
+    return proto3.util.equals(CancelAttackRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.CancelAttackResponse
+ */
+export class CancelAttackResponse extends Message<CancelAttackResponse> {
+  constructor(data?: PartialMessage<CancelAttackResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.CancelAttackResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CancelAttackResponse {
+    return new CancelAttackResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CancelAttackResponse {
+    return new CancelAttackResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CancelAttackResponse {
+    return new CancelAttackResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CancelAttackResponse | PlainMessage<CancelAttackResponse> | undefined, b: CancelAttackResponse | PlainMessage<CancelAttackResponse> | undefined): boolean {
+    return proto3.util.equals(CancelAttackResponse, a, b);
   }
 }
 
