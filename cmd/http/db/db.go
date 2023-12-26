@@ -1,17 +1,17 @@
 package db
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 
-	"github.com/bufbuild/connect-go"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/libsql/libsql-client-go/libsql"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	_ "modernc.org/sqlite"
 )
 
-var ErrNotFound = connect.NewError(connect.CodeNotFound, errors.New("not found"))
+var ErrNotFound = status.Error(codes.NotFound, "not found")
 
 var DB *sqlx.DB
 

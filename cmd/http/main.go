@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -9,11 +10,13 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/bufbuild/connect-go"
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"war-of-faith/cmd/http/db"
 	"war-of-faith/cmd/http/model"
@@ -599,7 +602,7 @@ func main() {
 	}
 }
 
-func ExtractStatusCodeInterceptor() connect.UnaryInterceptorFunc {
+func GRPCStatusCodeToConnectStatusCodeInterceptor() connect.UnaryInterceptorFunc {
 	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			res, err := next(ctx, req)
@@ -607,6 +610,27 @@ func ExtractStatusCodeInterceptor() connect.UnaryInterceptorFunc {
 				return nil, connect.NewError(connect.Code(code), err)
 			}
 			return res, err
+		})
+	})
+}
+
+func ValidationInterceptor(validator *protovalidate.Validator) connect.UnaryInterceptorFunc {
+	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			err := validator.Validate(req.Any().(protoreflect.ProtoMessage))
+			if err != nil {
+				if vErr, ok := err.(*protovalidate.ValidationError); ok {
+					connectErr := connect.NewError(connect.Code(connect.CodeInvalidArgument), errors.New("validation error"))
+					detail, err := connect.NewErrorDetail(vErr.ToProto())
+					if err != nil {
+						return nil, err
+					}
+					connectErr.AddDetail(detail)
+					return nil, connectErr
+				}
+				return nil, err
+			}
+			return next(ctx, req)
 		})
 	})
 }
@@ -622,13 +646,20 @@ func runServer() {
 		AllowCredentials: true,
 	}))
 
+	validator, err := protovalidate.New()
+	if err != nil {
+		log.Fatalf("failed to create proto validator: %v", err)
+	}
+
 	path, handler := serverv1connect.NewServiceHandler(
 		&Server{},
-		connect.WithInterceptors(ExtractStatusCodeInterceptor()),
+		connect.WithInterceptors(
+			ValidationInterceptor(validator),
+			GRPCStatusCodeToConnectStatusCodeInterceptor(),
+		),
 	)
 	server.Any(fmt.Sprintf("%s*w", path), gin.WrapH(handler))
-	err := server.Run(":3000")
-	if err != nil {
+	if err = server.Run(":3000"); err != nil {
 		log.Fatalf("failed run server: %v", err)
 	}
 }
