@@ -17,10 +17,6 @@ message Coords {
   uint32 y = 2;
 }
 
-message Temple {
-  uint32 id = 1;
-}
-
 /* VILLAGES */
 message Village {
   uint32 id = 1;
@@ -119,6 +115,27 @@ message CancelTroopTrainingOrderRequest {
 }
 message CancelTroopTrainingOrderResponse {}
 
+/* TEMPLES */
+message Temple {
+  uint32 id = 1;
+  uint32 gold = 2;
+}
+
+message GetTempleRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+message GetTempleResponse {
+  Temple temple = 1;
+}
+
+// IssueTempleDonationOrder
+message IssueTempleDonationOrderRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 gold = 2 [(buf.validate.field).uint32.gt = 0];
+  uint32 village_id = 3 [(buf.validate.field).uint32.gt = 0];
+}
+message IssueTempleDonationOrderResponse {}
+
 /* WORLD */
 message World {
   uint32 width = 1;
@@ -158,7 +175,7 @@ message GetWorldResponse {
 // IssueAttack
 message IssueAttackRequest {
   uint32 village_id = 1 [(buf.validate.field).uint32.gt = 0];
-  Coords target_coords = 2 [(buf.validate.field).required = true];
+  Coords target_coords = 2 [(buf.validate.field).uint32.gt = 0];
   map<string, uint32> troop_quantity = 3 [(buf.validate.field).map.min_pairs = 1]; // <troop_kind, quantity>
 }
 message IssueAttackResponse {
@@ -205,6 +222,10 @@ service Service {
   rpc GetTroops(GetTroopsRequest) returns (GetTroopsResponse);
   rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
   rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
+
+  /* TEMPLES */
+  rpc GetTemple(GetTempleRequest) returns (GetTempleResponse);
+  rpc IssueTempleDonationOrder(IssueTempleDonationOrderRequest) returns (IssueTempleDonationOrderResponse);
 
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);

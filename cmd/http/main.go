@@ -255,6 +255,57 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 	return connect.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
 }
 
+func (s *Server) IssueTempleDonationOrder(ctx context.Context, req *connect.Request[serverv1.IssueTempleDonationOrderRequest]) (*connect.Response[serverv1.IssueTempleDonationOrderResponse], error) {
+	// TODO: Wrap in transaction
+	temple, err := db.First[model.Temple](ctx, sq.Select("*").From(model.TemplesTableName), sq.Eq{"id": req.Msg.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get temple: %w", err)
+	}
+
+	village, err := db.First[model.Village](ctx, sq.Select("*").From(model.VillagesTableName), sq.Eq{"id": req.Msg.VillageId})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get village: %w", err)
+	}
+
+	if !village.CanAfford(model.Resources{Gold: req.Msg.Gold}) {
+		return nil, status.Error(codes.FailedPrecondition, "not enough gold")
+	}
+	village.SpendResources(model.Resources{Gold: req.Msg.Gold})
+	err = db.Update(ctx, model.VillagesTableName, village, sq.Eq{"id": village.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update village: %w", err)
+	}
+
+	// TODO: Create TempleDonationOrder
+	// TODO: Ability to cancel TempleDonationOrder
+
+	temple.Gold += req.Msg.Gold
+	err = db.Update(ctx, model.TemplesTableName, temple, sq.Eq{"id": temple.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update temple: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.IssueTempleDonationOrderResponse{}), nil
+}
+
+/* TEMPLES */
+func (s *Server) GetTemple(ctx context.Context, req *connect.Request[serverv1.GetTempleRequest]) (*connect.Response[serverv1.GetTempleResponse], error) {
+	temple, found, err := db.FindOne[model.Temple](ctx, model.TemplesTableName, sq.Eq{"id": req.Msg.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get temple: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "temple not found")
+	}
+
+	pTemple, err := temple.ToProtobuf()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert temple to protobuf: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.GetTempleResponse{Temple: pTemple}), nil
+}
+
 /* WORLD */
 func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.GetWorldRequest]) (*connect.Response[serverv1.GetWorldResponse], error) {
 	world := model.GetWorld(ctx)
@@ -307,7 +358,6 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 	}
 
 	// TODO: Check if coords inside the world
-
 	targetCoords, err := model.CoordsFromProtobuf(req.Msg.TargetCoords)
 	if err != nil {
 		return nil, fmt.Errorf("invalid target coords: %w", err)
@@ -708,7 +758,8 @@ func CreateDB() error {
 		);
 
 		CREATE TABLE temples (
-			id INTEGER PRIMARY KEY
+			id INTEGER PRIMARY KEY,
+			gold UNSIGNED INTEGER NOT NULL
 		);
 
 		CREATE TABLE attacks (

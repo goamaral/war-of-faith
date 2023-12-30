@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
+import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTempleRequest, GetTempleResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTempleDonationOrderRequest, IssueTempleDonationOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -88,6 +88,26 @@ export const Service = {
       name: "CancelTroopTrainingOrder",
       I: CancelTroopTrainingOrderRequest,
       O: CancelTroopTrainingOrderResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * TEMPLES 
+     *
+     * @generated from rpc server.v1.Service.GetTemple
+     */
+    getTemple: {
+      name: "GetTemple",
+      I: GetTempleRequest,
+      O: GetTempleResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.IssueTempleDonationOrder
+     */
+    issueTempleDonationOrder: {
+      name: "IssueTempleDonationOrder",
+      I: IssueTempleDonationOrderRequest,
+      O: IssueTempleDonationOrderResponse,
       kind: MethodKind.Unary,
     },
     /**

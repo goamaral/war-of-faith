@@ -12,9 +12,10 @@ Players compete to conquer the 4 mighty temples.
 - SQLite implementaion - https://gitlab.com/cznic/sqlite
 - SQLite driver - https://github.com/libsql/libsql-client-go
 - DB connector - https://github.com/jmoiron/sqlx
-- General utilities - github.com/samber/lo
+- General utilities - https://github.com/samber/lo
 - Process manager - https://github.com/DarthSim/overmind
 - Protobuf transport protocol - https://github.com/bufbuild/connect-go
+- Protobuf validation -  https://github.com/bufbuild/protovalidate-go
 
 ### Other
 - Protobuf compiler - https://github.com/bufbuild/buf

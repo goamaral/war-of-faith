@@ -33,6 +33,9 @@ type ServiceClient interface {
 	GetTroops(ctx context.Context, in *GetTroopsRequest, opts ...grpc.CallOption) (*GetTroopsResponse, error)
 	IssueTroopTrainingOrder(ctx context.Context, in *IssueTroopTrainingOrderRequest, opts ...grpc.CallOption) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(ctx context.Context, in *CancelTroopTrainingOrderRequest, opts ...grpc.CallOption) (*CancelTroopTrainingOrderResponse, error)
+	// TEMPLES
+	GetTemple(ctx context.Context, in *GetTempleRequest, opts ...grpc.CallOption) (*GetTempleResponse, error)
+	IssueTempleDonationOrder(ctx context.Context, in *IssueTempleDonationOrderRequest, opts ...grpc.CallOption) (*IssueTempleDonationOrderResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
 	IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error)
@@ -122,6 +125,24 @@ func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, in *Cancel
 	return out, nil
 }
 
+func (c *serviceClient) GetTemple(ctx context.Context, in *GetTempleRequest, opts ...grpc.CallOption) (*GetTempleResponse, error) {
+	out := new(GetTempleResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetTemple", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) IssueTempleDonationOrder(ctx context.Context, in *IssueTempleDonationOrderRequest, opts ...grpc.CallOption) (*IssueTempleDonationOrderResponse, error) {
+	out := new(IssueTempleDonationOrderResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueTempleDonationOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error) {
 	out := new(GetWorldResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/GetWorld", in, out, opts...)
@@ -182,6 +203,9 @@ type ServiceServer interface {
 	GetTroops(context.Context, *GetTroopsRequest) (*GetTroopsResponse, error)
 	IssueTroopTrainingOrder(context.Context, *IssueTroopTrainingOrderRequest) (*IssueTroopTrainingOrderResponse, error)
 	CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error)
+	// TEMPLES
+	GetTemple(context.Context, *GetTempleRequest) (*GetTempleResponse, error)
+	IssueTempleDonationOrder(context.Context, *IssueTempleDonationOrderRequest) (*IssueTempleDonationOrderResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
 	IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error)
@@ -218,6 +242,12 @@ func (UnimplementedServiceServer) IssueTroopTrainingOrder(context.Context, *Issu
 }
 func (UnimplementedServiceServer) CancelTroopTrainingOrder(context.Context, *CancelTroopTrainingOrderRequest) (*CancelTroopTrainingOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelTroopTrainingOrder not implemented")
+}
+func (UnimplementedServiceServer) GetTemple(context.Context, *GetTempleRequest) (*GetTempleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTemple not implemented")
+}
+func (UnimplementedServiceServer) IssueTempleDonationOrder(context.Context, *IssueTempleDonationOrderRequest) (*IssueTempleDonationOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssueTempleDonationOrder not implemented")
 }
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
@@ -390,6 +420,42 @@ func _Service_CancelTroopTrainingOrder_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetTemple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTempleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetTemple(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetTemple",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetTemple(ctx, req.(*GetTempleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_IssueTempleDonationOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IssueTempleDonationOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).IssueTempleDonationOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/IssueTempleDonationOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).IssueTempleDonationOrder(ctx, req.(*IssueTempleDonationOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetWorldRequest)
 	if err := dec(in); err != nil {
@@ -518,6 +584,14 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelTroopTrainingOrder",
 			Handler:    _Service_CancelTroopTrainingOrder_Handler,
+		},
+		{
+			MethodName: "GetTemple",
+			Handler:    _Service_GetTemple_Handler,
+		},
+		{
+			MethodName: "IssueTempleDonationOrder",
+			Handler:    _Service_IssueTempleDonationOrder_Handler,
 		},
 		{
 			MethodName: "GetWorld",

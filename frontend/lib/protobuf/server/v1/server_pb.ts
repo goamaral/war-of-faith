@@ -93,43 +93,6 @@ export class Coords extends Message<Coords> {
 }
 
 /**
- * @generated from message server.v1.Temple
- */
-export class Temple extends Message<Temple> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  constructor(data?: PartialMessage<Temple>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Temple";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Temple {
-    return new Temple().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Temple {
-    return new Temple().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Temple {
-    return new Temple().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Temple | PlainMessage<Temple> | undefined, b: Temple | PlainMessage<Temple> | undefined): boolean {
-    return proto3.util.equals(Temple, a, b);
-  }
-}
-
-/**
  * VILLAGES 
  *
  * @generated from message server.v1.Village
@@ -1019,6 +982,207 @@ export class CancelTroopTrainingOrderResponse extends Message<CancelTroopTrainin
 
   static equals(a: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined, b: CancelTroopTrainingOrderResponse | PlainMessage<CancelTroopTrainingOrderResponse> | undefined): boolean {
     return proto3.util.equals(CancelTroopTrainingOrderResponse, a, b);
+  }
+}
+
+/**
+ * TEMPLES 
+ *
+ * @generated from message server.v1.Temple
+ */
+export class Temple extends Message<Temple> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 gold = 2;
+   */
+  gold = 0;
+
+  constructor(data?: PartialMessage<Temple>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Temple";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "gold", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Temple {
+    return new Temple().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Temple {
+    return new Temple().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Temple {
+    return new Temple().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Temple | PlainMessage<Temple> | undefined, b: Temple | PlainMessage<Temple> | undefined): boolean {
+    return proto3.util.equals(Temple, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetTempleRequest
+ */
+export class GetTempleRequest extends Message<GetTempleRequest> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<GetTempleRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetTempleRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTempleRequest {
+    return new GetTempleRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTempleRequest {
+    return new GetTempleRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTempleRequest {
+    return new GetTempleRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetTempleRequest | PlainMessage<GetTempleRequest> | undefined, b: GetTempleRequest | PlainMessage<GetTempleRequest> | undefined): boolean {
+    return proto3.util.equals(GetTempleRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetTempleResponse
+ */
+export class GetTempleResponse extends Message<GetTempleResponse> {
+  /**
+   * @generated from field: server.v1.Temple temple = 1;
+   */
+  temple?: Temple;
+
+  constructor(data?: PartialMessage<GetTempleResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetTempleResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "temple", kind: "message", T: Temple },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTempleResponse {
+    return new GetTempleResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetTempleResponse {
+    return new GetTempleResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetTempleResponse {
+    return new GetTempleResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetTempleResponse | PlainMessage<GetTempleResponse> | undefined, b: GetTempleResponse | PlainMessage<GetTempleResponse> | undefined): boolean {
+    return proto3.util.equals(GetTempleResponse, a, b);
+  }
+}
+
+/**
+ * IssueTempleDonationOrder
+ *
+ * @generated from message server.v1.IssueTempleDonationOrderRequest
+ */
+export class IssueTempleDonationOrderRequest extends Message<IssueTempleDonationOrderRequest> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 gold = 2;
+   */
+  gold = 0;
+
+  /**
+   * @generated from field: uint32 village_id = 3;
+   */
+  villageId = 0;
+
+  constructor(data?: PartialMessage<IssueTempleDonationOrderRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.IssueTempleDonationOrderRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "gold", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueTempleDonationOrderRequest {
+    return new IssueTempleDonationOrderRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueTempleDonationOrderRequest {
+    return new IssueTempleDonationOrderRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueTempleDonationOrderRequest {
+    return new IssueTempleDonationOrderRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IssueTempleDonationOrderRequest | PlainMessage<IssueTempleDonationOrderRequest> | undefined, b: IssueTempleDonationOrderRequest | PlainMessage<IssueTempleDonationOrderRequest> | undefined): boolean {
+    return proto3.util.equals(IssueTempleDonationOrderRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.IssueTempleDonationOrderResponse
+ */
+export class IssueTempleDonationOrderResponse extends Message<IssueTempleDonationOrderResponse> {
+  constructor(data?: PartialMessage<IssueTempleDonationOrderResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.IssueTempleDonationOrderResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueTempleDonationOrderResponse {
+    return new IssueTempleDonationOrderResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IssueTempleDonationOrderResponse {
+    return new IssueTempleDonationOrderResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IssueTempleDonationOrderResponse {
+    return new IssueTempleDonationOrderResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IssueTempleDonationOrderResponse | PlainMessage<IssueTempleDonationOrderResponse> | undefined, b: IssueTempleDonationOrderResponse | PlainMessage<IssueTempleDonationOrderResponse> | undefined): boolean {
+    return proto3.util.equals(IssueTempleDonationOrderResponse, a, b);
   }
 }
 

@@ -53,6 +53,11 @@ const (
 	// ServiceCancelTroopTrainingOrderProcedure is the fully-qualified name of the Service's
 	// CancelTroopTrainingOrder RPC.
 	ServiceCancelTroopTrainingOrderProcedure = "/server.v1.Service/CancelTroopTrainingOrder"
+	// ServiceGetTempleProcedure is the fully-qualified name of the Service's GetTemple RPC.
+	ServiceGetTempleProcedure = "/server.v1.Service/GetTemple"
+	// ServiceIssueTempleDonationOrderProcedure is the fully-qualified name of the Service's
+	// IssueTempleDonationOrder RPC.
+	ServiceIssueTempleDonationOrderProcedure = "/server.v1.Service/IssueTempleDonationOrder"
 	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
 	// ServiceIssueAttackProcedure is the fully-qualified name of the Service's IssueAttack RPC.
@@ -78,6 +83,9 @@ type ServiceClient interface {
 	GetTroops(context.Context, *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error)
 	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
+	// TEMPLES
+	GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error)
+	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
@@ -137,6 +145,16 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceCancelTroopTrainingOrderProcedure,
 			opts...,
 		),
+		getTemple: connect_go.NewClient[v1.GetTempleRequest, v1.GetTempleResponse](
+			httpClient,
+			baseURL+ServiceGetTempleProcedure,
+			opts...,
+		),
+		issueTempleDonationOrder: connect_go.NewClient[v1.IssueTempleDonationOrderRequest, v1.IssueTempleDonationOrderResponse](
+			httpClient,
+			baseURL+ServiceIssueTempleDonationOrderProcedure,
+			opts...,
+		),
 		getWorld: connect_go.NewClient[v1.GetWorldRequest, v1.GetWorldResponse](
 			httpClient,
 			baseURL+ServiceGetWorldProcedure,
@@ -175,6 +193,8 @@ type serviceClient struct {
 	getTroops                  *connect_go.Client[v1.GetTroopsRequest, v1.GetTroopsResponse]
 	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
 	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
+	getTemple                  *connect_go.Client[v1.GetTempleRequest, v1.GetTempleResponse]
+	issueTempleDonationOrder   *connect_go.Client[v1.IssueTempleDonationOrderRequest, v1.IssueTempleDonationOrderResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
 	issueAttack                *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
 	cancelAttack               *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
@@ -222,6 +242,16 @@ func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, req *conne
 	return c.cancelTroopTrainingOrder.CallUnary(ctx, req)
 }
 
+// GetTemple calls server.v1.Service.GetTemple.
+func (c *serviceClient) GetTemple(ctx context.Context, req *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error) {
+	return c.getTemple.CallUnary(ctx, req)
+}
+
+// IssueTempleDonationOrder calls server.v1.Service.IssueTempleDonationOrder.
+func (c *serviceClient) IssueTempleDonationOrder(ctx context.Context, req *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error) {
+	return c.issueTempleDonationOrder.CallUnary(ctx, req)
+}
+
 // GetWorld calls server.v1.Service.GetWorld.
 func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
 	return c.getWorld.CallUnary(ctx, req)
@@ -260,6 +290,9 @@ type ServiceHandler interface {
 	GetTroops(context.Context, *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error)
 	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
 	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
+	// TEMPLES
+	GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error)
+	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
@@ -315,6 +348,16 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.CancelTroopTrainingOrder,
 		opts...,
 	)
+	serviceGetTempleHandler := connect_go.NewUnaryHandler(
+		ServiceGetTempleProcedure,
+		svc.GetTemple,
+		opts...,
+	)
+	serviceIssueTempleDonationOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueTempleDonationOrderProcedure,
+		svc.IssueTempleDonationOrder,
+		opts...,
+	)
 	serviceGetWorldHandler := connect_go.NewUnaryHandler(
 		ServiceGetWorldProcedure,
 		svc.GetWorld,
@@ -358,6 +401,10 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceIssueTroopTrainingOrderHandler.ServeHTTP(w, r)
 		case ServiceCancelTroopTrainingOrderProcedure:
 			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
+		case ServiceGetTempleProcedure:
+			serviceGetTempleHandler.ServeHTTP(w, r)
+		case ServiceIssueTempleDonationOrderProcedure:
+			serviceIssueTempleDonationOrderHandler.ServeHTTP(w, r)
 		case ServiceGetWorldProcedure:
 			serviceGetWorldHandler.ServeHTTP(w, r)
 		case ServiceIssueAttackProcedure:
@@ -407,6 +454,14 @@ func (UnimplementedServiceHandler) IssueTroopTrainingOrder(context.Context, *con
 
 func (UnimplementedServiceHandler) CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelTroopTrainingOrder is not implemented"))
+}
+
+func (UnimplementedServiceHandler) GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetTemple is not implemented"))
+}
+
+func (UnimplementedServiceHandler) IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueTempleDonationOrder is not implemented"))
 }
 
 func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
