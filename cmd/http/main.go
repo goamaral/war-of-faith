@@ -47,12 +47,7 @@ func (s *Server) GetVillage(ctx context.Context, req *connect.Request[serverv1.G
 }
 
 func (s *Server) GetVillages(ctx context.Context, req *connect.Request[serverv1.GetVillagesRequest]) (*connect.Response[serverv1.GetVillagesResponse], error) {
-	filters := []db.QueryOption{}
-	if req.Msg.PlayerId != nil {
-		filters = append(filters, sq.Eq{"player_id": req.Msg.PlayerId.Value})
-	}
-
-	villages, err := model.GetVillages(ctx, filters...)
+	villages, err := model.GetVillages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get villages: %w", err)
 	}
@@ -788,7 +783,11 @@ func CreateDB() error {
 func SeedDB() error {
 	_, err := model.CreatePlayer(context.Background(), model.Coords{X: 3, Y: 4})
 	if err != nil {
-		return fmt.Errorf("failed to create player: %w", err)
+		return fmt.Errorf("failed to create player 1: %w", err)
+	}
+	_, err = model.CreatePlayer(context.Background(), model.Coords{X: 6, Y: 5})
+	if err != nil {
+		return fmt.Errorf("failed to create player 2: %w", err)
 	}
 	_, err = model.CreateTemple(context.Background(), model.Coords{X: 1, Y: 1})
 	if err != nil {

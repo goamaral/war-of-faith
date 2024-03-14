@@ -18,7 +18,6 @@ interface Store {
   consumeSSE: (world: serverV1.World, outgoingAttacks: serverV1.Attack[]) => void
   issueAttack: (fvillageId: number, coords: serverV1.Coords|undefined, troopQuantity: { [key: string]: number }) => Promise<void>
   cancelAttack: (id: number) => Promise<void>
-  getWorldFieldById: (id: number) => serverV1.World_Field | undefined
 }
 
 const useStore = create<Store>((set, get) => ({
@@ -30,7 +29,7 @@ const useStore = create<Store>((set, get) => ({
   async load() {
     const results = await Promise.all([
       server.getWorld({ loadFields: true }),
-      server.getVillages({ playerId: 1 }), // TODO: Use auth player
+      server.getVillages({}),
       server.getTroops({}),
       server.getAttacks({}),
     ])
@@ -68,12 +67,20 @@ const useStore = create<Store>((set, get) => ({
       alert(`Failed to cancel attack (id: ${id}): ${err}`)
     }
   },
-
-  getWorldFieldById(id: number): serverV1.World_Field | undefined {
-    console.log("getWorldFieldById", id)
-    return get().world.fields.find(f => f.id == id)
-  },
 }))
+
+function getWorldFieldById(id: number): serverV1.World_Field | undefined {
+  return useStore(s => s.world.fields.find(f => f.id == id))
+}
+
+function getVillageById(id: number): serverV1.Village | undefined {
+  return useStore(s => s.villages.find(v => v.id == id))
+}
+
+function getPlayerVillages(): entities.Village[] {
+  // TODO: Use auth player
+  return useStore(s => s.villages.filter(v => v.playerId == 1))
+}
 
 export default () => <WorldLoader />
 
@@ -148,10 +155,13 @@ function World() {
 }
 
 function Field({ field, selectedField }: { field: serverV1.World_Field, selectedField: Signal<serverV1.World_Field | undefined> }) {
+  const navigate = useNavigate()
+
   function kindStyle() {
     switch (field.entityKind) {
       case serverV1.World_Field_EntityKind.VILLAGE:
-        return { backgroundColor: 'green', cursor: 'pointer' }
+        const village = getVillageById(field.entityId)
+        return { backgroundColor: village?.playerId == 1 ? 'green' : 'red' , cursor: 'pointer' }
 
       case serverV1.World_Field_EntityKind.TEMPLE:
         return { backgroundColor: 'yellow' }
@@ -173,8 +183,6 @@ function Field({ field, selectedField }: { field: serverV1.World_Field, selected
     }
   }
 
-  const navigate = useNavigate()
-
   // TODO: Convert to tailwind
   const fieldStyle = {
     position: 'relative',
@@ -195,11 +203,11 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
 
   switch (selectedField.value.entityKind) {
     case serverV1.World_Field_EntityKind.WILD: {
-      const villages = useStore(state => state.villages)
-      const troops = useStore(state => state.troops)
-      const issueAttack = useStore(state => state.issueAttack)
+      const troops = useStore(s => s.troops)
+      const issueAttack = useStore(s => s.issueAttack)
+      const playerVillages = getPlayerVillages()
 
-      const selectedVillage = useSignal(villages[0])
+      const selectedVillage = useSignal(playerVillages[0])
       const selectedTroopQuantity = useSignal<{ [key: string]: number }>(Object.fromEntries(troops.map(t => ([t.kind, 0]))))
       function updateSelectedTroopQuantity(kind: string, quantity: number) {
         selectedTroopQuantity.value = { ...selectedTroopQuantity.value, [kind]: quantity }
@@ -208,8 +216,8 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
       bottom.push(
         <div>
           <label>Village</label>
-          <select value={selectedVillage.value.id} onChange={ev => selectedVillage.value = villages.find(v => v.id == +ev.currentTarget.value)!}>
-            {villages.map(v => (<option value={v.id}>{v.name}</option>))}
+          <select value={selectedVillage.value.id} onChange={ev => selectedVillage.value = playerVillages.find(v => v.id == +ev.currentTarget.value)!}>
+            {playerVillages.map(v => (<option value={v.id}>{v.name}</option>))}
           </select>
 
           <label>Troops</label>
@@ -288,7 +296,6 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
 function Attacks() {
   const outgoingAttacks = useStore(state => state.outgoingAttacks)
   const cancelAttack = useStore(state => state.cancelAttack)
-  const getWorldFieldById = useStore(state => state.getWorldFieldById)
 
   let outgoingAttacksListBody: JSX.Element
   if (outgoingAttacks.length == 0) {

@@ -117,5 +117,6 @@ func (v *Village) ToProtobuf(ctx context.Context) (*serverv1.Village, error) {
 		BuildingUpgradeOrders: pBuildingUpgradeOrders,
 		TroopQuantity:         v.TroopQuantity.ToProtobuf(),
 		TroopTrainingOrders:   pTroopTrainingOrders,
+		PlayerId:              v.PlayerId,
 	}, nil
 }

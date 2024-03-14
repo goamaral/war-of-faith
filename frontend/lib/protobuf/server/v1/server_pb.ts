@@ -253,11 +253,6 @@ export class GetVillageResponse extends Message<GetVillageResponse> {
  * @generated from message server.v1.GetVillagesRequest
  */
 export class GetVillagesRequest extends Message<GetVillagesRequest> {
-  /**
-   * @generated from field: google.protobuf.UInt32Value player_id = 1;
-   */
-  playerId?: number;
-
   constructor(data?: PartialMessage<GetVillagesRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -266,7 +261,6 @@ export class GetVillagesRequest extends Message<GetVillagesRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.GetVillagesRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "player_id", kind: "message", T: UInt32Value },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetVillagesRequest {

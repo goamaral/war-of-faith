@@ -37,9 +37,7 @@ message GetVillageResponse {
 }
 
 // GetVillages
-message GetVillagesRequest {
-  google.protobuf.UInt32Value player_id = 1 [(buf.validate.field).uint32.gt = 0];
-}
+message GetVillagesRequest {}
 message GetVillagesResponse {
   repeated Village villages = 1;
 }
