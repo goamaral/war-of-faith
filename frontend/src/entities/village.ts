@@ -38,6 +38,18 @@ export default class Village extends serverV1Types.Village {
   }
 
   /* TROOPS */
+  addTroops(troopQuantity: {[key: string]: number}) {
+    for (const kind in troopQuantity) {
+      this.troopQuantity[kind] += troopQuantity[kind]
+    }
+  }
+
+  removeTroops(troopQuantity: { [key: string]: number }) {
+    for (const kind in troopQuantity) {
+      this.troopQuantity[kind] -= troopQuantity[kind]
+    }
+  }
+
   getTroopTrainingStatus(troop: Troop, quantity: number, trainableTroops?: number): TroopTrainingStatus {
     if (trainableTroops == 0) return TroopTrainingStatus.MAX_TRAINABLE
     if (!this.canAfford(troop.trainCost(quantity))) return TroopTrainingStatus.INSUFFICIENT_RESOURCES

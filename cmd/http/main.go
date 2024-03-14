@@ -367,14 +367,17 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 		return nil, fmt.Errorf("failed to get world field: %w", err)
 	}
 	if !found {
-		worldField = model.WorldField{Coords: targetCoords, EntityKind: serverv1.World_Field_ENTITY_KIND_WILD}
-		err = db.Insert(ctx, model.WorldFieldsTableName, &worldField)
+		worldField := model.WorldField{
+			Coords:     targetCoords,
+			EntityKind: serverv1.World_Field_ENTITY_KIND_WILD,
+		}
+		_, err = db.Insert(ctx, model.WorldFieldsTableName, &worldField)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create world field: %w", err)
 		}
 	}
 
-	err = db.Insert(ctx, model.AttacksTableName, &model.Attack{
+	_, err = db.Insert(ctx, model.AttacksTableName, &model.Attack{
 		TroopQuantity: troopQuantity,
 		TimeLeft:      10, // TODO: Define time based on distance and troop types
 		WorldFieldId:  worldField.Id,
@@ -529,7 +532,7 @@ func main() {
 				switch worldField.EntityKind {
 				case serverv1.World_Field_ENTITY_KIND_WILD:
 					village := model.NewVillage(attack.PlayerId)
-					err = db.Insert(ctx, model.VillagesTableName, &village)
+					_, err = db.Insert(ctx, model.VillagesTableName, &village)
 					if err != nil {
 						log.Printf("failed to create new village: %v", err)
 						continue

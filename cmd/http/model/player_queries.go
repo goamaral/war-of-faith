@@ -12,7 +12,7 @@ const PlayersTableName = "players"
 
 func CreatePlayer(ctx context.Context, coords Coords) (Player, error) {
 	var player Player
-	err := db.Insert[Player](ctx, PlayersTableName, &player)
+	_, err := db.Insert[Player](ctx, PlayersTableName, &player)
 	if err != nil {
 		return Player{}, fmt.Errorf("failed to create player: %w", err)
 	}

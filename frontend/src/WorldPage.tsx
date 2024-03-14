@@ -1,22 +1,33 @@
-import { useContext } from 'preact/hooks'
-import { useSignal, Signal, useSignalEffect, signal, batch } from '@preact/signals';
+import { useEffect } from 'preact/hooks'
+import { useSignal, Signal } from '@preact/signals'
 import { useNavigate } from 'react-router-dom'
 import { Link } from "react-router-dom"
+import { JSX } from 'preact/jsx-runtime'
+import { create } from 'zustand'
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import * as entities from './entities'
 import server from './server'
-import { JSX } from 'preact/jsx-runtime';
-import { createContext } from 'preact';
 
-function createWorldState(preload = true) {
-  const loading = signal(true)
-  const world = signal<serverV1.World>(new serverV1.World())
-  const villages = signal<entities.Village[]>([])
-  const troops = signal<entities.Troop[]>([])
-  const outgoingAttacks = signal<serverV1.Attack[]>([])
+interface Store {
+  world: serverV1.World
+  villages: entities.Village[]
+  troops: serverV1.Troop[]
+  outgoingAttacks: serverV1.Attack[]
+  load: () => Promise<void>
+  consumeSSE: (world: serverV1.World, outgoingAttacks: serverV1.Attack[]) => void
+  issueAttack: (fvillageId: number, coords: serverV1.Coords|undefined, troopQuantity: { [key: string]: number }) => Promise<void>
+  cancelAttack: (id: number) => Promise<void>
+  getWorldFieldById: (id: number) => serverV1.World_Field | undefined
+}
 
-  async function load() {
+const useStore = create<Store>((set, get) => ({
+  world: new serverV1.World(),
+  villages: [],
+  troops: [],
+  outgoingAttacks: [],
+
+  async load() {
     const results = await Promise.all([
       server.getWorld({ loadFields: true }),
       server.getVillages({ playerId: 1 }), // TODO: Use auth player
@@ -24,47 +35,73 @@ function createWorldState(preload = true) {
       server.getAttacks({}),
     ])
 
-    batch(() => {
-      loading.value = false
-      world.value = results[0].world!
-      villages.value = results[1].villages.map(village => new entities.Village(village))
-      troops.value = results[2].troops.map(troop => new entities.Troop(troop))
-      outgoingAttacks.value = results[3].outgoingAttacks
-    })
-  }
+    set(() => ({
+      world: results[0].world,
+      villages: results[1].villages.map(v => new entities.Village(v)),
+      troops: results[2].troops,
+      outgoingAttacks: results[3].outgoingAttacks,
+    }))
+  },
 
-  function getWorldFieldById(id: number): serverV1.World_Field | undefined {
-    return world.peek()!.fields.find(f => f.id == id)
-  }
+  consumeSSE(world: serverV1.World, outgoingAttacks: serverV1.Attack[]) {
+    set(() => ({ world, outgoingAttacks }))
+  },
 
-  if (preload) load().catch(err => alert(err))
+  async issueAttack(villageId: number, targetCoords: serverV1.Coords|undefined, troopQuantity: { [key: string]: number }) {
+    try {
+      if (targetCoords == undefined) return alert("No target to attack")
 
-  return {
-    loading, world, villages, troops, outgoingAttacks,
-    getWorldFieldById,
-  }
-}
+      const totalTroops = Object.values(troopQuantity).reduce((acc, q) => acc + q, 0)
+      if (totalTroops == 0) return alert("No troops to attack")
 
-const WorldContext = createContext(createWorldState(false))
+      await server.issueAttack({ villageId, targetCoords, troopQuantity })
+    } catch (err) {
+      alert(`Failed to issue attack (coords: ${targetCoords?.toJsonString()}): ${err}`)
+    }
+  },
 
-export default () => {
-  return <WorldContext.Provider value={createWorldState()}>
-    <WorldLoader />
-  </WorldContext.Provider>
-}
+  async cancelAttack(id: number) {
+    try {
+      await server.cancelAttack({ id })
+      set({ outgoingAttacks: get().outgoingAttacks.filter(a => a.id != id) })
+    } catch (err) {
+      alert(`Failed to cancel attack (id: ${id}): ${err}`)
+    }
+  },
+
+  getWorldFieldById(id: number): serverV1.World_Field | undefined {
+    console.log("getWorldFieldById", id)
+    return get().world.fields.find(f => f.id == id)
+  },
+}))
+
+export default () => <WorldLoader />
 
 function WorldLoader() {
-  const { loading, villages, troops, world, outgoingAttacks } = useContext(WorldContext)
+  const loaded = useSignal(false)
+  const load = useStore(state => state.load)
+  useEffect(() => {
+    load()
+      .then(() => loaded.value = true)
+      .catch(err => alert(err))
+  }, [])
 
-  if (loading.value) return <div>Loading...</div>
+  if (!loaded.value) return <div>Loading...</div>
+
+  const consumeSSE = useStore(state => state.consumeSSE)
 
   // TODO: Replace with SSE
-  useSignalEffect(() => {
-    const intervalId = loading.value ? 0 : setInterval(async () => {
-      await Promise.all([
-        server.getWorld({ loadFields: true }).then(res => world.value = res.world!),
-        server.getAttacks({}).then(res => outgoingAttacks.value = res.outgoingAttacks),
-      ]).catch(err => alert(err))
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      try {
+        const results = await Promise.all([
+          server.getWorld({ loadFields: true }).then(res => res.world!),
+          server.getAttacks({}).then(res => res.outgoingAttacks),
+        ])
+        consumeSSE(results[0], results[1])
+      } catch (err) {
+        alert(err)
+      }
     }, 1000)
 
     return () => {
@@ -75,13 +112,15 @@ function WorldLoader() {
   return (
     <div>
       <h1>World Map</h1>
-      <World world={world.value!} villages={villages.value} troops={troops.value} />
+      <World />
       <Attacks />
     </div>
   )
 }
 
-function World({ world, villages, troops }: { world: serverV1.World, villages: entities.Village[], troops: entities.Troop[] }) {
+function World() {
+  const world = useStore(state => state.world)
+
   const selectedField = useSignal<serverV1.World_Field | undefined>(undefined)
 
   // TODO: Convert to tailwind
@@ -104,7 +143,7 @@ function World({ world, villages, troops }: { world: serverV1.World, villages: e
 
   return (<div class="flex">
     <div style={gridStyle}>{fields.flat().map(field => <Field field={field} selectedField={selectedField} />)}</div>
-    <FieldInfo selectedField={selectedField} villages={villages} troops={troops} />
+    <FieldInfo selectedField={selectedField} />
   </div>)
 }
 
@@ -149,42 +188,23 @@ function Field({ field, selectedField }: { field: serverV1.World_Field, selected
   )
 }
 
-function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<serverV1.World_Field|undefined>, villages: entities.Village[], troops: entities.Troop[] }) {
+function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Field | undefined> }) {
   if (selectedField.value == undefined) return <div><h2>No field selected</h2></div>
-
-  let title = World_Field_EntityKindToString(selectedField.value.entityKind)
-  const entity = useSignal<undefined|serverV1.Temple>(undefined)
 
   const bottom: JSX.Element[] = []
 
   switch (selectedField.value.entityKind) {
-    case serverV1.World_Field_EntityKind.WILD:
+    case serverV1.World_Field_EntityKind.WILD: {
+      const villages = useStore(state => state.villages)
+      const troops = useStore(state => state.troops)
+      const issueAttack = useStore(state => state.issueAttack)
+
       const selectedVillage = useSignal(villages[0])
       const selectedTroopQuantity = useSignal<{ [key: string]: number }>(Object.fromEntries(troops.map(t => ([t.kind, 0]))))
       function updateSelectedTroopQuantity(kind: string, quantity: number) {
         selectedTroopQuantity.value = { ...selectedTroopQuantity.value, [kind]: quantity }
       }
-      const { outgoingAttacks } = useContext(WorldContext)
-
-      async function attack() {
-        try {
-          const totalTroops = Object.values(selectedTroopQuantity.peek()).reduce((acc, q) => acc + q, 0)
-          if (totalTroops == 0) {
-            alert("No troops to attack")
-            return
-          }
-
-          const { attack } = await server.issueAttack({
-            villageId: selectedVillage.peek().id,
-            targetCoords: selectedField.peek()!.coords,
-            troopQuantity: selectedTroopQuantity.peek(),
-          })
-          outgoingAttacks.value = [...outgoingAttacks.value, attack!]
-        } catch (err) {
-          alert(`Failed to issue attack (coords: ${selectedField.peek()!.coords}): ${err}`)
-        }
-      }
-
+      
       bottom.push(
         <div>
           <label>Village</label>
@@ -206,12 +226,17 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
             })}
           </div>
 
-          <button onClick={attack}>Attack</button>
+          <button onClick={() => issueAttack(selectedVillage.peek().id, selectedField.peek()?.coords, selectedTroopQuantity.peek())}>Attack</button>
         </div>
       )
       break
+    }
 
-    case serverV1.World_Field_EntityKind.TEMPLE:
+    case serverV1.World_Field_EntityKind.TEMPLE: {
+      const villages = useStore(state => state.villages)
+
+      const entity = useSignal<undefined | serverV1.Temple>(undefined)
+
       if (entity.value == undefined) {
         server.getTemple({ id: selectedField.value.entityId })
           .then(({ temple }) => entity.value = temple!)
@@ -250,33 +275,27 @@ function FieldInfo({ selectedField, villages, troops }: { selectedField: Signal<
         )
       }
       break
+    }
   }
 
   return <div>
-    <h2>{title}</h2>
+    <h2>{World_Field_EntityKindToString(selectedField.value.entityKind)}</h2>
     <p><span>Coords</span> {selectedField.value.coords!.x}, {selectedField.value.coords!.y}</p>
     {bottom}
   </div>
 }
 
 function Attacks() {
-  async function cancelAttack(id: number) {
-    try {
-      await server.cancelAttack({ id })
-      outgoingAttacks.value = outgoingAttacks.value.filter(a => a.id != id)
-    } catch (err) {
-      alert(`Failed to cancel attack (id: ${id}): ${err}`)
-    }
-  }
-
-  const { outgoingAttacks, getWorldFieldById } = useContext(WorldContext)
+  const outgoingAttacks = useStore(state => state.outgoingAttacks)
+  const cancelAttack = useStore(state => state.cancelAttack)
+  const getWorldFieldById = useStore(state => state.getWorldFieldById)
 
   let outgoingAttacksListBody: JSX.Element
-  if (outgoingAttacks.value.length == 0) {
+  if (outgoingAttacks.length == 0) {
     outgoingAttacksListBody = <p>No attacks</p>
   } else {
     outgoingAttacksListBody = <div>{
-      outgoingAttacks.value.map(attack => {
+      outgoingAttacks.map(attack => {
         const worldField = getWorldFieldById(attack.worldFieldId)!
         return (<div>
           <Link to={`/world/fields/${worldField.id}`}>{World_Field_EntityKindToString(worldField.entityKind)}</Link>

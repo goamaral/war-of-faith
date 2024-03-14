@@ -178,9 +178,7 @@ message IssueAttackRequest {
   Coords target_coords = 2 [(buf.validate.field).uint32.gt = 0];
   map<string, uint32> troop_quantity = 3 [(buf.validate.field).map.min_pairs = 1]; // <troop_kind, quantity>
 }
-message IssueAttackResponse {
-  Attack attack = 1;
-}
+message IssueAttackResponse {}
 
 // CancelAttack
 message CancelAttackRequest {

@@ -16,7 +16,8 @@ func CreateWorldField(ctx context.Context, coords Coords, entityKind serverv1.Wo
 		EntityKind: entityKind,
 		EntityId:   entityId,
 	}
-	return field, db.Insert(ctx, WorldFieldsTableName, &field)
+	_, err := db.Insert(ctx, WorldFieldsTableName, &field)
+	return field, err
 }
 
 func GetWorldFields(ctx context.Context, opts ...db.QueryOption) ([]WorldField, error) {

@@ -13,7 +13,7 @@ const TemplesTableName = "temples"
 
 func CreateTemple(ctx context.Context, coords Coords) (Temple, error) {
 	temple := Temple{}
-	err := db.Insert(ctx, TemplesTableName, &temple)
+	_, err := db.Insert(ctx, TemplesTableName, &temple)
 	if err != nil {
 		return Temple{}, fmt.Errorf("failed to create temple: %w", err)
 	}

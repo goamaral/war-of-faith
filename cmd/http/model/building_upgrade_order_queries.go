@@ -10,7 +10,7 @@ import (
 const BuildingUpgradeOrdersTableName = "building_upgrade_orders"
 
 func CreateBuildingUpgradeOrder(ctx context.Context, order *BuildingUpgradeOrder) (*BuildingUpgradeOrder, error) {
-	return order, db.Insert(ctx, BuildingUpgradeOrdersTableName, order)
+	return db.Insert(ctx, BuildingUpgradeOrdersTableName, order)
 }
 
 func GetBuildingUpgradeOrder(ctx context.Context, id uint32) (BuildingUpgradeOrder, bool, error) {

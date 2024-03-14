@@ -10,10 +10,10 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func Insert[T any](ctx context.Context, table string, record *T) error {
+func Insert[T any](ctx context.Context, table string, record *T) (*T, error) {
 	recordMap, err := recordToMap(record)
 	if err != nil {
-		return fmt.Errorf("failed to convert record to map: %w", err)
+		return nil, fmt.Errorf("failed to convert record to map: %w", err)
 	}
 	delete(recordMap, "id")
 
@@ -22,11 +22,11 @@ func Insert[T any](ctx context.Context, table string, record *T) error {
 	if len(recordMap) != 0 {
 		qrySql, args, err = sq.Insert(table).SetMap(recordMap).Suffix("RETURNING *").ToSql()
 		if err != nil {
-			return fmt.Errorf("failed to build sql query: %w", err)
+			return nil, fmt.Errorf("failed to build sql query: %w", err)
 		}
 	}
 
-	return DB.QueryRowxContext(ctx, qrySql, args...).StructScan(record)
+	return record, queryRowxContext(ctx, qrySql, args...).StructScan(record)
 }
 
 func Find[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOption) ([]T, error) {
@@ -42,7 +42,7 @@ func Find[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOpt
 		return nil, fmt.Errorf("failed to build sql query: %w", err)
 	}
 
-	rows, err := DB.QueryxContext(ctx, qrySql, args...)
+	rows, err := queryxContext(ctx, qrySql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run sql query: %w", err)
 	}
@@ -75,7 +75,7 @@ func FindOne[T any](ctx context.Context, table string, opts ...QueryOption) (T, 
 		return record, false, fmt.Errorf("failed to build sql query: %w", err)
 	}
 
-	err = DB.QueryRowxContext(ctx, qrySql, args...).StructScan(&record)
+	err = queryRowxContext(ctx, qrySql, args...).StructScan(&record)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, false, nil
@@ -99,7 +99,7 @@ func First[T any](ctx context.Context, builder sq.SelectBuilder, opts ...QueryOp
 		return record, fmt.Errorf("failed to build sql query: %w", err)
 	}
 
-	err = rowScan(DB.QueryRowxContext(ctx, qrySql, args...), &record)
+	err = rowScan(queryRowxContext(ctx, qrySql, args...), &record)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return record, ErrNotFound

@@ -1514,11 +1514,6 @@ export class IssueAttackRequest extends Message<IssueAttackRequest> {
  * @generated from message server.v1.IssueAttackResponse
  */
 export class IssueAttackResponse extends Message<IssueAttackResponse> {
-  /**
-   * @generated from field: server.v1.Attack attack = 1;
-   */
-  attack?: Attack;
-
   constructor(data?: PartialMessage<IssueAttackResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1527,7 +1522,6 @@ export class IssueAttackResponse extends Message<IssueAttackResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "server.v1.IssueAttackResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "attack", kind: "message", T: Attack },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IssueAttackResponse {

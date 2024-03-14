@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -14,6 +15,7 @@ import (
 var ErrNotFound = status.Error(codes.NotFound, "not found")
 
 var DB *sqlx.DB
+var Debug bool
 
 func Init(uri string) error {
 	var err error
@@ -29,6 +31,20 @@ func Init(uri string) error {
 	}
 
 	return nil
+}
+
+func queryRowxContext(ctx context.Context, query string, args ...any) *sqlx.Row {
+	if Debug {
+		fmt.Println("Query:", query, args)
+	}
+	return DB.QueryRowxContext(ctx, query, args...)
+}
+
+func queryxContext(ctx context.Context, query string, args ...any) (*sqlx.Rows, error) {
+	if Debug {
+		fmt.Println("Query:", query, args)
+	}
+	return DB.QueryxContext(ctx, query, args...)
 }
 
 func recordToMap(record any) (map[string]any, error) {

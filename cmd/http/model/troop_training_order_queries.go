@@ -10,7 +10,7 @@ import (
 const TroopTrainingOrdersTableName = "troop_training_orders"
 
 func CreateTroopTrainingOrder(ctx context.Context, order *TroopTrainingOrder) (*TroopTrainingOrder, error) {
-	return order, db.Insert(ctx, TroopTrainingOrdersTableName, order)
+	return db.Insert(ctx, TroopTrainingOrdersTableName, order)
 }
 
 func GetTroopTrainingOrder(ctx context.Context, id uint32) (TroopTrainingOrder, bool, error) {

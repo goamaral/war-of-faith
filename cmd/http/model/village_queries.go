@@ -14,7 +14,7 @@ const VillagesTableName = "villages"
 
 func BootstrapVillage(ctx context.Context, coords Coords, playerId uint32) (Village, error) {
 	village := NewVillage(playerId)
-	err := db.Insert(ctx, VillagesTableName, &village)
+	_, err := db.Insert(ctx, VillagesTableName, &village)
 	if err != nil {
 		return Village{}, fmt.Errorf("failed to create village: %w", err)
 	}
