@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,6 +26,7 @@ type ServiceClient interface {
 	// VILLAGES
 	GetVillage(ctx context.Context, in *GetVillageRequest, opts ...grpc.CallOption) (*GetVillageResponse, error)
 	GetVillages(ctx context.Context, in *GetVillagesRequest, opts ...grpc.CallOption) (*GetVillagesResponse, error)
+	SubscribeToVillages(ctx context.Context, in *SubscribeToVillagesRequest, opts ...grpc.CallOption) (Service_SubscribeToVillagesClient, error)
 	// BUILDINGS
 	GetBuildings(ctx context.Context, in *GetBuildingsRequest, opts ...grpc.CallOption) (*GetBuildingsResponse, error)
 	IssueBuildingUpgradeOrder(ctx context.Context, in *IssueBuildingUpgradeOrderRequest, opts ...grpc.CallOption) (*IssueBuildingUpgradeOrderResponse, error)
@@ -38,11 +40,15 @@ type ServiceClient interface {
 	IssueTempleDonationOrder(ctx context.Context, in *IssueTempleDonationOrderRequest, opts ...grpc.CallOption) (*IssueTempleDonationOrderResponse, error)
 	// WORLD
 	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
+	SubscribeToWorldFields(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToWorldFieldsClient, error)
+	// ATTACKS
 	IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error)
 	CancelAttack(ctx context.Context, in *CancelAttackRequest, opts ...grpc.CallOption) (*CancelAttackResponse, error)
 	GetAttacks(ctx context.Context, in *GetAttacksRequest, opts ...grpc.CallOption) (*GetAttacksResponse, error)
+	SubscribeToAttacks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToAttacksClient, error)
 	// PLAYERS
 	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
+	SubscribeToPlayer(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToPlayerClient, error)
 }
 
 type serviceClient struct {
@@ -69,6 +75,38 @@ func (c *serviceClient) GetVillages(ctx context.Context, in *GetVillagesRequest,
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *serviceClient) SubscribeToVillages(ctx context.Context, in *SubscribeToVillagesRequest, opts ...grpc.CallOption) (Service_SubscribeToVillagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[0], "/server.v1.Service/SubscribeToVillages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &serviceSubscribeToVillagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Service_SubscribeToVillagesClient interface {
+	Recv() (*Village_Event, error)
+	grpc.ClientStream
+}
+
+type serviceSubscribeToVillagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceSubscribeToVillagesClient) Recv() (*Village_Event, error) {
+	m := new(Village_Event)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *serviceClient) GetBuildings(ctx context.Context, in *GetBuildingsRequest, opts ...grpc.CallOption) (*GetBuildingsResponse, error) {
@@ -152,6 +190,38 @@ func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts 
 	return out, nil
 }
 
+func (c *serviceClient) SubscribeToWorldFields(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToWorldFieldsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[1], "/server.v1.Service/SubscribeToWorldFields", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &serviceSubscribeToWorldFieldsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Service_SubscribeToWorldFieldsClient interface {
+	Recv() (*World_Field, error)
+	grpc.ClientStream
+}
+
+type serviceSubscribeToWorldFieldsClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceSubscribeToWorldFieldsClient) Recv() (*World_Field, error) {
+	m := new(World_Field)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *serviceClient) IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error) {
 	out := new(IssueAttackResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/IssueAttack", in, out, opts...)
@@ -179,6 +249,38 @@ func (c *serviceClient) GetAttacks(ctx context.Context, in *GetAttacksRequest, o
 	return out, nil
 }
 
+func (c *serviceClient) SubscribeToAttacks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToAttacksClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[2], "/server.v1.Service/SubscribeToAttacks", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &serviceSubscribeToAttacksClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Service_SubscribeToAttacksClient interface {
+	Recv() (*Attack_Event, error)
+	grpc.ClientStream
+}
+
+type serviceSubscribeToAttacksClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceSubscribeToAttacksClient) Recv() (*Attack_Event, error) {
+	m := new(Attack_Event)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *serviceClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error) {
 	out := new(GetPlayerResponse)
 	err := c.cc.Invoke(ctx, "/server.v1.Service/GetPlayer", in, out, opts...)
@@ -188,6 +290,38 @@ func (c *serviceClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opt
 	return out, nil
 }
 
+func (c *serviceClient) SubscribeToPlayer(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToPlayerClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[3], "/server.v1.Service/SubscribeToPlayer", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &serviceSubscribeToPlayerClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Service_SubscribeToPlayerClient interface {
+	Recv() (*Player, error)
+	grpc.ClientStream
+}
+
+type serviceSubscribeToPlayerClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceSubscribeToPlayerClient) Recv() (*Player, error) {
+	m := new(Player)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility
@@ -195,6 +329,7 @@ type ServiceServer interface {
 	// VILLAGES
 	GetVillage(context.Context, *GetVillageRequest) (*GetVillageResponse, error)
 	GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error)
+	SubscribeToVillages(*SubscribeToVillagesRequest, Service_SubscribeToVillagesServer) error
 	// BUILDINGS
 	GetBuildings(context.Context, *GetBuildingsRequest) (*GetBuildingsResponse, error)
 	IssueBuildingUpgradeOrder(context.Context, *IssueBuildingUpgradeOrderRequest) (*IssueBuildingUpgradeOrderResponse, error)
@@ -208,11 +343,15 @@ type ServiceServer interface {
 	IssueTempleDonationOrder(context.Context, *IssueTempleDonationOrderRequest) (*IssueTempleDonationOrderResponse, error)
 	// WORLD
 	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
+	SubscribeToWorldFields(*emptypb.Empty, Service_SubscribeToWorldFieldsServer) error
+	// ATTACKS
 	IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error)
 	CancelAttack(context.Context, *CancelAttackRequest) (*CancelAttackResponse, error)
 	GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error)
+	SubscribeToAttacks(*emptypb.Empty, Service_SubscribeToAttacksServer) error
 	// PLAYERS
 	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
+	SubscribeToPlayer(*emptypb.Empty, Service_SubscribeToPlayerServer) error
 }
 
 // UnimplementedServiceServer should be embedded to have forward compatible implementations.
@@ -224,6 +363,9 @@ func (UnimplementedServiceServer) GetVillage(context.Context, *GetVillageRequest
 }
 func (UnimplementedServiceServer) GetVillages(context.Context, *GetVillagesRequest) (*GetVillagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVillages not implemented")
+}
+func (UnimplementedServiceServer) SubscribeToVillages(*SubscribeToVillagesRequest, Service_SubscribeToVillagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method SubscribeToVillages not implemented")
 }
 func (UnimplementedServiceServer) GetBuildings(context.Context, *GetBuildingsRequest) (*GetBuildingsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBuildings not implemented")
@@ -252,6 +394,9 @@ func (UnimplementedServiceServer) IssueTempleDonationOrder(context.Context, *Iss
 func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
 }
+func (UnimplementedServiceServer) SubscribeToWorldFields(*emptypb.Empty, Service_SubscribeToWorldFieldsServer) error {
+	return status.Errorf(codes.Unimplemented, "method SubscribeToWorldFields not implemented")
+}
 func (UnimplementedServiceServer) IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssueAttack not implemented")
 }
@@ -261,8 +406,14 @@ func (UnimplementedServiceServer) CancelAttack(context.Context, *CancelAttackReq
 func (UnimplementedServiceServer) GetAttacks(context.Context, *GetAttacksRequest) (*GetAttacksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttacks not implemented")
 }
+func (UnimplementedServiceServer) SubscribeToAttacks(*emptypb.Empty, Service_SubscribeToAttacksServer) error {
+	return status.Errorf(codes.Unimplemented, "method SubscribeToAttacks not implemented")
+}
 func (UnimplementedServiceServer) GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlayer not implemented")
+}
+func (UnimplementedServiceServer) SubscribeToPlayer(*emptypb.Empty, Service_SubscribeToPlayerServer) error {
+	return status.Errorf(codes.Unimplemented, "method SubscribeToPlayer not implemented")
 }
 
 // UnsafeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -310,6 +461,27 @@ func _Service_GetVillages_Handler(srv interface{}, ctx context.Context, dec func
 		return srv.(ServiceServer).GetVillages(ctx, req.(*GetVillagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_SubscribeToVillages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeToVillagesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceServer).SubscribeToVillages(m, &serviceSubscribeToVillagesServer{stream})
+}
+
+type Service_SubscribeToVillagesServer interface {
+	Send(*Village_Event) error
+	grpc.ServerStream
+}
+
+type serviceSubscribeToVillagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceSubscribeToVillagesServer) Send(m *Village_Event) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Service_GetBuildings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -474,6 +646,27 @@ func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_SubscribeToWorldFields_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceServer).SubscribeToWorldFields(m, &serviceSubscribeToWorldFieldsServer{stream})
+}
+
+type Service_SubscribeToWorldFieldsServer interface {
+	Send(*World_Field) error
+	grpc.ServerStream
+}
+
+type serviceSubscribeToWorldFieldsServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceSubscribeToWorldFieldsServer) Send(m *World_Field) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 func _Service_IssueAttack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IssueAttackRequest)
 	if err := dec(in); err != nil {
@@ -528,6 +721,27 @@ func _Service_GetAttacks_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_SubscribeToAttacks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceServer).SubscribeToAttacks(m, &serviceSubscribeToAttacksServer{stream})
+}
+
+type Service_SubscribeToAttacksServer interface {
+	Send(*Attack_Event) error
+	grpc.ServerStream
+}
+
+type serviceSubscribeToAttacksServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceSubscribeToAttacksServer) Send(m *Attack_Event) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 func _Service_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetPlayerRequest)
 	if err := dec(in); err != nil {
@@ -544,6 +758,27 @@ func _Service_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(i
 		return srv.(ServiceServer).GetPlayer(ctx, req.(*GetPlayerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_SubscribeToPlayer_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceServer).SubscribeToPlayer(m, &serviceSubscribeToPlayerServer{stream})
+}
+
+type Service_SubscribeToPlayerServer interface {
+	Send(*Player) error
+	grpc.ServerStream
+}
+
+type serviceSubscribeToPlayerServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceSubscribeToPlayerServer) Send(m *Player) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
@@ -614,6 +849,27 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_GetPlayer_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SubscribeToVillages",
+			Handler:       _Service_SubscribeToVillages_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SubscribeToWorldFields",
+			Handler:       _Service_SubscribeToWorldFields_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SubscribeToAttacks",
+			Handler:       _Service_SubscribeToAttacks_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SubscribeToPlayer",
+			Handler:       _Service_SubscribeToPlayer_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "server/v1/server.proto",
 }

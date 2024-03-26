@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"slices"
+	"sync"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,10 +15,12 @@ import (
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"war-of-faith/cmd/http/db"
 	"war-of-faith/cmd/http/model"
@@ -62,6 +66,36 @@ func (s *Server) GetVillages(ctx context.Context, req *connect.Request[serverv1.
 	}
 
 	return connect.NewResponse(&serverv1.GetVillagesResponse{Villages: pVillages}), nil
+}
+
+var VillageBrodcaster = NewBrodcaster[VillageEvent]()
+
+type VillageEvent struct {
+	Village model.Village
+	Action  serverv1.Village_Event_Action
+}
+
+func (s *Server) SubscribeToVillages(ctx context.Context, req *connect.Request[serverv1.SubscribeToVillagesRequest], stream *connect.ServerStream[serverv1.Village_Event]) error {
+	// TODO: Add timeout
+	id, ch := VillageBrodcaster.Subscribe()
+	defer VillageBrodcaster.Unsubscribe(id)
+	for {
+		event := <-ch
+
+		if !slices.Contains(req.Msg.Ids, event.Village.Id) {
+			continue
+		}
+
+		pVillage, err := event.Village.ToProtobuf(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to convert village to protobuf: %w", err)
+		}
+
+		err = stream.Send(&serverv1.Village_Event{Village: pVillage, Action: event.Action})
+		if err != nil {
+			return fmt.Errorf("failed to send village event to stream: %w", err)
+		}
+	}
 }
 
 /* BUILDINGS */
@@ -213,6 +247,17 @@ func (s *Server) IssueTroopTrainingOrder(ctx context.Context, req *connect.Reque
 		return nil, fmt.Errorf("failed to create troop training order: %w", err)
 	}
 
+	if troopKind == model.Troop_Kind_LEADER {
+		player, found, err := model.GetPlayer(ctx, village.PlayerId)
+		if err != nil {
+			log.Printf("failed to get player (id: %d): %v", village.PlayerId, err)
+		}
+		if !found {
+			log.Printf("player (id: %d) not found", village.PlayerId)
+		}
+		PlayerBrodcaster.Publish(player)
+	}
+
 	pOrder, err := order.ToProtobuf(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert troop training order to protobuf: %w", err)
@@ -241,13 +286,43 @@ func (s *Server) CancelTroopTrainingOrder(ctx context.Context, req *connect.Requ
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
+	VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_UPDATE})
 
 	err = model.DeleteTroopTrainingOrder(ctx, order.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete troop training order: %w", err)
 	}
 
+	if order.TroopKind == model.Troop_Kind_LEADER {
+		player, found, err := model.GetPlayer(ctx, village.PlayerId)
+		if err != nil {
+			log.Printf("failed to get player (id: %d): %v", village.PlayerId, err)
+		}
+		if !found {
+			log.Printf("player (id: %d) not found", village.PlayerId)
+		}
+		PlayerBrodcaster.Publish(player)
+	}
+
 	return connect.NewResponse(&serverv1.CancelTroopTrainingOrderResponse{}), nil
+}
+
+/* TEMPLES */
+func (s *Server) GetTemple(ctx context.Context, req *connect.Request[serverv1.GetTempleRequest]) (*connect.Response[serverv1.GetTempleResponse], error) {
+	temple, found, err := db.FindOne[model.Temple](ctx, model.TemplesTableName, sq.Eq{"id": req.Msg.Id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get temple: %w", err)
+	}
+	if !found {
+		return nil, status.Error(codes.NotFound, "temple not found")
+	}
+
+	pTemple, err := temple.ToProtobuf()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert temple to protobuf: %w", err)
+	}
+
+	return connect.NewResponse(&serverv1.GetTempleResponse{Temple: pTemple}), nil
 }
 
 func (s *Server) IssueTempleDonationOrder(ctx context.Context, req *connect.Request[serverv1.IssueTempleDonationOrderRequest]) (*connect.Response[serverv1.IssueTempleDonationOrderResponse], error) {
@@ -270,6 +345,7 @@ func (s *Server) IssueTempleDonationOrder(ctx context.Context, req *connect.Requ
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
+	VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_UPDATE})
 
 	// TODO: Create TempleDonationOrder
 	// TODO: Ability to cancel TempleDonationOrder
@@ -281,24 +357,6 @@ func (s *Server) IssueTempleDonationOrder(ctx context.Context, req *connect.Requ
 	}
 
 	return connect.NewResponse(&serverv1.IssueTempleDonationOrderResponse{}), nil
-}
-
-/* TEMPLES */
-func (s *Server) GetTemple(ctx context.Context, req *connect.Request[serverv1.GetTempleRequest]) (*connect.Response[serverv1.GetTempleResponse], error) {
-	temple, found, err := db.FindOne[model.Temple](ctx, model.TemplesTableName, sq.Eq{"id": req.Msg.Id})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get temple: %w", err)
-	}
-	if !found {
-		return nil, status.Error(codes.NotFound, "temple not found")
-	}
-
-	pTemple, err := temple.ToProtobuf()
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert temple to protobuf: %w", err)
-	}
-
-	return connect.NewResponse(&serverv1.GetTempleResponse{Temple: pTemple}), nil
 }
 
 /* WORLD */
@@ -313,6 +371,28 @@ func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.Get
 	return connect.NewResponse(&serverv1.GetWorldResponse{World: pWorld}), nil
 }
 
+var WorldFieldBrodcaster = NewBrodcaster[model.WorldField]()
+
+func (s *Server) SubscribeToWorldFields(ctx context.Context, req *connect.Request[emptypb.Empty], stream *connect.ServerStream[serverv1.World_Field]) error {
+	// TODO: Add timeout
+	id, ch := WorldFieldBrodcaster.Subscribe()
+	defer WorldFieldBrodcaster.Unsubscribe(id)
+	for {
+		worldField := <-ch
+
+		pWorldField, err := worldField.ToProtobuf()
+		if err != nil {
+			return fmt.Errorf("failed to convert world field to protobuf: %w", err)
+		}
+
+		err = stream.Send(pWorldField)
+		if err != nil {
+			return fmt.Errorf("failed to send world field to stream: %w", err)
+		}
+	}
+}
+
+/* ATTACKS */
 func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.IssueAttackRequest]) (*connect.Response[serverv1.IssueAttackResponse], error) {
 	// TODO: Wrap in transaction
 	// TODO: Use auth player
@@ -362,7 +442,7 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 		return nil, fmt.Errorf("failed to get world field: %w", err)
 	}
 	if !found {
-		worldField := model.WorldField{
+		worldField = model.WorldField{
 			Coords:     targetCoords,
 			EntityKind: serverv1.World_Field_ENTITY_KIND_WILD,
 		}
@@ -370,9 +450,10 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 		if err != nil {
 			return nil, fmt.Errorf("failed to create world field: %w", err)
 		}
+		WorldFieldBrodcaster.Publish(worldField)
 	}
 
-	_, err = db.Insert(ctx, model.AttacksTableName, &model.Attack{
+	attack, err := db.Insert(ctx, model.AttacksTableName, &model.Attack{
 		TroopQuantity: troopQuantity,
 		TimeLeft:      10, // TODO: Define time based on distance and troop types
 		WorldFieldId:  worldField.Id,
@@ -382,6 +463,7 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 	if err != nil {
 		return nil, fmt.Errorf("failed to create attack: %w", err)
 	}
+	AttackBrodcaster.Publish(AttackEvent{Attack: *attack, Action: serverv1.Attack_Event_ACTION_CREATE})
 
 	// FUTURE: Move this to the loop above when this method is inside a transaction
 	for kind, quantity := range troopQuantity.Iter() {
@@ -391,6 +473,7 @@ func (s *Server) IssueAttack(ctx context.Context, req *connect.Request[serverv1.
 	if err != nil {
 		return nil, fmt.Errorf("failed to update village: %w", err)
 	}
+	VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_UPDATE})
 
 	return connect.NewResponse(&serverv1.IssueAttackResponse{}), nil
 }
@@ -413,11 +496,21 @@ func (s *Server) CancelAttack(ctx context.Context, req *connect.Request[serverv1
 	if err != nil {
 		return nil, fmt.Errorf("failed to return troops to village: %w", err)
 	}
+	VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_DELETE})
+	player, found, err := model.GetPlayer(ctx, village.PlayerId)
+	if err != nil {
+		log.Printf("failed to get player (id: %d): %v", village.PlayerId, err)
+	}
+	if !found {
+		log.Printf("player (id: %d) not found", village.PlayerId)
+	}
+	PlayerBrodcaster.Publish(player)
 
 	err = db.Delete(ctx, model.AttacksTableName, sq.Eq{"id": attack.Id})
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete attack: %w", err)
 	}
+	AttackBrodcaster.Publish(AttackEvent{Attack: attack, Action: serverv1.Attack_Event_ACTION_DELETE})
 
 	return connect.NewResponse(&serverv1.CancelAttackResponse{}), nil
 }
@@ -443,6 +536,32 @@ func (s *Server) GetAttacks(ctx context.Context, req *connect.Request[serverv1.G
 	}), nil
 }
 
+var AttackBrodcaster = NewBrodcaster[AttackEvent]()
+
+type AttackEvent struct {
+	Attack model.Attack
+	Action serverv1.Attack_Event_Action
+}
+
+func (s *Server) SubscribeToAttacks(ctx context.Context, req *connect.Request[emptypb.Empty], stream *connect.ServerStream[serverv1.Attack_Event]) error {
+	// TODO: Add timeout
+	id, ch := AttackBrodcaster.Subscribe()
+	defer AttackBrodcaster.Unsubscribe(id)
+	for {
+		attackEvent := <-ch
+
+		pAttack, err := attackEvent.Attack.ToProtobuf()
+		if err != nil {
+			return fmt.Errorf("failed to convert attack to protobuf: %w", err)
+		}
+
+		err = stream.Send(&serverv1.Attack_Event{Attack: pAttack, Action: attackEvent.Action})
+		if err != nil {
+			return fmt.Errorf("failed to send attack event to stream: %w", err)
+		}
+	}
+}
+
 /* PLAYERS */
 func (s *Server) GetPlayer(ctx context.Context, req *connect.Request[serverv1.GetPlayerRequest]) (*connect.Response[serverv1.GetPlayerResponse], error) {
 	id := req.Msg.Id.GetValue()
@@ -464,6 +583,65 @@ func (s *Server) GetPlayer(ctx context.Context, req *connect.Request[serverv1.Ge
 	}
 
 	return connect.NewResponse(&serverv1.GetPlayerResponse{Player: pPlayer}), nil
+}
+
+var PlayerBrodcaster = NewBrodcaster[model.Player]()
+
+func (s *Server) SubscribeToPlayer(ctx context.Context, req *connect.Request[emptypb.Empty], stream *connect.ServerStream[serverv1.Player]) error {
+	// TODO: Add timeout
+	id, ch := PlayerBrodcaster.Subscribe()
+	defer PlayerBrodcaster.Unsubscribe(id)
+	for {
+		player := <-ch
+
+		pPlayer, err := player.ToProtobuf(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to convert player to protobuf: %w", err)
+		}
+
+		err = stream.Send(pPlayer)
+		if err != nil {
+			return fmt.Errorf("failed to send player to stream: %w", err)
+		}
+	}
+}
+
+/* SUBSCRIBERS */
+type Brodcaster[T any] struct {
+	subscribers map[string]chan T
+	mutex       sync.Mutex
+}
+
+func NewBrodcaster[T any]() Brodcaster[T] {
+	return Brodcaster[T]{subscribers: map[string]chan T{}}
+}
+func (b *Brodcaster[T]) Subscribe() (string, chan T) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	for {
+		id := uuid.NewString()
+		_, found := b.subscribers[id]
+		if !found {
+			b.subscribers[id] = make(chan T)
+			return id, b.subscribers[id]
+		}
+	}
+}
+func (b *Brodcaster[T]) Unsubscribe(id string) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	ch, found := b.subscribers[id]
+	if found {
+		close(ch)
+		delete(b.subscribers, id)
+	}
+}
+func (b *Brodcaster[T]) Publish(event T) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	for _, ch := range b.subscribers {
+		ch <- event
+	}
 }
 
 func main() {
@@ -518,6 +696,7 @@ func main() {
 					log.Printf("failed to delete attack (id: %d): %v", attack.Id, err)
 					continue
 				}
+				AttackBrodcaster.Publish(AttackEvent{Attack: attack, Action: serverv1.Attack_Event_ACTION_DELETE})
 
 				worldField, err := attack.WorldField(ctx)
 				if err != nil {
@@ -532,6 +711,15 @@ func main() {
 						log.Printf("failed to create new village: %v", err)
 						continue
 					}
+					VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_CREATE})
+					player, found, err := model.GetPlayer(ctx, village.PlayerId)
+					if err != nil {
+						log.Printf("failed to get player (id: %d): %v", village.PlayerId, err)
+					}
+					if !found {
+						log.Printf("player (id: %d) not found", village.PlayerId)
+					}
+					PlayerBrodcaster.Publish(player)
 
 					err = db.Update(ctx, model.WorldFieldsTableName,
 						map[string]any{
@@ -544,6 +732,9 @@ func main() {
 						log.Printf("failed to convert world field (id: %d) from wild to village: %v", worldField.Id, err)
 						continue
 					}
+					worldField.EntityKind = serverv1.World_Field_ENTITY_KIND_VILLAGE
+					worldField.EntityId = village.Id
+					WorldFieldBrodcaster.Publish(worldField)
 
 				case serverv1.World_Field_ENTITY_KIND_VILLAGE:
 					targetVillage, err := db.First[model.Village](ctx, sq.Select("*").From(model.VillagesTableName), sq.Eq{"id": worldField.EntityId})
@@ -570,6 +761,7 @@ func main() {
 								log.Printf("failed to update village (id: %d) owner: %v", targetVillage.Id, err)
 								continue
 							}
+							VillageBrodcaster.Publish(VillageEvent{Village: targetVillage, Action: serverv1.Village_Event_ACTION_UPDATE})
 						}
 					}
 
@@ -582,6 +774,7 @@ func main() {
 					log.Printf("failed to update attack (id: %d): %v", attack.Id, err)
 					continue
 				}
+				AttackBrodcaster.Publish(AttackEvent{Attack: attack, Action: serverv1.Attack_Event_ACTION_UPDATE})
 			}
 		}
 
@@ -646,6 +839,16 @@ func main() {
 				log.Printf("failed to update village (id: %d): %v", village.Id, err)
 				continue
 			}
+			village, found, err := model.GetVillage(ctx, village.Id)
+			if err != nil {
+				log.Printf("failed to get village (id: %d): %v", village.Id, err)
+				continue
+			}
+			if !found {
+				log.Printf("village (id: %d) not found", village.Id)
+				continue
+			}
+			VillageBrodcaster.Publish(VillageEvent{Village: village, Action: serverv1.Village_Event_ACTION_UPDATE})
 		}
 	}
 }

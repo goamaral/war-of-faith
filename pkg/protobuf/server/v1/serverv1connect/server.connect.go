@@ -8,6 +8,7 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	strings "strings"
 	v1 "war-of-faith/pkg/protobuf/server/v1"
@@ -37,6 +38,9 @@ const (
 	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
 	// ServiceGetVillagesProcedure is the fully-qualified name of the Service's GetVillages RPC.
 	ServiceGetVillagesProcedure = "/server.v1.Service/GetVillages"
+	// ServiceSubscribeToVillagesProcedure is the fully-qualified name of the Service's
+	// SubscribeToVillages RPC.
+	ServiceSubscribeToVillagesProcedure = "/server.v1.Service/SubscribeToVillages"
 	// ServiceGetBuildingsProcedure is the fully-qualified name of the Service's GetBuildings RPC.
 	ServiceGetBuildingsProcedure = "/server.v1.Service/GetBuildings"
 	// ServiceIssueBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
@@ -60,14 +64,23 @@ const (
 	ServiceIssueTempleDonationOrderProcedure = "/server.v1.Service/IssueTempleDonationOrder"
 	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
 	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
+	// ServiceSubscribeToWorldFieldsProcedure is the fully-qualified name of the Service's
+	// SubscribeToWorldFields RPC.
+	ServiceSubscribeToWorldFieldsProcedure = "/server.v1.Service/SubscribeToWorldFields"
 	// ServiceIssueAttackProcedure is the fully-qualified name of the Service's IssueAttack RPC.
 	ServiceIssueAttackProcedure = "/server.v1.Service/IssueAttack"
 	// ServiceCancelAttackProcedure is the fully-qualified name of the Service's CancelAttack RPC.
 	ServiceCancelAttackProcedure = "/server.v1.Service/CancelAttack"
 	// ServiceGetAttacksProcedure is the fully-qualified name of the Service's GetAttacks RPC.
 	ServiceGetAttacksProcedure = "/server.v1.Service/GetAttacks"
+	// ServiceSubscribeToAttacksProcedure is the fully-qualified name of the Service's
+	// SubscribeToAttacks RPC.
+	ServiceSubscribeToAttacksProcedure = "/server.v1.Service/SubscribeToAttacks"
 	// ServiceGetPlayerProcedure is the fully-qualified name of the Service's GetPlayer RPC.
 	ServiceGetPlayerProcedure = "/server.v1.Service/GetPlayer"
+	// ServiceSubscribeToPlayerProcedure is the fully-qualified name of the Service's SubscribeToPlayer
+	// RPC.
+	ServiceSubscribeToPlayerProcedure = "/server.v1.Service/SubscribeToPlayer"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
@@ -75,6 +88,7 @@ type ServiceClient interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
+	SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest]) (*connect_go.ServerStreamForClient[v1.Village_Event], error)
 	// BUILDINGS
 	GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error)
 	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
@@ -88,11 +102,15 @@ type ServiceClient interface {
 	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World_Field], error)
+	// ATTACKS
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
+	SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Attack_Event], error)
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
+	SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Player], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -113,6 +131,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 		getVillages: connect_go.NewClient[v1.GetVillagesRequest, v1.GetVillagesResponse](
 			httpClient,
 			baseURL+ServiceGetVillagesProcedure,
+			opts...,
+		),
+		subscribeToVillages: connect_go.NewClient[v1.SubscribeToVillagesRequest, v1.Village_Event](
+			httpClient,
+			baseURL+ServiceSubscribeToVillagesProcedure,
 			opts...,
 		),
 		getBuildings: connect_go.NewClient[v1.GetBuildingsRequest, v1.GetBuildingsResponse](
@@ -160,6 +183,11 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceGetWorldProcedure,
 			opts...,
 		),
+		subscribeToWorldFields: connect_go.NewClient[emptypb.Empty, v1.World_Field](
+			httpClient,
+			baseURL+ServiceSubscribeToWorldFieldsProcedure,
+			opts...,
+		),
 		issueAttack: connect_go.NewClient[v1.IssueAttackRequest, v1.IssueAttackResponse](
 			httpClient,
 			baseURL+ServiceIssueAttackProcedure,
@@ -175,9 +203,19 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceGetAttacksProcedure,
 			opts...,
 		),
+		subscribeToAttacks: connect_go.NewClient[emptypb.Empty, v1.Attack_Event](
+			httpClient,
+			baseURL+ServiceSubscribeToAttacksProcedure,
+			opts...,
+		),
 		getPlayer: connect_go.NewClient[v1.GetPlayerRequest, v1.GetPlayerResponse](
 			httpClient,
 			baseURL+ServiceGetPlayerProcedure,
+			opts...,
+		),
+		subscribeToPlayer: connect_go.NewClient[emptypb.Empty, v1.Player](
+			httpClient,
+			baseURL+ServiceSubscribeToPlayerProcedure,
 			opts...,
 		),
 	}
@@ -187,6 +225,7 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 type serviceClient struct {
 	getVillage                 *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
 	getVillages                *connect_go.Client[v1.GetVillagesRequest, v1.GetVillagesResponse]
+	subscribeToVillages        *connect_go.Client[v1.SubscribeToVillagesRequest, v1.Village_Event]
 	getBuildings               *connect_go.Client[v1.GetBuildingsRequest, v1.GetBuildingsResponse]
 	issueBuildingUpgradeOrder  *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
 	cancelBuildingUpgradeOrder *connect_go.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
@@ -196,10 +235,13 @@ type serviceClient struct {
 	getTemple                  *connect_go.Client[v1.GetTempleRequest, v1.GetTempleResponse]
 	issueTempleDonationOrder   *connect_go.Client[v1.IssueTempleDonationOrderRequest, v1.IssueTempleDonationOrderResponse]
 	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
+	subscribeToWorldFields     *connect_go.Client[emptypb.Empty, v1.World_Field]
 	issueAttack                *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
 	cancelAttack               *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
 	getAttacks                 *connect_go.Client[v1.GetAttacksRequest, v1.GetAttacksResponse]
+	subscribeToAttacks         *connect_go.Client[emptypb.Empty, v1.Attack_Event]
 	getPlayer                  *connect_go.Client[v1.GetPlayerRequest, v1.GetPlayerResponse]
+	subscribeToPlayer          *connect_go.Client[emptypb.Empty, v1.Player]
 }
 
 // GetVillage calls server.v1.Service.GetVillage.
@@ -210,6 +252,11 @@ func (c *serviceClient) GetVillage(ctx context.Context, req *connect_go.Request[
 // GetVillages calls server.v1.Service.GetVillages.
 func (c *serviceClient) GetVillages(ctx context.Context, req *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
 	return c.getVillages.CallUnary(ctx, req)
+}
+
+// SubscribeToVillages calls server.v1.Service.SubscribeToVillages.
+func (c *serviceClient) SubscribeToVillages(ctx context.Context, req *connect_go.Request[v1.SubscribeToVillagesRequest]) (*connect_go.ServerStreamForClient[v1.Village_Event], error) {
+	return c.subscribeToVillages.CallServerStream(ctx, req)
 }
 
 // GetBuildings calls server.v1.Service.GetBuildings.
@@ -257,6 +304,11 @@ func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1
 	return c.getWorld.CallUnary(ctx, req)
 }
 
+// SubscribeToWorldFields calls server.v1.Service.SubscribeToWorldFields.
+func (c *serviceClient) SubscribeToWorldFields(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World_Field], error) {
+	return c.subscribeToWorldFields.CallServerStream(ctx, req)
+}
+
 // IssueAttack calls server.v1.Service.IssueAttack.
 func (c *serviceClient) IssueAttack(ctx context.Context, req *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error) {
 	return c.issueAttack.CallUnary(ctx, req)
@@ -272,9 +324,19 @@ func (c *serviceClient) GetAttacks(ctx context.Context, req *connect_go.Request[
 	return c.getAttacks.CallUnary(ctx, req)
 }
 
+// SubscribeToAttacks calls server.v1.Service.SubscribeToAttacks.
+func (c *serviceClient) SubscribeToAttacks(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Attack_Event], error) {
+	return c.subscribeToAttacks.CallServerStream(ctx, req)
+}
+
 // GetPlayer calls server.v1.Service.GetPlayer.
 func (c *serviceClient) GetPlayer(ctx context.Context, req *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
 	return c.getPlayer.CallUnary(ctx, req)
+}
+
+// SubscribeToPlayer calls server.v1.Service.SubscribeToPlayer.
+func (c *serviceClient) SubscribeToPlayer(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Player], error) {
+	return c.subscribeToPlayer.CallServerStream(ctx, req)
 }
 
 // ServiceHandler is an implementation of the server.v1.Service service.
@@ -282,6 +344,7 @@ type ServiceHandler interface {
 	// VILLAGES
 	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
 	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
+	SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest], *connect_go.ServerStream[v1.Village_Event]) error
 	// BUILDINGS
 	GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error)
 	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
@@ -295,11 +358,15 @@ type ServiceHandler interface {
 	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
 	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World_Field]) error
+	// ATTACKS
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
+	SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Attack_Event]) error
 	// PLAYERS
 	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
+	SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Player]) error
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -316,6 +383,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 	serviceGetVillagesHandler := connect_go.NewUnaryHandler(
 		ServiceGetVillagesProcedure,
 		svc.GetVillages,
+		opts...,
+	)
+	serviceSubscribeToVillagesHandler := connect_go.NewServerStreamHandler(
+		ServiceSubscribeToVillagesProcedure,
+		svc.SubscribeToVillages,
 		opts...,
 	)
 	serviceGetBuildingsHandler := connect_go.NewUnaryHandler(
@@ -363,6 +435,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.GetWorld,
 		opts...,
 	)
+	serviceSubscribeToWorldFieldsHandler := connect_go.NewServerStreamHandler(
+		ServiceSubscribeToWorldFieldsProcedure,
+		svc.SubscribeToWorldFields,
+		opts...,
+	)
 	serviceIssueAttackHandler := connect_go.NewUnaryHandler(
 		ServiceIssueAttackProcedure,
 		svc.IssueAttack,
@@ -378,9 +455,19 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.GetAttacks,
 		opts...,
 	)
+	serviceSubscribeToAttacksHandler := connect_go.NewServerStreamHandler(
+		ServiceSubscribeToAttacksProcedure,
+		svc.SubscribeToAttacks,
+		opts...,
+	)
 	serviceGetPlayerHandler := connect_go.NewUnaryHandler(
 		ServiceGetPlayerProcedure,
 		svc.GetPlayer,
+		opts...,
+	)
+	serviceSubscribeToPlayerHandler := connect_go.NewServerStreamHandler(
+		ServiceSubscribeToPlayerProcedure,
+		svc.SubscribeToPlayer,
 		opts...,
 	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -389,6 +476,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceGetVillageHandler.ServeHTTP(w, r)
 		case ServiceGetVillagesProcedure:
 			serviceGetVillagesHandler.ServeHTTP(w, r)
+		case ServiceSubscribeToVillagesProcedure:
+			serviceSubscribeToVillagesHandler.ServeHTTP(w, r)
 		case ServiceGetBuildingsProcedure:
 			serviceGetBuildingsHandler.ServeHTTP(w, r)
 		case ServiceIssueBuildingUpgradeOrderProcedure:
@@ -407,14 +496,20 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 			serviceIssueTempleDonationOrderHandler.ServeHTTP(w, r)
 		case ServiceGetWorldProcedure:
 			serviceGetWorldHandler.ServeHTTP(w, r)
+		case ServiceSubscribeToWorldFieldsProcedure:
+			serviceSubscribeToWorldFieldsHandler.ServeHTTP(w, r)
 		case ServiceIssueAttackProcedure:
 			serviceIssueAttackHandler.ServeHTTP(w, r)
 		case ServiceCancelAttackProcedure:
 			serviceCancelAttackHandler.ServeHTTP(w, r)
 		case ServiceGetAttacksProcedure:
 			serviceGetAttacksHandler.ServeHTTP(w, r)
+		case ServiceSubscribeToAttacksProcedure:
+			serviceSubscribeToAttacksHandler.ServeHTTP(w, r)
 		case ServiceGetPlayerProcedure:
 			serviceGetPlayerHandler.ServeHTTP(w, r)
+		case ServiceSubscribeToPlayerProcedure:
+			serviceSubscribeToPlayerHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -430,6 +525,10 @@ func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Reque
 
 func (UnimplementedServiceHandler) GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillages is not implemented"))
+}
+
+func (UnimplementedServiceHandler) SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest], *connect_go.ServerStream[v1.Village_Event]) error {
+	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToVillages is not implemented"))
 }
 
 func (UnimplementedServiceHandler) GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error) {
@@ -468,6 +567,10 @@ func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetWorld is not implemented"))
 }
 
+func (UnimplementedServiceHandler) SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World_Field]) error {
+	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToWorldFields is not implemented"))
+}
+
 func (UnimplementedServiceHandler) IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueAttack is not implemented"))
 }
@@ -480,6 +583,14 @@ func (UnimplementedServiceHandler) GetAttacks(context.Context, *connect_go.Reque
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetAttacks is not implemented"))
 }
 
+func (UnimplementedServiceHandler) SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Attack_Event]) error {
+	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToAttacks is not implemented"))
+}
+
 func (UnimplementedServiceHandler) GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetPlayer is not implemented"))
+}
+
+func (UnimplementedServiceHandler) SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Player]) error {
+	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToPlayer is not implemented"))
 }

@@ -172,6 +172,81 @@ export class Village extends Message<Village> {
 }
 
 /**
+ * @generated from message server.v1.Village.Event
+ */
+export class Village_Event extends Message<Village_Event> {
+  /**
+   * @generated from field: server.v1.Village village = 1;
+   */
+  village?: Village;
+
+  /**
+   * @generated from field: server.v1.Village.Event.Action action = 2;
+   */
+  action = Village_Event_Action.UNDEFINED;
+
+  constructor(data?: PartialMessage<Village_Event>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Village.Event";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "village", kind: "message", T: Village },
+    { no: 2, name: "action", kind: "enum", T: proto3.getEnumType(Village_Event_Action) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Village_Event {
+    return new Village_Event().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Village_Event {
+    return new Village_Event().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Village_Event {
+    return new Village_Event().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Village_Event | PlainMessage<Village_Event> | undefined, b: Village_Event | PlainMessage<Village_Event> | undefined): boolean {
+    return proto3.util.equals(Village_Event, a, b);
+  }
+}
+
+/**
+ * @generated from enum server.v1.Village.Event.Action
+ */
+export enum Village_Event_Action {
+  /**
+   * @generated from enum value: ACTION_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: ACTION_CREATE = 1;
+   */
+  CREATE = 1,
+
+  /**
+   * @generated from enum value: ACTION_UPDATE = 2;
+   */
+  UPDATE = 2,
+
+  /**
+   * @generated from enum value: ACTION_DELETE = 3;
+   */
+  DELETE = 3,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Village_Event_Action)
+proto3.util.setEnumType(Village_Event_Action, "server.v1.Village.Event.Action", [
+  { no: 0, name: "ACTION_UNDEFINED" },
+  { no: 1, name: "ACTION_CREATE" },
+  { no: 2, name: "ACTION_UPDATE" },
+  { no: 3, name: "ACTION_DELETE" },
+]);
+
+/**
  * GetVillage
  *
  * @generated from message server.v1.GetVillageRequest
@@ -314,6 +389,45 @@ export class GetVillagesResponse extends Message<GetVillagesResponse> {
 
   static equals(a: GetVillagesResponse | PlainMessage<GetVillagesResponse> | undefined, b: GetVillagesResponse | PlainMessage<GetVillagesResponse> | undefined): boolean {
     return proto3.util.equals(GetVillagesResponse, a, b);
+  }
+}
+
+/**
+ * SubscribeToVillages
+ *
+ * @generated from message server.v1.SubscribeToVillagesRequest
+ */
+export class SubscribeToVillagesRequest extends Message<SubscribeToVillagesRequest> {
+  /**
+   * @generated from field: repeated uint32 ids = 1;
+   */
+  ids: number[] = [];
+
+  constructor(data?: PartialMessage<SubscribeToVillagesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.SubscribeToVillagesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "ids", kind: "scalar", T: 13 /* ScalarType.UINT32 */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeToVillagesRequest {
+    return new SubscribeToVillagesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeToVillagesRequest {
+    return new SubscribeToVillagesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeToVillagesRequest {
+    return new SubscribeToVillagesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SubscribeToVillagesRequest | PlainMessage<SubscribeToVillagesRequest> | undefined, b: SubscribeToVillagesRequest | PlainMessage<SubscribeToVillagesRequest> | undefined): boolean {
+    return proto3.util.equals(SubscribeToVillagesRequest, a, b);
   }
 }
 
@@ -1313,69 +1427,6 @@ proto3.util.setEnumType(World_Field_EntityKind, "server.v1.World.Field.EntityKin
 ]);
 
 /**
- * @generated from message server.v1.Attack
- */
-export class Attack extends Message<Attack> {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id = 0;
-
-  /**
-   * @generated from field: uint32 village_id = 2;
-   */
-  villageId = 0;
-
-  /**
-   * @generated from field: uint32 world_field_id = 3;
-   */
-  worldFieldId = 0;
-
-  /**
-   * <troop_kind, quantity>
-   *
-   * @generated from field: map<string, uint32> troop_quantity = 4;
-   */
-  troopQuantity: { [key: string]: number } = {};
-
-  /**
-   * @generated from field: uint32 time_left = 5;
-   */
-  timeLeft = 0;
-
-  constructor(data?: PartialMessage<Attack>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "server.v1.Attack";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "world_field_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
-    { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attack {
-    return new Attack().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Attack {
-    return new Attack().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Attack {
-    return new Attack().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: Attack | PlainMessage<Attack> | undefined, b: Attack | PlainMessage<Attack> | undefined): boolean {
-    return proto3.util.equals(Attack, a, b);
-  }
-}
-
-/**
  * GetWorld
  *
  * @generated from message server.v1.GetWorldRequest
@@ -1450,6 +1501,146 @@ export class GetWorldResponse extends Message<GetWorldResponse> {
     return proto3.util.equals(GetWorldResponse, a, b);
   }
 }
+
+/**
+ * ATTACKS 
+ *
+ * @generated from message server.v1.Attack
+ */
+export class Attack extends Message<Attack> {
+  /**
+   * @generated from field: uint32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: uint32 village_id = 2;
+   */
+  villageId = 0;
+
+  /**
+   * @generated from field: uint32 world_field_id = 3;
+   */
+  worldFieldId = 0;
+
+  /**
+   * <troop_kind, quantity>
+   *
+   * @generated from field: map<string, uint32> troop_quantity = 4;
+   */
+  troopQuantity: { [key: string]: number } = {};
+
+  /**
+   * @generated from field: uint32 time_left = 5;
+   */
+  timeLeft = 0;
+
+  constructor(data?: PartialMessage<Attack>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Attack";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "village_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "world_field_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "troop_quantity", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 13 /* ScalarType.UINT32 */} },
+    { no: 5, name: "time_left", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attack {
+    return new Attack().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Attack {
+    return new Attack().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Attack {
+    return new Attack().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Attack | PlainMessage<Attack> | undefined, b: Attack | PlainMessage<Attack> | undefined): boolean {
+    return proto3.util.equals(Attack, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.Attack.Event
+ */
+export class Attack_Event extends Message<Attack_Event> {
+  /**
+   * @generated from field: server.v1.Attack attack = 1;
+   */
+  attack?: Attack;
+
+  /**
+   * @generated from field: server.v1.Attack.Event.Action action = 2;
+   */
+  action = Attack_Event_Action.UNDEFINED;
+
+  constructor(data?: PartialMessage<Attack_Event>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.Attack.Event";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "attack", kind: "message", T: Attack },
+    { no: 2, name: "action", kind: "enum", T: proto3.getEnumType(Attack_Event_Action) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attack_Event {
+    return new Attack_Event().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Attack_Event {
+    return new Attack_Event().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Attack_Event {
+    return new Attack_Event().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Attack_Event | PlainMessage<Attack_Event> | undefined, b: Attack_Event | PlainMessage<Attack_Event> | undefined): boolean {
+    return proto3.util.equals(Attack_Event, a, b);
+  }
+}
+
+/**
+ * @generated from enum server.v1.Attack.Event.Action
+ */
+export enum Attack_Event_Action {
+  /**
+   * @generated from enum value: ACTION_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: ACTION_CREATE = 1;
+   */
+  CREATE = 1,
+
+  /**
+   * @generated from enum value: ACTION_UPDATE = 2;
+   */
+  UPDATE = 2,
+
+  /**
+   * @generated from enum value: ACTION_DELETE = 3;
+   */
+  DELETE = 3,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Attack_Event_Action)
+proto3.util.setEnumType(Attack_Event_Action, "server.v1.Attack.Event.Action", [
+  { no: 0, name: "ACTION_UNDEFINED" },
+  { no: 1, name: "ACTION_CREATE" },
+  { no: 2, name: "ACTION_UPDATE" },
+  { no: 3, name: "ACTION_DELETE" },
+]);
 
 /**
  * IssueAttack

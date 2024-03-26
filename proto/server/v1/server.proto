@@ -6,6 +6,7 @@ option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
 import "buf/validate/validate.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 
 message Resources {
   uint32 time = 1;
@@ -26,6 +27,18 @@ message Village {
   map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
   repeated Troop.TrainingOrder troop_training_orders = 6;
   uint32 player_id = 7;
+
+  message Event {
+    Village village = 1;
+    Action action = 2;
+
+    enum Action {
+      ACTION_UNDEFINED = 0;
+      ACTION_CREATE = 1;
+      ACTION_UPDATE = 2;
+      ACTION_DELETE = 3;
+    }
+  }
 }
 
 // GetVillage
@@ -40,6 +53,11 @@ message GetVillageResponse {
 message GetVillagesRequest {}
 message GetVillagesResponse {
   repeated Village villages = 1;
+}
+
+// SubscribeToVillages
+message SubscribeToVillagesRequest {
+  repeated uint32 ids = 1;
 }
 
 /* BUILDINGS */
@@ -154,20 +172,33 @@ message World {
   }
 }
 
-message Attack {
-  uint32 id = 1;
-  uint32 village_id = 2;
-  uint32 world_field_id = 3;
-  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
-  uint32 time_left = 5;
-}
-
 // GetWorld
 message GetWorldRequest {
   bool load_fields = 1;
 }
 message GetWorldResponse {
   World world = 1;
+}
+
+/* ATTACKS */
+message Attack {
+  uint32 id = 1;
+  uint32 village_id = 2;
+  uint32 world_field_id = 3;
+  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
+  uint32 time_left = 5;
+
+  message Event {
+    Attack attack = 1;
+    Action action = 2;
+
+    enum Action {
+      ACTION_UNDEFINED = 0;
+      ACTION_CREATE = 1;
+      ACTION_UPDATE = 2;
+      ACTION_DELETE = 3;
+    }
+  }
 }
 
 // IssueAttack
@@ -208,6 +239,7 @@ service Service {
   /* VILLAGES */
   rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
   rpc GetVillages(GetVillagesRequest) returns (GetVillagesResponse);
+  rpc SubscribeToVillages(SubscribeToVillagesRequest) returns (stream Village.Event);
 
   /* BUILDINGS */
   rpc GetBuildings(GetBuildingsRequest) returns (GetBuildingsResponse);
@@ -225,10 +257,15 @@ service Service {
 
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
+  rpc SubscribeToWorldFields(google.protobuf.Empty) returns (stream World.Field);
+
+  /* ATTACKS */
   rpc IssueAttack(IssueAttackRequest) returns (IssueAttackResponse);
   rpc CancelAttack(CancelAttackRequest) returns (CancelAttackResponse);
   rpc GetAttacks(GetAttacksRequest) returns (GetAttacksResponse);
+  rpc SubscribeToAttacks(google.protobuf.Empty) returns (stream Attack.Event);
 
   /* PLAYERS */
   rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);
+  rpc SubscribeToPlayer(google.protobuf.Empty) returns (stream Player);
 }

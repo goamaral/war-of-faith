@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTempleRequest, GetTempleResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTempleDonationOrderRequest, IssueTempleDonationOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse } from "./server_pb.js";
-import { MethodKind } from "@bufbuild/protobuf";
+import { Attack_Event, CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTempleRequest, GetTempleResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTempleDonationOrderRequest, IssueTempleDonationOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, Player, SubscribeToVillagesRequest, Village_Event, World_Field } from "./server_pb.js";
+import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service server.v1.Service
@@ -31,6 +31,15 @@ export const Service = {
       I: GetVillagesRequest,
       O: GetVillagesResponse,
       kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.SubscribeToVillages
+     */
+    subscribeToVillages: {
+      name: "SubscribeToVillages",
+      I: SubscribeToVillagesRequest,
+      O: Village_Event,
+      kind: MethodKind.ServerStreaming,
     },
     /**
      * BUILDINGS 
@@ -122,6 +131,17 @@ export const Service = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc server.v1.Service.SubscribeToWorldFields
+     */
+    subscribeToWorldFields: {
+      name: "SubscribeToWorldFields",
+      I: Empty,
+      O: World_Field,
+      kind: MethodKind.ServerStreaming,
+    },
+    /**
+     * ATTACKS 
+     *
      * @generated from rpc server.v1.Service.IssueAttack
      */
     issueAttack: {
@@ -149,6 +169,15 @@ export const Service = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc server.v1.Service.SubscribeToAttacks
+     */
+    subscribeToAttacks: {
+      name: "SubscribeToAttacks",
+      I: Empty,
+      O: Attack_Event,
+      kind: MethodKind.ServerStreaming,
+    },
+    /**
      * PLAYERS 
      *
      * @generated from rpc server.v1.Service.GetPlayer
@@ -158,6 +187,15 @@ export const Service = {
       I: GetPlayerRequest,
       O: GetPlayerResponse,
       kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc server.v1.Service.SubscribeToPlayer
+     */
+    subscribeToPlayer: {
+      name: "SubscribeToPlayer",
+      I: Empty,
+      O: Player,
+      kind: MethodKind.ServerStreaming,
     },
   }
 } as const;

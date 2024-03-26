@@ -15,7 +15,9 @@ interface Store {
   troops: serverV1.Troop[]
   outgoingAttacks: serverV1.Attack[]
   load: () => Promise<void>
-  consumeSSE: (world: serverV1.World, outgoingAttacks: serverV1.Attack[]) => void
+  consumeVillageEvent: (event: serverV1.Village_Event) => void
+  consumeAttackEvent: (event: serverV1.Attack_Event) => void
+  updateWorldField: (worldField: serverV1.World_Field) => void
   issueAttack: (fvillageId: number, coords: serverV1.Coords|undefined, troopQuantity: { [key: string]: number }) => Promise<void>
   cancelAttack: (id: number) => Promise<void>
 }
@@ -42,8 +44,71 @@ const useStore = create<Store>((set, get) => ({
     }))
   },
 
-  consumeSSE(world: serverV1.World, outgoingAttacks: serverV1.Attack[]) {
-    set(() => ({ world, outgoingAttacks }))
+  consumeVillageEvent(event: serverV1.Village_Event) {
+    console.debug("New village event", event)
+    const villages = get().villages
+
+    switch (event.action) {
+      case serverV1.Village_Event_Action.CREATE: {
+        set({ villages: [...villages, new entities.Village(event.village!)] })
+        break
+      }
+
+      case serverV1.Village_Event_Action.UPDATE: {
+        set({
+          villages: villages.map(a => (a.id == event.village?.id) ? new entities.Village(event.village!) : a)
+        })
+        break
+      }
+
+      case serverV1.Village_Event_Action.DELETE: {
+        set({ villages: villages.filter(a => a.id != event.village?.id) })
+        break
+      }
+
+      default:
+        alert(`Unknown village event action: ${event.action}`)
+        break
+    }
+  },
+
+  consumeAttackEvent(event: serverV1.Attack_Event) {
+    console.debug("New attack event", event)
+    const outgoingAttacks = get().outgoingAttacks
+
+    switch (event.action) {
+      case serverV1.Attack_Event_Action.CREATE: {
+        set({ outgoingAttacks: [...outgoingAttacks, event.attack!] })
+        break
+      }
+
+      case serverV1.Attack_Event_Action.UPDATE: {
+        set({
+          outgoingAttacks: outgoingAttacks.map(a => (a.id == event.attack?.id) ? event.attack! : a)
+        })
+        break
+      }
+
+      case serverV1.Attack_Event_Action.DELETE: {
+        set({ outgoingAttacks: outgoingAttacks.filter(a => a.id != event.attack?.id) })
+        break
+      }
+
+      default:
+        alert(`Unknown attack event action: ${event.action}`)
+        break
+    }
+  },
+
+  updateWorldField(worldField: serverV1.World_Field) {
+    const world = get().world
+    const index = world.fields.findIndex(f => f.id == worldField.id)
+    if (index == -1) {
+      world.fields.push(worldField)
+    } else {
+      world.fields[index] = worldField
+    }
+    set(() => ({ world: world.clone() }))
   },
 
   async issueAttack(villageId: number, targetCoords: serverV1.Coords|undefined, troopQuantity: { [key: string]: number }) {
@@ -95,26 +160,48 @@ function WorldLoader() {
 
   if (!loaded.value) return <div>Loading...</div>
 
-  const consumeSSE = useStore(state => state.consumeSSE)
+  const consumeVillageEvent = useStore(state => state.consumeVillageEvent)
+  const consumeAttackEvent = useStore(state => state.consumeAttackEvent)
+  const updateWorldField = useStore(state => state.updateWorldField)
 
-  // TODO: Replace with SSE
   useEffect(() => {
-    const intervalId = setInterval(async () => {
+    const villagesStream = server.subscribeToVillages({})
+    async function subscribeToVillages() {
       try {
-        const results = await Promise.all([
-          server.getWorld({ loadFields: true }).then(res => res.world!),
-          server.getAttacks({}).then(res => res.outgoingAttacks),
-        ])
-        consumeSSE(results[0], results[1])
+        for await (const villageEvent of villagesStream) consumeVillageEvent(villageEvent)
       } catch (err) {
-        alert(err)
+        console.error(err)
+        subscribeToVillages()
       }
-    }, 1000)
-
-    return () => {
-      if (intervalId !== -1) clearInterval(intervalId)
     }
-  })
+    subscribeToVillages()
+  }, [])
+
+  useEffect(() => {
+    const attacksStream = server.subscribeToAttacks({})
+    async function subscribeToAttacks() {
+      try {
+        for await (const attackEvent of attacksStream) consumeAttackEvent(attackEvent)
+      } catch (err) {
+        console.error(err)
+        subscribeToAttacks()
+      }
+    }
+    subscribeToAttacks()
+  }, [])
+
+  useEffect(() => {
+    const worldFieldsStream = server.subscribeToWorldFields({})
+    async function subscribeToWorldFields() {
+      try {
+        for await (const worldFiled of worldFieldsStream) updateWorldField(worldFiled)
+      } catch (err) {
+        console.error(err)
+        subscribeToWorldFields()
+      }
+    }
+    subscribeToWorldFields()
+  }, [])
 
   return (
     <div>
@@ -207,7 +294,7 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
       const issueAttack = useStore(s => s.issueAttack)
       const playerVillages = getPlayerVillages()
 
-      const selectedVillage = useSignal(playerVillages[0])
+      const selectedVillageId = useSignal(playerVillages[0].id)
       const selectedTroopQuantity = useSignal<{ [key: string]: number }>(Object.fromEntries(troops.map(t => ([t.kind, 0]))))
       function updateSelectedTroopQuantity(kind: string, quantity: number) {
         selectedTroopQuantity.value = { ...selectedTroopQuantity.value, [kind]: quantity }
@@ -216,14 +303,14 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
       bottom.push(
         <div>
           <label>Village</label>
-          <select value={selectedVillage.value.id} onChange={ev => selectedVillage.value = playerVillages.find(v => v.id == +ev.currentTarget.value)!}>
+          <select value={selectedVillageId.value} onChange={ev => selectedVillageId.value = +ev.currentTarget.value}>
             {playerVillages.map(v => (<option value={v.id}>{v.name}</option>))}
           </select>
 
           <label>Troops</label>
           <div>
             {troops.map(t => {
-              const maxQuantity = selectedVillage.value.troopQuantity[t.kind]
+              const maxQuantity = playerVillages.find(v => v.id == selectedVillageId.value)!.troopQuantity[t.kind]
               return (<div key={t.kind}>
                 <span>{t.name} ({maxQuantity})</span>
                 <input type="number" min={0} max={maxQuantity}
@@ -234,7 +321,7 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
             })}
           </div>
 
-          <button onClick={() => issueAttack(selectedVillage.peek().id, selectedField.peek()?.coords, selectedTroopQuantity.peek())}>Attack</button>
+          <button onClick={() => issueAttack(selectedVillageId.value, selectedField.value?.coords, selectedTroopQuantity.value)}>Attack</button>
         </div>
       )
       break
