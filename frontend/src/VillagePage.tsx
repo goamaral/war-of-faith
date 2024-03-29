@@ -5,7 +5,7 @@ import { create } from 'zustand'
 
 import * as serverV1 from "../lib/protobuf/server/v1/server_pb"
 import * as entities from './entities'
-import server from './server'
+import { serverV1Client } from './api'
 
 interface Store {
   village: entities.Village
@@ -29,10 +29,10 @@ const useStore = create<Store>((set, get) => ({
 
   async load(villageId: number) {
     const results = await Promise.all([
-      server.getVillage({ id: villageId }),
-      server.getBuildings({}),
-      server.getTroops({}),
-      server.getPlayer({}),
+      serverV1Client.getVillage({ id: villageId }),
+      serverV1Client.getBuildings({}),
+      serverV1Client.getTroops({}),
+      serverV1Client.getPlayer({}),
     ])
 
     set({
@@ -60,7 +60,7 @@ const useStore = create<Store>((set, get) => ({
   async cancelBuildingUpgradeOrder(order: serverV1.Building_UpgradeOrder) {
     try {
       const village = get().village
-      await server.cancelBuildingUpgradeOrder({ id: order.id })
+      await serverV1Client.cancelBuildingUpgradeOrder({ id: order.id })
       village.removeBuildingUpgradeOrder(order.id)
       village.addGold(order.cost!.gold)
       set({ village: new entities.Village(village) })
@@ -72,7 +72,7 @@ const useStore = create<Store>((set, get) => ({
   async issueUpgradeOrder(building: entities.Building) {
     try {
       const village = get().village
-      const { order } = await server.issueBuildingUpgradeOrder({ buildingKind: building.kind, villageId: village.id })
+      const { order } = await serverV1Client.issueBuildingUpgradeOrder({ buildingKind: building.kind, villageId: village.id })
       village.addBuildingUpgradeOrder(order!)
       village.addGold(-order!.cost!.gold!)
       set({ village: new entities.Village(village) })
@@ -84,7 +84,7 @@ const useStore = create<Store>((set, get) => ({
   async cancelTrainingOrder(order: serverV1.Troop_TrainingOrder) {
     try {
       const { village, trainableLeaders } = get()
-      await server.cancelTroopTrainingOrder({ id: order.id })
+      await serverV1Client.cancelTroopTrainingOrder({ id: order.id })
       village.removeTroopTrainingOrder(order.id)
       village.addGold(order.cost!.gold)
 
@@ -100,7 +100,7 @@ const useStore = create<Store>((set, get) => ({
   async issueTrainingOrder(troopKind: entities.TroopKind, quantity: number) {
     try {
       const { village, trainableLeaders } = get()
-      const { order } = await server.issueTroopTrainingOrder({ troopKind, quantity, villageId: village.id })
+      const { order } = await serverV1Client.issueTroopTrainingOrder({ troopKind, quantity, villageId: village.id })
       village.addTroopTrainingOrder(order!)
       village.addGold(-order?.cost?.gold!)
 
@@ -132,7 +132,7 @@ const VillageLoader = () => {
   const consumePlayerEvent = useStore(state => state.consumePlayerEvent)
 
   useEffect(() => {
-    const villagesStream = server.subscribeToVillages({ ids: [+id] })
+    const villagesStream = serverV1Client.subscribeToVillages({ ids: [+id] })
     async function subscribeToVillages() {
       try {
         
@@ -146,7 +146,7 @@ const VillageLoader = () => {
   }, [])
 
   useEffect(() => {
-    const playerStream = server.subscribeToPlayer({})
+    const playerStream = serverV1Client.subscribeToPlayer({})
     async function subscribeToPlayer() {
       try {
         for await (const playerEvent of playerStream) consumePlayerEvent(playerEvent)

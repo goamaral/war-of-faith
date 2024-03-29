@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -16,14 +15,17 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/samber/do"
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"war-of-faith/cmd/http/db"
+	"war-of-faith/cmd/http/di"
 	"war-of-faith/cmd/http/model"
+	"war-of-faith/cmd/http/server"
+	"war-of-faith/cmd/http/server/helper"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
 	"war-of-faith/pkg/protobuf/server/v1/serverv1connect"
 )
@@ -645,6 +647,8 @@ func (b *Brodcaster[T]) Publish(event T) {
 }
 
 func main() {
+	i := di.NewInjector()
+
 	createDB := flag.Bool("db-create", false, "creates database")
 	recreateDB := flag.Bool("db-recreate", false, "recreates database")
 	seedDB := flag.Bool("db-seed", false, "seeds database")
@@ -677,7 +681,7 @@ func main() {
 		}
 	}
 
-	go runServer()
+	go runServer(i)
 
 	ticker := time.NewTicker(time.Second)
 	for range ticker.C {
@@ -853,43 +857,10 @@ func main() {
 	}
 }
 
-func GRPCStatusCodeToConnectStatusCodeInterceptor() connect.UnaryInterceptorFunc {
-	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
-		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			res, err := next(ctx, req)
-			if code := status.Code(err); code != codes.OK {
-				return nil, connect.NewError(connect.Code(code), err)
-			}
-			return res, err
-		})
-	})
-}
-
-func ValidationInterceptor(validator *protovalidate.Validator) connect.UnaryInterceptorFunc {
-	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
-		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			err := validator.Validate(req.Any().(protoreflect.ProtoMessage))
-			if err != nil {
-				if vErr, ok := err.(*protovalidate.ValidationError); ok {
-					connectErr := connect.NewError(connect.Code(connect.CodeInvalidArgument), errors.New("validation error"))
-					detail, err := connect.NewErrorDetail(vErr.ToProto())
-					if err != nil {
-						return nil, err
-					}
-					connectErr.AddDetail(detail)
-					return nil, connectErr
-				}
-				return nil, err
-			}
-			return next(ctx, req)
-		})
-	})
-}
-
-func runServer() {
-	server := gin.Default()
-	server.SetTrustedProxies(nil)
-	server.Use(cors.New(cors.Config{
+func runServer(i *do.Injector) {
+	ginEngine := gin.Default()
+	ginEngine.SetTrustedProxies(nil)
+	ginEngine.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:4000"},
 		AllowMethods:     []string{"POST"},
 		AllowHeaders:     []string{"Origin", "Connect-Protocol-Version", "Content-Type"},
@@ -897,20 +868,19 @@ func runServer() {
 		AllowCredentials: true,
 	}))
 
-	validator, err := protovalidate.New()
-	if err != nil {
-		log.Fatalf("failed to create proto validator: %v", err)
-	}
+	server.NewPublicV1Server(ginEngine, i)
+	cors.Default()
 
 	path, handler := serverv1connect.NewServiceHandler(
 		&Server{},
 		connect.WithInterceptors(
-			ValidationInterceptor(validator),
-			GRPCStatusCodeToConnectStatusCodeInterceptor(),
+			helper.ValidationInterceptor(do.MustInvoke[*protovalidate.Validator](i)),
+			helper.GRPCStatusToConnectStatusInterceptor(),
 		),
 	)
-	server.Any(fmt.Sprintf("%s*w", path), gin.WrapH(handler))
-	if err = server.Run(":3000"); err != nil {
+	ginEngine.Any(fmt.Sprintf("%s*w", path), gin.WrapH(handler))
+
+	if err := ginEngine.Run(":3000"); err != nil {
 		log.Fatalf("failed run server: %v", err)
 	}
 }

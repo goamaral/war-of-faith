@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail
+SCRIPT_DIR=${0%/*}
+
+EMAIL="war-of-faith@email.com"
+
+if [[ $# -gt 0 ]]; then
+  EMAIL=$1
+fi
+
+mkdir -p $SCRIPT_DIR/../secrets
+ssh-keygen -a 100 -t ecdsa -m PEM -f $SCRIPT_DIR/../secrets/ecdsa -C $EMAIL
+ssh-keygen -a 100 -t ecdsa -m PEM -f $SCRIPT_DIR/../secrets/ecdsa -e -C $EMAIL > $SCRIPT_DIR/../secrets/ecdsa.pub

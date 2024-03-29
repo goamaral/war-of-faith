@@ -2,12 +2,17 @@ import "preact/debug"
 import { render } from 'preact'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import LoginPage from './LoginPage'
 import VillagesPage from './VillagesPage'
 import VillagePage from './VillagePage'
 import WorldPage from './WorldPage'
 
 function App() {
   const router = createBrowserRouter([
+    {
+      path: "/login",
+      element: <LoginPage />
+    },
     {
       path: "/villages",
       element: <VillagesPage />
@@ -22,7 +27,7 @@ function App() {
     },
   ])
 
-  return  <RouterProvider router={router} />
+  return <RouterProvider router={router} />
 }
 
 render(

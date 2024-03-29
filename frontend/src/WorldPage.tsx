@@ -7,7 +7,7 @@ import { create } from 'zustand'
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import * as entities from './entities'
-import server from './server'
+import { serverV1Client } from './api'
 
 interface Store {
   world: serverV1.World
@@ -30,10 +30,10 @@ const useStore = create<Store>((set, get) => ({
 
   async load() {
     const results = await Promise.all([
-      server.getWorld({ loadFields: true }),
-      server.getVillages({}),
-      server.getTroops({}),
-      server.getAttacks({}),
+      serverV1Client.getWorld({ loadFields: true }),
+      serverV1Client.getVillages({}),
+      serverV1Client.getTroops({}),
+      serverV1Client.getAttacks({}),
     ])
 
     set(() => ({
@@ -118,7 +118,7 @@ const useStore = create<Store>((set, get) => ({
       const totalTroops = Object.values(troopQuantity).reduce((acc, q) => acc + q, 0)
       if (totalTroops == 0) return alert("No troops to attack")
 
-      await server.issueAttack({ villageId, targetCoords, troopQuantity })
+      await serverV1Client.issueAttack({ villageId, targetCoords, troopQuantity })
     } catch (err) {
       alert(`Failed to issue attack (coords: ${targetCoords?.toJsonString()}): ${err}`)
     }
@@ -126,7 +126,7 @@ const useStore = create<Store>((set, get) => ({
 
   async cancelAttack(id: number) {
     try {
-      await server.cancelAttack({ id })
+      await serverV1Client.cancelAttack({ id })
       set({ outgoingAttacks: get().outgoingAttacks.filter(a => a.id != id) })
     } catch (err) {
       alert(`Failed to cancel attack (id: ${id}): ${err}`)
@@ -165,7 +165,7 @@ function WorldLoader() {
   const updateWorldField = useStore(state => state.updateWorldField)
 
   useEffect(() => {
-    const villagesStream = server.subscribeToVillages({})
+    const villagesStream = serverV1Client.subscribeToVillages({})
     async function subscribeToVillages() {
       try {
         for await (const villageEvent of villagesStream) consumeVillageEvent(villageEvent)
@@ -178,7 +178,7 @@ function WorldLoader() {
   }, [])
 
   useEffect(() => {
-    const attacksStream = server.subscribeToAttacks({})
+    const attacksStream = serverV1Client.subscribeToAttacks({})
     async function subscribeToAttacks() {
       try {
         for await (const attackEvent of attacksStream) consumeAttackEvent(attackEvent)
@@ -191,7 +191,7 @@ function WorldLoader() {
   }, [])
 
   useEffect(() => {
-    const worldFieldsStream = server.subscribeToWorldFields({})
+    const worldFieldsStream = serverV1Client.subscribeToWorldFields({})
     async function subscribeToWorldFields() {
       try {
         for await (const worldFiled of worldFieldsStream) updateWorldField(worldFiled)
@@ -333,7 +333,7 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
       const entity = useSignal<undefined | serverV1.Temple>(undefined)
 
       if (entity.value == undefined) {
-        server.getTemple({ id: selectedField.value.entityId })
+        serverV1Client.getTemple({ id: selectedField.value.entityId })
           .then(({ temple }) => entity.value = temple!)
           .catch(err => alert(err))
         bottom.push(<p>Loading...</p>)
@@ -344,7 +344,7 @@ function FieldInfo({ selectedField }: { selectedField: Signal<serverV1.World_Fie
         const navigate = useNavigate()
 
         async function donate() {
-          await server.issueTempleDonationOrder({
+          await serverV1Client.issueTempleDonationOrder({
             id: temple.id,
             gold: goldToDonate.peek(),
             villageId: selectedVillage.peek().id,
