@@ -34,83 +34,46 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ServiceGetVillageProcedure is the fully-qualified name of the Service's GetVillage RPC.
-	ServiceGetVillageProcedure = "/server.v1.Service/GetVillage"
-	// ServiceGetVillagesProcedure is the fully-qualified name of the Service's GetVillages RPC.
-	ServiceGetVillagesProcedure = "/server.v1.Service/GetVillages"
-	// ServiceSubscribeToVillagesProcedure is the fully-qualified name of the Service's
-	// SubscribeToVillages RPC.
-	ServiceSubscribeToVillagesProcedure = "/server.v1.Service/SubscribeToVillages"
-	// ServiceGetBuildingsProcedure is the fully-qualified name of the Service's GetBuildings RPC.
-	ServiceGetBuildingsProcedure = "/server.v1.Service/GetBuildings"
+	// ServiceSubscribeToWorldProcedure is the fully-qualified name of the Service's SubscribeToWorld
+	// RPC.
+	ServiceSubscribeToWorldProcedure = "/server.v1.Service/SubscribeToWorld"
+	// ServiceIssueAttackProcedure is the fully-qualified name of the Service's IssueAttack RPC.
+	ServiceIssueAttackProcedure = "/server.v1.Service/IssueAttack"
+	// ServiceCancelAttackProcedure is the fully-qualified name of the Service's CancelAttack RPC.
+	ServiceCancelAttackProcedure = "/server.v1.Service/CancelAttack"
 	// ServiceIssueBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
 	// IssueBuildingUpgradeOrder RPC.
 	ServiceIssueBuildingUpgradeOrderProcedure = "/server.v1.Service/IssueBuildingUpgradeOrder"
 	// ServiceCancelBuildingUpgradeOrderProcedure is the fully-qualified name of the Service's
 	// CancelBuildingUpgradeOrder RPC.
 	ServiceCancelBuildingUpgradeOrderProcedure = "/server.v1.Service/CancelBuildingUpgradeOrder"
-	// ServiceGetTroopsProcedure is the fully-qualified name of the Service's GetTroops RPC.
-	ServiceGetTroopsProcedure = "/server.v1.Service/GetTroops"
 	// ServiceIssueTroopTrainingOrderProcedure is the fully-qualified name of the Service's
 	// IssueTroopTrainingOrder RPC.
 	ServiceIssueTroopTrainingOrderProcedure = "/server.v1.Service/IssueTroopTrainingOrder"
 	// ServiceCancelTroopTrainingOrderProcedure is the fully-qualified name of the Service's
 	// CancelTroopTrainingOrder RPC.
 	ServiceCancelTroopTrainingOrderProcedure = "/server.v1.Service/CancelTroopTrainingOrder"
-	// ServiceGetTempleProcedure is the fully-qualified name of the Service's GetTemple RPC.
-	ServiceGetTempleProcedure = "/server.v1.Service/GetTemple"
-	// ServiceIssueTempleDonationOrderProcedure is the fully-qualified name of the Service's
-	// IssueTempleDonationOrder RPC.
-	ServiceIssueTempleDonationOrderProcedure = "/server.v1.Service/IssueTempleDonationOrder"
-	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
-	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
-	// ServiceSubscribeToWorldFieldsProcedure is the fully-qualified name of the Service's
-	// SubscribeToWorldFields RPC.
-	ServiceSubscribeToWorldFieldsProcedure = "/server.v1.Service/SubscribeToWorldFields"
-	// ServiceIssueAttackProcedure is the fully-qualified name of the Service's IssueAttack RPC.
-	ServiceIssueAttackProcedure = "/server.v1.Service/IssueAttack"
-	// ServiceCancelAttackProcedure is the fully-qualified name of the Service's CancelAttack RPC.
-	ServiceCancelAttackProcedure = "/server.v1.Service/CancelAttack"
-	// ServiceGetAttacksProcedure is the fully-qualified name of the Service's GetAttacks RPC.
-	ServiceGetAttacksProcedure = "/server.v1.Service/GetAttacks"
-	// ServiceSubscribeToAttacksProcedure is the fully-qualified name of the Service's
-	// SubscribeToAttacks RPC.
-	ServiceSubscribeToAttacksProcedure = "/server.v1.Service/SubscribeToAttacks"
-	// ServiceGetPlayerProcedure is the fully-qualified name of the Service's GetPlayer RPC.
-	ServiceGetPlayerProcedure = "/server.v1.Service/GetPlayer"
-	// ServiceSubscribeToPlayerProcedure is the fully-qualified name of the Service's SubscribeToPlayer
-	// RPC.
-	ServiceSubscribeToPlayerProcedure = "/server.v1.Service/SubscribeToPlayer"
+	// ServiceIssueResourceTransferOrderProcedure is the fully-qualified name of the Service's
+	// IssueResourceTransferOrder RPC.
+	ServiceIssueResourceTransferOrderProcedure = "/server.v1.Service/IssueResourceTransferOrder"
+	// ServiceCancelResourceTransferOrderProcedure is the fully-qualified name of the Service's
+	// CancelResourceTransferOrder RPC.
+	ServiceCancelResourceTransferOrderProcedure = "/server.v1.Service/CancelResourceTransferOrder"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
 type ServiceClient interface {
-	// VILLAGES
-	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
-	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
-	SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest]) (*connect_go.ServerStreamForClient[v1.Village_Event], error)
-	// BUILDINGS
-	GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error)
-	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
-	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
-	// TROOPS
-	GetTroops(context.Context, *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error)
-	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
-	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
-	// TEMPLES
-	GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error)
-	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
-	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
-	SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World_Field], error)
-	// ATTACKS
+	SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World], error)
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
-	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
-	SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Attack_Event], error)
-	// PLAYERS
-	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
-	SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Player], error)
+	// VILLAGES
+	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
+	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
+	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
+	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
+	IssueResourceTransferOrder(context.Context, *connect_go.Request[v1.IssueResourceTransferOrderRequest]) (*connect_go.Response[v1.IssueResourceTransferOrderResponse], error)
+	CancelResourceTransferOrder(context.Context, *connect_go.Request[v1.CancelResourceTransferOrderRequest]) (*connect_go.Response[v1.CancelResourceTransferOrderResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -123,69 +86,9 @@ type ServiceClient interface {
 func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &serviceClient{
-		getVillage: connect_go.NewClient[v1.GetVillageRequest, v1.GetVillageResponse](
+		subscribeToWorld: connect_go.NewClient[emptypb.Empty, v1.World](
 			httpClient,
-			baseURL+ServiceGetVillageProcedure,
-			opts...,
-		),
-		getVillages: connect_go.NewClient[v1.GetVillagesRequest, v1.GetVillagesResponse](
-			httpClient,
-			baseURL+ServiceGetVillagesProcedure,
-			opts...,
-		),
-		subscribeToVillages: connect_go.NewClient[v1.SubscribeToVillagesRequest, v1.Village_Event](
-			httpClient,
-			baseURL+ServiceSubscribeToVillagesProcedure,
-			opts...,
-		),
-		getBuildings: connect_go.NewClient[v1.GetBuildingsRequest, v1.GetBuildingsResponse](
-			httpClient,
-			baseURL+ServiceGetBuildingsProcedure,
-			opts...,
-		),
-		issueBuildingUpgradeOrder: connect_go.NewClient[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse](
-			httpClient,
-			baseURL+ServiceIssueBuildingUpgradeOrderProcedure,
-			opts...,
-		),
-		cancelBuildingUpgradeOrder: connect_go.NewClient[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse](
-			httpClient,
-			baseURL+ServiceCancelBuildingUpgradeOrderProcedure,
-			opts...,
-		),
-		getTroops: connect_go.NewClient[v1.GetTroopsRequest, v1.GetTroopsResponse](
-			httpClient,
-			baseURL+ServiceGetTroopsProcedure,
-			opts...,
-		),
-		issueTroopTrainingOrder: connect_go.NewClient[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse](
-			httpClient,
-			baseURL+ServiceIssueTroopTrainingOrderProcedure,
-			opts...,
-		),
-		cancelTroopTrainingOrder: connect_go.NewClient[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse](
-			httpClient,
-			baseURL+ServiceCancelTroopTrainingOrderProcedure,
-			opts...,
-		),
-		getTemple: connect_go.NewClient[v1.GetTempleRequest, v1.GetTempleResponse](
-			httpClient,
-			baseURL+ServiceGetTempleProcedure,
-			opts...,
-		),
-		issueTempleDonationOrder: connect_go.NewClient[v1.IssueTempleDonationOrderRequest, v1.IssueTempleDonationOrderResponse](
-			httpClient,
-			baseURL+ServiceIssueTempleDonationOrderProcedure,
-			opts...,
-		),
-		getWorld: connect_go.NewClient[v1.GetWorldRequest, v1.GetWorldResponse](
-			httpClient,
-			baseURL+ServiceGetWorldProcedure,
-			opts...,
-		),
-		subscribeToWorldFields: connect_go.NewClient[emptypb.Empty, v1.World_Field](
-			httpClient,
-			baseURL+ServiceSubscribeToWorldFieldsProcedure,
+			baseURL+ServiceSubscribeToWorldProcedure,
 			opts...,
 		),
 		issueAttack: connect_go.NewClient[v1.IssueAttackRequest, v1.IssueAttackResponse](
@@ -198,24 +101,34 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 			baseURL+ServiceCancelAttackProcedure,
 			opts...,
 		),
-		getAttacks: connect_go.NewClient[v1.GetAttacksRequest, v1.GetAttacksResponse](
+		issueBuildingUpgradeOrder: connect_go.NewClient[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse](
 			httpClient,
-			baseURL+ServiceGetAttacksProcedure,
+			baseURL+ServiceIssueBuildingUpgradeOrderProcedure,
 			opts...,
 		),
-		subscribeToAttacks: connect_go.NewClient[emptypb.Empty, v1.Attack_Event](
+		cancelBuildingUpgradeOrder: connect_go.NewClient[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse](
 			httpClient,
-			baseURL+ServiceSubscribeToAttacksProcedure,
+			baseURL+ServiceCancelBuildingUpgradeOrderProcedure,
 			opts...,
 		),
-		getPlayer: connect_go.NewClient[v1.GetPlayerRequest, v1.GetPlayerResponse](
+		issueTroopTrainingOrder: connect_go.NewClient[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse](
 			httpClient,
-			baseURL+ServiceGetPlayerProcedure,
+			baseURL+ServiceIssueTroopTrainingOrderProcedure,
 			opts...,
 		),
-		subscribeToPlayer: connect_go.NewClient[emptypb.Empty, v1.Player](
+		cancelTroopTrainingOrder: connect_go.NewClient[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse](
 			httpClient,
-			baseURL+ServiceSubscribeToPlayerProcedure,
+			baseURL+ServiceCancelTroopTrainingOrderProcedure,
+			opts...,
+		),
+		issueResourceTransferOrder: connect_go.NewClient[v1.IssueResourceTransferOrderRequest, v1.IssueResourceTransferOrderResponse](
+			httpClient,
+			baseURL+ServiceIssueResourceTransferOrderProcedure,
+			opts...,
+		),
+		cancelResourceTransferOrder: connect_go.NewClient[v1.CancelResourceTransferOrderRequest, v1.CancelResourceTransferOrderResponse](
+			httpClient,
+			baseURL+ServiceCancelResourceTransferOrderProcedure,
 			opts...,
 		),
 	}
@@ -223,90 +136,20 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	getVillage                 *connect_go.Client[v1.GetVillageRequest, v1.GetVillageResponse]
-	getVillages                *connect_go.Client[v1.GetVillagesRequest, v1.GetVillagesResponse]
-	subscribeToVillages        *connect_go.Client[v1.SubscribeToVillagesRequest, v1.Village_Event]
-	getBuildings               *connect_go.Client[v1.GetBuildingsRequest, v1.GetBuildingsResponse]
-	issueBuildingUpgradeOrder  *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
-	cancelBuildingUpgradeOrder *connect_go.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
-	getTroops                  *connect_go.Client[v1.GetTroopsRequest, v1.GetTroopsResponse]
-	issueTroopTrainingOrder    *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
-	cancelTroopTrainingOrder   *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
-	getTemple                  *connect_go.Client[v1.GetTempleRequest, v1.GetTempleResponse]
-	issueTempleDonationOrder   *connect_go.Client[v1.IssueTempleDonationOrderRequest, v1.IssueTempleDonationOrderResponse]
-	getWorld                   *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
-	subscribeToWorldFields     *connect_go.Client[emptypb.Empty, v1.World_Field]
-	issueAttack                *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
-	cancelAttack               *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
-	getAttacks                 *connect_go.Client[v1.GetAttacksRequest, v1.GetAttacksResponse]
-	subscribeToAttacks         *connect_go.Client[emptypb.Empty, v1.Attack_Event]
-	getPlayer                  *connect_go.Client[v1.GetPlayerRequest, v1.GetPlayerResponse]
-	subscribeToPlayer          *connect_go.Client[emptypb.Empty, v1.Player]
+	subscribeToWorld            *connect_go.Client[emptypb.Empty, v1.World]
+	issueAttack                 *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
+	cancelAttack                *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
+	issueBuildingUpgradeOrder   *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
+	cancelBuildingUpgradeOrder  *connect_go.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
+	issueTroopTrainingOrder     *connect_go.Client[v1.IssueTroopTrainingOrderRequest, v1.IssueTroopTrainingOrderResponse]
+	cancelTroopTrainingOrder    *connect_go.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
+	issueResourceTransferOrder  *connect_go.Client[v1.IssueResourceTransferOrderRequest, v1.IssueResourceTransferOrderResponse]
+	cancelResourceTransferOrder *connect_go.Client[v1.CancelResourceTransferOrderRequest, v1.CancelResourceTransferOrderResponse]
 }
 
-// GetVillage calls server.v1.Service.GetVillage.
-func (c *serviceClient) GetVillage(ctx context.Context, req *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
-	return c.getVillage.CallUnary(ctx, req)
-}
-
-// GetVillages calls server.v1.Service.GetVillages.
-func (c *serviceClient) GetVillages(ctx context.Context, req *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
-	return c.getVillages.CallUnary(ctx, req)
-}
-
-// SubscribeToVillages calls server.v1.Service.SubscribeToVillages.
-func (c *serviceClient) SubscribeToVillages(ctx context.Context, req *connect_go.Request[v1.SubscribeToVillagesRequest]) (*connect_go.ServerStreamForClient[v1.Village_Event], error) {
-	return c.subscribeToVillages.CallServerStream(ctx, req)
-}
-
-// GetBuildings calls server.v1.Service.GetBuildings.
-func (c *serviceClient) GetBuildings(ctx context.Context, req *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error) {
-	return c.getBuildings.CallUnary(ctx, req)
-}
-
-// IssueBuildingUpgradeOrder calls server.v1.Service.IssueBuildingUpgradeOrder.
-func (c *serviceClient) IssueBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
-	return c.issueBuildingUpgradeOrder.CallUnary(ctx, req)
-}
-
-// CancelBuildingUpgradeOrder calls server.v1.Service.CancelBuildingUpgradeOrder.
-func (c *serviceClient) CancelBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
-	return c.cancelBuildingUpgradeOrder.CallUnary(ctx, req)
-}
-
-// GetTroops calls server.v1.Service.GetTroops.
-func (c *serviceClient) GetTroops(ctx context.Context, req *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error) {
-	return c.getTroops.CallUnary(ctx, req)
-}
-
-// IssueTroopTrainingOrder calls server.v1.Service.IssueTroopTrainingOrder.
-func (c *serviceClient) IssueTroopTrainingOrder(ctx context.Context, req *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
-	return c.issueTroopTrainingOrder.CallUnary(ctx, req)
-}
-
-// CancelTroopTrainingOrder calls server.v1.Service.CancelTroopTrainingOrder.
-func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, req *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error) {
-	return c.cancelTroopTrainingOrder.CallUnary(ctx, req)
-}
-
-// GetTemple calls server.v1.Service.GetTemple.
-func (c *serviceClient) GetTemple(ctx context.Context, req *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error) {
-	return c.getTemple.CallUnary(ctx, req)
-}
-
-// IssueTempleDonationOrder calls server.v1.Service.IssueTempleDonationOrder.
-func (c *serviceClient) IssueTempleDonationOrder(ctx context.Context, req *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error) {
-	return c.issueTempleDonationOrder.CallUnary(ctx, req)
-}
-
-// GetWorld calls server.v1.Service.GetWorld.
-func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
-	return c.getWorld.CallUnary(ctx, req)
-}
-
-// SubscribeToWorldFields calls server.v1.Service.SubscribeToWorldFields.
-func (c *serviceClient) SubscribeToWorldFields(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World_Field], error) {
-	return c.subscribeToWorldFields.CallServerStream(ctx, req)
+// SubscribeToWorld calls server.v1.Service.SubscribeToWorld.
+func (c *serviceClient) SubscribeToWorld(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World], error) {
+	return c.subscribeToWorld.CallServerStream(ctx, req)
 }
 
 // IssueAttack calls server.v1.Service.IssueAttack.
@@ -319,54 +162,49 @@ func (c *serviceClient) CancelAttack(ctx context.Context, req *connect_go.Reques
 	return c.cancelAttack.CallUnary(ctx, req)
 }
 
-// GetAttacks calls server.v1.Service.GetAttacks.
-func (c *serviceClient) GetAttacks(ctx context.Context, req *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error) {
-	return c.getAttacks.CallUnary(ctx, req)
+// IssueBuildingUpgradeOrder calls server.v1.Service.IssueBuildingUpgradeOrder.
+func (c *serviceClient) IssueBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
+	return c.issueBuildingUpgradeOrder.CallUnary(ctx, req)
 }
 
-// SubscribeToAttacks calls server.v1.Service.SubscribeToAttacks.
-func (c *serviceClient) SubscribeToAttacks(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Attack_Event], error) {
-	return c.subscribeToAttacks.CallServerStream(ctx, req)
+// CancelBuildingUpgradeOrder calls server.v1.Service.CancelBuildingUpgradeOrder.
+func (c *serviceClient) CancelBuildingUpgradeOrder(ctx context.Context, req *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
+	return c.cancelBuildingUpgradeOrder.CallUnary(ctx, req)
 }
 
-// GetPlayer calls server.v1.Service.GetPlayer.
-func (c *serviceClient) GetPlayer(ctx context.Context, req *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
-	return c.getPlayer.CallUnary(ctx, req)
+// IssueTroopTrainingOrder calls server.v1.Service.IssueTroopTrainingOrder.
+func (c *serviceClient) IssueTroopTrainingOrder(ctx context.Context, req *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
+	return c.issueTroopTrainingOrder.CallUnary(ctx, req)
 }
 
-// SubscribeToPlayer calls server.v1.Service.SubscribeToPlayer.
-func (c *serviceClient) SubscribeToPlayer(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.Player], error) {
-	return c.subscribeToPlayer.CallServerStream(ctx, req)
+// CancelTroopTrainingOrder calls server.v1.Service.CancelTroopTrainingOrder.
+func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, req *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error) {
+	return c.cancelTroopTrainingOrder.CallUnary(ctx, req)
+}
+
+// IssueResourceTransferOrder calls server.v1.Service.IssueResourceTransferOrder.
+func (c *serviceClient) IssueResourceTransferOrder(ctx context.Context, req *connect_go.Request[v1.IssueResourceTransferOrderRequest]) (*connect_go.Response[v1.IssueResourceTransferOrderResponse], error) {
+	return c.issueResourceTransferOrder.CallUnary(ctx, req)
+}
+
+// CancelResourceTransferOrder calls server.v1.Service.CancelResourceTransferOrder.
+func (c *serviceClient) CancelResourceTransferOrder(ctx context.Context, req *connect_go.Request[v1.CancelResourceTransferOrderRequest]) (*connect_go.Response[v1.CancelResourceTransferOrderResponse], error) {
+	return c.cancelResourceTransferOrder.CallUnary(ctx, req)
 }
 
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
-	// VILLAGES
-	GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error)
-	GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error)
-	SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest], *connect_go.ServerStream[v1.Village_Event]) error
-	// BUILDINGS
-	GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error)
-	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
-	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
-	// TROOPS
-	GetTroops(context.Context, *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error)
-	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
-	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
-	// TEMPLES
-	GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error)
-	IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error)
 	// WORLD
-	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
-	SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World_Field]) error
-	// ATTACKS
+	SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World]) error
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
-	GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error)
-	SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Attack_Event]) error
-	// PLAYERS
-	GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error)
-	SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Player]) error
+	// VILLAGES
+	IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error)
+	CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error)
+	IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error)
+	CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error)
+	IssueResourceTransferOrder(context.Context, *connect_go.Request[v1.IssueResourceTransferOrderRequest]) (*connect_go.Response[v1.IssueResourceTransferOrderResponse], error)
+	CancelResourceTransferOrder(context.Context, *connect_go.Request[v1.CancelResourceTransferOrderRequest]) (*connect_go.Response[v1.CancelResourceTransferOrderResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -375,69 +213,9 @@ type ServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	serviceGetVillageHandler := connect_go.NewUnaryHandler(
-		ServiceGetVillageProcedure,
-		svc.GetVillage,
-		opts...,
-	)
-	serviceGetVillagesHandler := connect_go.NewUnaryHandler(
-		ServiceGetVillagesProcedure,
-		svc.GetVillages,
-		opts...,
-	)
-	serviceSubscribeToVillagesHandler := connect_go.NewServerStreamHandler(
-		ServiceSubscribeToVillagesProcedure,
-		svc.SubscribeToVillages,
-		opts...,
-	)
-	serviceGetBuildingsHandler := connect_go.NewUnaryHandler(
-		ServiceGetBuildingsProcedure,
-		svc.GetBuildings,
-		opts...,
-	)
-	serviceIssueBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
-		ServiceIssueBuildingUpgradeOrderProcedure,
-		svc.IssueBuildingUpgradeOrder,
-		opts...,
-	)
-	serviceCancelBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
-		ServiceCancelBuildingUpgradeOrderProcedure,
-		svc.CancelBuildingUpgradeOrder,
-		opts...,
-	)
-	serviceGetTroopsHandler := connect_go.NewUnaryHandler(
-		ServiceGetTroopsProcedure,
-		svc.GetTroops,
-		opts...,
-	)
-	serviceIssueTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
-		ServiceIssueTroopTrainingOrderProcedure,
-		svc.IssueTroopTrainingOrder,
-		opts...,
-	)
-	serviceCancelTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
-		ServiceCancelTroopTrainingOrderProcedure,
-		svc.CancelTroopTrainingOrder,
-		opts...,
-	)
-	serviceGetTempleHandler := connect_go.NewUnaryHandler(
-		ServiceGetTempleProcedure,
-		svc.GetTemple,
-		opts...,
-	)
-	serviceIssueTempleDonationOrderHandler := connect_go.NewUnaryHandler(
-		ServiceIssueTempleDonationOrderProcedure,
-		svc.IssueTempleDonationOrder,
-		opts...,
-	)
-	serviceGetWorldHandler := connect_go.NewUnaryHandler(
-		ServiceGetWorldProcedure,
-		svc.GetWorld,
-		opts...,
-	)
-	serviceSubscribeToWorldFieldsHandler := connect_go.NewServerStreamHandler(
-		ServiceSubscribeToWorldFieldsProcedure,
-		svc.SubscribeToWorldFields,
+	serviceSubscribeToWorldHandler := connect_go.NewServerStreamHandler(
+		ServiceSubscribeToWorldProcedure,
+		svc.SubscribeToWorld,
 		opts...,
 	)
 	serviceIssueAttackHandler := connect_go.NewUnaryHandler(
@@ -450,66 +228,56 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 		svc.CancelAttack,
 		opts...,
 	)
-	serviceGetAttacksHandler := connect_go.NewUnaryHandler(
-		ServiceGetAttacksProcedure,
-		svc.GetAttacks,
+	serviceIssueBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueBuildingUpgradeOrderProcedure,
+		svc.IssueBuildingUpgradeOrder,
 		opts...,
 	)
-	serviceSubscribeToAttacksHandler := connect_go.NewServerStreamHandler(
-		ServiceSubscribeToAttacksProcedure,
-		svc.SubscribeToAttacks,
+	serviceCancelBuildingUpgradeOrderHandler := connect_go.NewUnaryHandler(
+		ServiceCancelBuildingUpgradeOrderProcedure,
+		svc.CancelBuildingUpgradeOrder,
 		opts...,
 	)
-	serviceGetPlayerHandler := connect_go.NewUnaryHandler(
-		ServiceGetPlayerProcedure,
-		svc.GetPlayer,
+	serviceIssueTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueTroopTrainingOrderProcedure,
+		svc.IssueTroopTrainingOrder,
 		opts...,
 	)
-	serviceSubscribeToPlayerHandler := connect_go.NewServerStreamHandler(
-		ServiceSubscribeToPlayerProcedure,
-		svc.SubscribeToPlayer,
+	serviceCancelTroopTrainingOrderHandler := connect_go.NewUnaryHandler(
+		ServiceCancelTroopTrainingOrderProcedure,
+		svc.CancelTroopTrainingOrder,
+		opts...,
+	)
+	serviceIssueResourceTransferOrderHandler := connect_go.NewUnaryHandler(
+		ServiceIssueResourceTransferOrderProcedure,
+		svc.IssueResourceTransferOrder,
+		opts...,
+	)
+	serviceCancelResourceTransferOrderHandler := connect_go.NewUnaryHandler(
+		ServiceCancelResourceTransferOrderProcedure,
+		svc.CancelResourceTransferOrder,
 		opts...,
 	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ServiceGetVillageProcedure:
-			serviceGetVillageHandler.ServeHTTP(w, r)
-		case ServiceGetVillagesProcedure:
-			serviceGetVillagesHandler.ServeHTTP(w, r)
-		case ServiceSubscribeToVillagesProcedure:
-			serviceSubscribeToVillagesHandler.ServeHTTP(w, r)
-		case ServiceGetBuildingsProcedure:
-			serviceGetBuildingsHandler.ServeHTTP(w, r)
-		case ServiceIssueBuildingUpgradeOrderProcedure:
-			serviceIssueBuildingUpgradeOrderHandler.ServeHTTP(w, r)
-		case ServiceCancelBuildingUpgradeOrderProcedure:
-			serviceCancelBuildingUpgradeOrderHandler.ServeHTTP(w, r)
-		case ServiceGetTroopsProcedure:
-			serviceGetTroopsHandler.ServeHTTP(w, r)
-		case ServiceIssueTroopTrainingOrderProcedure:
-			serviceIssueTroopTrainingOrderHandler.ServeHTTP(w, r)
-		case ServiceCancelTroopTrainingOrderProcedure:
-			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
-		case ServiceGetTempleProcedure:
-			serviceGetTempleHandler.ServeHTTP(w, r)
-		case ServiceIssueTempleDonationOrderProcedure:
-			serviceIssueTempleDonationOrderHandler.ServeHTTP(w, r)
-		case ServiceGetWorldProcedure:
-			serviceGetWorldHandler.ServeHTTP(w, r)
-		case ServiceSubscribeToWorldFieldsProcedure:
-			serviceSubscribeToWorldFieldsHandler.ServeHTTP(w, r)
+		case ServiceSubscribeToWorldProcedure:
+			serviceSubscribeToWorldHandler.ServeHTTP(w, r)
 		case ServiceIssueAttackProcedure:
 			serviceIssueAttackHandler.ServeHTTP(w, r)
 		case ServiceCancelAttackProcedure:
 			serviceCancelAttackHandler.ServeHTTP(w, r)
-		case ServiceGetAttacksProcedure:
-			serviceGetAttacksHandler.ServeHTTP(w, r)
-		case ServiceSubscribeToAttacksProcedure:
-			serviceSubscribeToAttacksHandler.ServeHTTP(w, r)
-		case ServiceGetPlayerProcedure:
-			serviceGetPlayerHandler.ServeHTTP(w, r)
-		case ServiceSubscribeToPlayerProcedure:
-			serviceSubscribeToPlayerHandler.ServeHTTP(w, r)
+		case ServiceIssueBuildingUpgradeOrderProcedure:
+			serviceIssueBuildingUpgradeOrderHandler.ServeHTTP(w, r)
+		case ServiceCancelBuildingUpgradeOrderProcedure:
+			serviceCancelBuildingUpgradeOrderHandler.ServeHTTP(w, r)
+		case ServiceIssueTroopTrainingOrderProcedure:
+			serviceIssueTroopTrainingOrderHandler.ServeHTTP(w, r)
+		case ServiceCancelTroopTrainingOrderProcedure:
+			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
+		case ServiceIssueResourceTransferOrderProcedure:
+			serviceIssueResourceTransferOrderHandler.ServeHTTP(w, r)
+		case ServiceCancelResourceTransferOrderProcedure:
+			serviceCancelResourceTransferOrderHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -519,56 +287,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 // UnimplementedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedServiceHandler struct{}
 
-func (UnimplementedServiceHandler) GetVillage(context.Context, *connect_go.Request[v1.GetVillageRequest]) (*connect_go.Response[v1.GetVillageResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillage is not implemented"))
-}
-
-func (UnimplementedServiceHandler) GetVillages(context.Context, *connect_go.Request[v1.GetVillagesRequest]) (*connect_go.Response[v1.GetVillagesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetVillages is not implemented"))
-}
-
-func (UnimplementedServiceHandler) SubscribeToVillages(context.Context, *connect_go.Request[v1.SubscribeToVillagesRequest], *connect_go.ServerStream[v1.Village_Event]) error {
-	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToVillages is not implemented"))
-}
-
-func (UnimplementedServiceHandler) GetBuildings(context.Context, *connect_go.Request[v1.GetBuildingsRequest]) (*connect_go.Response[v1.GetBuildingsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetBuildings is not implemented"))
-}
-
-func (UnimplementedServiceHandler) IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueBuildingUpgradeOrder is not implemented"))
-}
-
-func (UnimplementedServiceHandler) CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelBuildingUpgradeOrder is not implemented"))
-}
-
-func (UnimplementedServiceHandler) GetTroops(context.Context, *connect_go.Request[v1.GetTroopsRequest]) (*connect_go.Response[v1.GetTroopsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetTroops is not implemented"))
-}
-
-func (UnimplementedServiceHandler) IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueTroopTrainingOrder is not implemented"))
-}
-
-func (UnimplementedServiceHandler) CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelTroopTrainingOrder is not implemented"))
-}
-
-func (UnimplementedServiceHandler) GetTemple(context.Context, *connect_go.Request[v1.GetTempleRequest]) (*connect_go.Response[v1.GetTempleResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetTemple is not implemented"))
-}
-
-func (UnimplementedServiceHandler) IssueTempleDonationOrder(context.Context, *connect_go.Request[v1.IssueTempleDonationOrderRequest]) (*connect_go.Response[v1.IssueTempleDonationOrderResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueTempleDonationOrder is not implemented"))
-}
-
-func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetWorld is not implemented"))
-}
-
-func (UnimplementedServiceHandler) SubscribeToWorldFields(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World_Field]) error {
-	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToWorldFields is not implemented"))
+func (UnimplementedServiceHandler) SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World]) error {
+	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToWorld is not implemented"))
 }
 
 func (UnimplementedServiceHandler) IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error) {
@@ -579,18 +299,26 @@ func (UnimplementedServiceHandler) CancelAttack(context.Context, *connect_go.Req
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelAttack is not implemented"))
 }
 
-func (UnimplementedServiceHandler) GetAttacks(context.Context, *connect_go.Request[v1.GetAttacksRequest]) (*connect_go.Response[v1.GetAttacksResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetAttacks is not implemented"))
+func (UnimplementedServiceHandler) IssueBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.IssueBuildingUpgradeOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueBuildingUpgradeOrder is not implemented"))
 }
 
-func (UnimplementedServiceHandler) SubscribeToAttacks(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Attack_Event]) error {
-	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToAttacks is not implemented"))
+func (UnimplementedServiceHandler) CancelBuildingUpgradeOrder(context.Context, *connect_go.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect_go.Response[v1.CancelBuildingUpgradeOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelBuildingUpgradeOrder is not implemented"))
 }
 
-func (UnimplementedServiceHandler) GetPlayer(context.Context, *connect_go.Request[v1.GetPlayerRequest]) (*connect_go.Response[v1.GetPlayerResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetPlayer is not implemented"))
+func (UnimplementedServiceHandler) IssueTroopTrainingOrder(context.Context, *connect_go.Request[v1.IssueTroopTrainingOrderRequest]) (*connect_go.Response[v1.IssueTroopTrainingOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueTroopTrainingOrder is not implemented"))
 }
 
-func (UnimplementedServiceHandler) SubscribeToPlayer(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.Player]) error {
-	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToPlayer is not implemented"))
+func (UnimplementedServiceHandler) CancelTroopTrainingOrder(context.Context, *connect_go.Request[v1.CancelTroopTrainingOrderRequest]) (*connect_go.Response[v1.CancelTroopTrainingOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelTroopTrainingOrder is not implemented"))
+}
+
+func (UnimplementedServiceHandler) IssueResourceTransferOrder(context.Context, *connect_go.Request[v1.IssueResourceTransferOrderRequest]) (*connect_go.Response[v1.IssueResourceTransferOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.IssueResourceTransferOrder is not implemented"))
+}
+
+func (UnimplementedServiceHandler) CancelResourceTransferOrder(context.Context, *connect_go.Request[v1.CancelResourceTransferOrderRequest]) (*connect_go.Response[v1.CancelResourceTransferOrderResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.CancelResourceTransferOrder is not implemented"))
 }

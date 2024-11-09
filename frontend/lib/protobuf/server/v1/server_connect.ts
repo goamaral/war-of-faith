@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Attack_Event, CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetAttacksRequest, GetAttacksResponse, GetBuildingsRequest, GetBuildingsResponse, GetPlayerRequest, GetPlayerResponse, GetTempleRequest, GetTempleResponse, GetTroopsRequest, GetTroopsResponse, GetVillageRequest, GetVillageResponse, GetVillagesRequest, GetVillagesResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueTempleDonationOrderRequest, IssueTempleDonationOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, Player, SubscribeToVillagesRequest, Village_Event, World_Field } from "./server_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
+import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelResourceTransferOrderRequest, CancelResourceTransferOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueResourceTransferOrderRequest, IssueResourceTransferOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, World } from "./server_pb.js";
 
 /**
  * @generated from service server.v1.Service
@@ -13,46 +13,37 @@ export const Service = {
   typeName: "server.v1.Service",
   methods: {
     /**
-     * VILLAGES 
+     * WORLD 
      *
-     * @generated from rpc server.v1.Service.GetVillage
+     * @generated from rpc server.v1.Service.SubscribeToWorld
      */
-    getVillage: {
-      name: "GetVillage",
-      I: GetVillageRequest,
-      O: GetVillageResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.GetVillages
-     */
-    getVillages: {
-      name: "GetVillages",
-      I: GetVillagesRequest,
-      O: GetVillagesResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.SubscribeToVillages
-     */
-    subscribeToVillages: {
-      name: "SubscribeToVillages",
-      I: SubscribeToVillagesRequest,
-      O: Village_Event,
+    subscribeToWorld: {
+      name: "SubscribeToWorld",
+      I: Empty,
+      O: World,
       kind: MethodKind.ServerStreaming,
     },
     /**
-     * BUILDINGS 
-     *
-     * @generated from rpc server.v1.Service.GetBuildings
+     * @generated from rpc server.v1.Service.IssueAttack
      */
-    getBuildings: {
-      name: "GetBuildings",
-      I: GetBuildingsRequest,
-      O: GetBuildingsResponse,
+    issueAttack: {
+      name: "IssueAttack",
+      I: IssueAttackRequest,
+      O: IssueAttackResponse,
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc server.v1.Service.CancelAttack
+     */
+    cancelAttack: {
+      name: "CancelAttack",
+      I: CancelAttackRequest,
+      O: CancelAttackResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * VILLAGES 
+     *
      * @generated from rpc server.v1.Service.IssueBuildingUpgradeOrder
      */
     issueBuildingUpgradeOrder: {
@@ -68,17 +59,6 @@ export const Service = {
       name: "CancelBuildingUpgradeOrder",
       I: CancelBuildingUpgradeOrderRequest,
       O: CancelBuildingUpgradeOrderResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * TROOPS 
-     *
-     * @generated from rpc server.v1.Service.GetTroops
-     */
-    getTroops: {
-      name: "GetTroops",
-      I: GetTroopsRequest,
-      O: GetTroopsResponse,
       kind: MethodKind.Unary,
     },
     /**
@@ -100,102 +80,22 @@ export const Service = {
       kind: MethodKind.Unary,
     },
     /**
-     * TEMPLES 
-     *
-     * @generated from rpc server.v1.Service.GetTemple
+     * @generated from rpc server.v1.Service.IssueResourceTransferOrder
      */
-    getTemple: {
-      name: "GetTemple",
-      I: GetTempleRequest,
-      O: GetTempleResponse,
+    issueResourceTransferOrder: {
+      name: "IssueResourceTransferOrder",
+      I: IssueResourceTransferOrderRequest,
+      O: IssueResourceTransferOrderResponse,
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc server.v1.Service.IssueTempleDonationOrder
+     * @generated from rpc server.v1.Service.CancelResourceTransferOrder
      */
-    issueTempleDonationOrder: {
-      name: "IssueTempleDonationOrder",
-      I: IssueTempleDonationOrderRequest,
-      O: IssueTempleDonationOrderResponse,
+    cancelResourceTransferOrder: {
+      name: "CancelResourceTransferOrder",
+      I: CancelResourceTransferOrderRequest,
+      O: CancelResourceTransferOrderResponse,
       kind: MethodKind.Unary,
-    },
-    /**
-     * WORLD 
-     *
-     * @generated from rpc server.v1.Service.GetWorld
-     */
-    getWorld: {
-      name: "GetWorld",
-      I: GetWorldRequest,
-      O: GetWorldResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.SubscribeToWorldFields
-     */
-    subscribeToWorldFields: {
-      name: "SubscribeToWorldFields",
-      I: Empty,
-      O: World_Field,
-      kind: MethodKind.ServerStreaming,
-    },
-    /**
-     * ATTACKS 
-     *
-     * @generated from rpc server.v1.Service.IssueAttack
-     */
-    issueAttack: {
-      name: "IssueAttack",
-      I: IssueAttackRequest,
-      O: IssueAttackResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.CancelAttack
-     */
-    cancelAttack: {
-      name: "CancelAttack",
-      I: CancelAttackRequest,
-      O: CancelAttackResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.GetAttacks
-     */
-    getAttacks: {
-      name: "GetAttacks",
-      I: GetAttacksRequest,
-      O: GetAttacksResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.SubscribeToAttacks
-     */
-    subscribeToAttacks: {
-      name: "SubscribeToAttacks",
-      I: Empty,
-      O: Attack_Event,
-      kind: MethodKind.ServerStreaming,
-    },
-    /**
-     * PLAYERS 
-     *
-     * @generated from rpc server.v1.Service.GetPlayer
-     */
-    getPlayer: {
-      name: "GetPlayer",
-      I: GetPlayerRequest,
-      O: GetPlayerResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc server.v1.Service.SubscribeToPlayer
-     */
-    subscribeToPlayer: {
-      name: "SubscribeToPlayer",
-      I: Empty,
-      O: Player,
-      kind: MethodKind.ServerStreaming,
     },
   }
 } as const;

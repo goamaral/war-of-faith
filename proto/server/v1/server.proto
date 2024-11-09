@@ -4,268 +4,171 @@ package server.v1;
 
 option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 
-import "buf/validate/validate.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 
-message Resources {
-  uint32 time = 1;
-  uint32 gold = 2;
-}
+message World {
+  uint32 width = 1;
+  uint32 height = 2;
+  map<string, Building> buildings = 3; // key: building_id
+  map<string, Troop> troops = 4; // key: troop_id
+  map<string, Player> players = 5; // key: player_id
+  map<string, World.Field> fields = 6; // key: coords
+  map<string, Village> villages = 7; // key: village_coords, Affected by player pov
+  map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
+  map<string, Attack> attacks = 9; // key: attack_id, Affected by player pov
 
-message Coords {
-  uint32 x = 1;
-  uint32 y = 2;
-}
+  message Field {
+    string coords = 1;
+    Kind kind = 2; // Affected by player pov
 
-/* VILLAGES */
-message Village {
-  uint32 id = 1;
-  Resources resources = 2;
-  map<string, uint32> building_level = 3; // <building_kind, level>
-  repeated Building.UpgradeOrder building_upgrade_orders = 4;
-  map<string, uint32> troop_quantity = 5; // <troop_kind, quantity>
-  repeated Troop.TrainingOrder troop_training_orders = 6;
-  uint32 player_id = 7;
-
-  message Event {
-    Village village = 1;
-    Action action = 2;
-
-    enum Action {
-      ACTION_UNDEFINED = 0;
-      ACTION_CREATE = 1;
-      ACTION_UPDATE = 2;
-      ACTION_DELETE = 3;
+    enum Kind {
+      KIND_FOG = 0;
+      KIND_WILD = 1;
+      KIND_VILLAGE = 2;
+      KIND_TEMPLE = 3;
     }
   }
 }
 
-// GetVillage
-message GetVillageRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-}
-message GetVillageResponse {
-  Village village = 1;
-}
-
-// GetVillages
-message GetVillagesRequest {}
-message GetVillagesResponse {
-  repeated Village villages = 1;
-}
-
-// SubscribeToVillages
-message SubscribeToVillagesRequest {
-  repeated uint32 ids = 1;
-}
-
-/* BUILDINGS */
 message Building {
-  string kind = 1;
+  string id = 1;
   string name = 2;
+}
 
-  message UpgradeOrder {
-    uint32 id = 1;
-    uint32 level = 2;
+message Troop {
+  string id = 1;
+  string name = 2;
+}
+
+message Attack {
+  string id = 1;
+  string source_coords = 2;
+  string target_coords = 3;
+  map<string, uint32> troops = 4; // key: troop_id
+  uint32 time_left = 5;
+}
+
+message Resources {
+  uint32 gold = 1;
+}
+
+message Temple {
+  string coords = 1;
+  Resources resources = 2;
+  google.protobuf.StringValue player_id = 3;
+}
+
+message Village {
+  string coords = 1;
+  string player_id = 2;
+  Resources resources = 3;
+  map<string, uint32> buildings = 4; // key: building_id
+  map<string, uint32> troops = 5; // key: troop_id
+  repeated BuildingUpgradeOrder building_upgrade_orders = 6;
+  repeated TroopTrainingOrder troop_training_orders = 7;
+  repeated ResourceTransferOrder resource_transfer_orders = 8;
+
+  message BuildingUpgradeOrder {
+    string building_id = 1;
+    uint32 time_left = 2;
+  }
+
+  message TroopTrainingOrder {
+    string troop_id = 1;
+    uint32 quantity = 2;
     uint32 time_left = 3;
-    Resources cost = 4;
-    string building_kind = 5;
+  }
+
+  message ResourceTransferOrder {
+    string id = 1;
+    Resources resources = 2;
+    string target_coords = 3;
+    uint32 time_left = 4;
   }
 }
 
-// GetBuildings
-message GetBuildingsRequest {}
-message GetBuildingsResponse {
-  repeated Building buildings = 1;
+message Player {
+  string id = 1;
 }
 
+/* WORLD */
+// IssueAttack
+message IssueAttackRequest {
+  string source_coords = 1;
+  string target_coords = 2;
+  map<string, uint32> troops = 3; // <troop_id, quantity>
+}
+message IssueAttackResponse {
+  Attack attack = 1;
+}
+
+// CancelAttack
+message CancelAttackRequest {
+  string id = 1;
+}
+message CancelAttackResponse {}
+
+/* VILLAGES */
 // IssueBuildingUpgradeOrder
 message IssueBuildingUpgradeOrderRequest {
-  string building_kind = 1 [(buf.validate.field).string.in = "hall", (buf.validate.field).string.in = "gold-mine"];
-  uint32 village_id = 2 [(buf.validate.field).uint32.gt = 0];
+  string building_id = 1;
+  string village_id = 2;
 }
 message IssueBuildingUpgradeOrderResponse {
-  Building.UpgradeOrder order = 1;
+  Village.BuildingUpgradeOrder order = 1;
 }
 
 // CancelBuildingUpgradeOrder
 message CancelBuildingUpgradeOrderRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  string id = 1;
 }
 message CancelBuildingUpgradeOrderResponse {}
 
-/* TROOPS */
-message Troop {
-  string kind = 1;
-  string name = 2;
-
-  message TrainingOrder {
-    uint32 id = 1;
-    uint32 quantity = 3;
-    uint32 time_left = 4;
-    Resources cost = 5;
-    string troop_kind = 6;
-  }
-}
-
-// GetTroops
-message GetTroopsRequest {}
-message GetTroopsResponse {
-  repeated Troop troops = 1;
-}
-
 // IssueTroopTrainingOrder
 message IssueTroopTrainingOrderRequest {
-  string troop_kind = 1 [(buf.validate.field).string.in = "leader"];
-  uint32 quantity = 2 [(buf.validate.field).uint32.gt = 0];
-  uint32 village_id = 3 [(buf.validate.field).uint32.gt = 0];
+  string troop_id = 1;
+  uint32 quantity = 2;
+  string village_id = 3;
 }
 message IssueTroopTrainingOrderResponse {
-  Troop.TrainingOrder order = 1;
+  Village.TroopTrainingOrder order = 1;
 }
 
 // CancelTroopTrainingOrder
 message CancelTroopTrainingOrderRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  string id = 1;
 }
 message CancelTroopTrainingOrderResponse {}
 
-/* TEMPLES */
-message Temple {
-  uint32 id = 1;
-  uint32 gold = 2;
+// IssueResourceTransferOrder
+message IssueResourceTransferOrderRequest {
+  Resources resources = 1;
+  string source_coords = 2;
+  string target_coords = 3;
+}
+message IssueResourceTransferOrderResponse {
+  Village.ResourceTransferOrder order = 1;
 }
 
-message GetTempleRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+// CancelResourceTransferOrder
+message CancelResourceTransferOrderRequest {
+  string source_coords = 1;
+  string id = 2;
 }
-message GetTempleResponse {
-  Temple temple = 1;
-}
-
-// IssueTempleDonationOrder
-message IssueTempleDonationOrderRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  uint32 gold = 2 [(buf.validate.field).uint32.gt = 0];
-  uint32 village_id = 3 [(buf.validate.field).uint32.gt = 0];
-}
-message IssueTempleDonationOrderResponse {}
-
-/* WORLD */
-message World {
-  uint32 width = 1;
-  uint32 height = 2;
-  repeated World.Field fields = 3;
-
-  message Field {
-    uint32 id = 1;
-    Coords coords = 2;
-    World.Field.EntityKind entity_kind = 3;
-    uint32 entity_id = 4;
-
-    enum EntityKind {
-      ENTITY_KIND_WILD = 0;
-      ENTITY_KIND_VILLAGE = 1;
-      ENTITY_KIND_TEMPLE = 2;
-    }
-  }
-}
-
-// GetWorld
-message GetWorldRequest {
-  bool load_fields = 1;
-}
-message GetWorldResponse {
-  World world = 1;
-}
-
-/* ATTACKS */
-message Attack {
-  uint32 id = 1;
-  uint32 village_id = 2;
-  uint32 world_field_id = 3;
-  map<string, uint32> troop_quantity = 4; // <troop_kind, quantity>
-  uint32 time_left = 5;
-
-  message Event {
-    Attack attack = 1;
-    Action action = 2;
-
-    enum Action {
-      ACTION_UNDEFINED = 0;
-      ACTION_CREATE = 1;
-      ACTION_UPDATE = 2;
-      ACTION_DELETE = 3;
-    }
-  }
-}
-
-// IssueAttack
-message IssueAttackRequest {
-  uint32 village_id = 1 [(buf.validate.field).uint32.gt = 0];
-  Coords target_coords = 2 [(buf.validate.field).uint32.gt = 0];
-  map<string, uint32> troop_quantity = 3 [(buf.validate.field).map.min_pairs = 1]; // <troop_kind, quantity>
-}
-message IssueAttackResponse {}
-
-// CancelAttack
-message CancelAttackRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-}
-message CancelAttackResponse {}
-
-// GetAttacks
-message GetAttacksRequest {}
-message GetAttacksResponse {
-  repeated Attack outgoing_attacks = 1;
-}
-
-/* PLAYERS */
-message Player {
-  uint32 id = 1;
-  uint32 trainable_leaders = 2;
-}
-
-// GetPlayer
-message GetPlayerRequest {
-  google.protobuf.UInt32Value id = 1 [(buf.validate.field).uint32.gt = 0];
-}
-message GetPlayerResponse {
-  Player player = 1;
-}
+message CancelResourceTransferOrderResponse {}
 
 service Service {
-  /* VILLAGES */
-  rpc GetVillage(GetVillageRequest) returns (GetVillageResponse);
-  rpc GetVillages(GetVillagesRequest) returns (GetVillagesResponse);
-  rpc SubscribeToVillages(SubscribeToVillagesRequest) returns (stream Village.Event);
-
-  /* BUILDINGS */
-  rpc GetBuildings(GetBuildingsRequest) returns (GetBuildingsResponse);
-  rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
-  rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
-
-  /* TROOPS */
-  rpc GetTroops(GetTroopsRequest) returns (GetTroopsResponse);
-  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
-  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
-
-  /* TEMPLES */
-  rpc GetTemple(GetTempleRequest) returns (GetTempleResponse);
-  rpc IssueTempleDonationOrder(IssueTempleDonationOrderRequest) returns (IssueTempleDonationOrderResponse);
-
   /* WORLD */
-  rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
-  rpc SubscribeToWorldFields(google.protobuf.Empty) returns (stream World.Field);
-
-  /* ATTACKS */
+  rpc SubscribeToWorld(google.protobuf.Empty) returns (stream World);
   rpc IssueAttack(IssueAttackRequest) returns (IssueAttackResponse);
   rpc CancelAttack(CancelAttackRequest) returns (CancelAttackResponse);
-  rpc GetAttacks(GetAttacksRequest) returns (GetAttacksResponse);
-  rpc SubscribeToAttacks(google.protobuf.Empty) returns (stream Attack.Event);
 
-  /* PLAYERS */
-  rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);
-  rpc SubscribeToPlayer(google.protobuf.Empty) returns (stream Player);
+  /* VILLAGES */
+  rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
+  rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
+  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
+  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
+  rpc IssueResourceTransferOrder(IssueResourceTransferOrderRequest) returns (IssueResourceTransferOrderResponse);
+  rpc CancelResourceTransferOrder(CancelResourceTransferOrderRequest) returns (CancelResourceTransferOrderResponse);
 }

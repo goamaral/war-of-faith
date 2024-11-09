@@ -15,7 +15,6 @@ Players compete to conquer the 4 mighty temples.
 - General utilities - https://github.com/samber/lo
 - Process manager - https://github.com/DarthSim/overmind
 - Protobuf transport protocol - https://github.com/bufbuild/connect-go
-- Protobuf validation -  https://github.com/bufbuild/protovalidate-go
 
 ### Other
 - Protobuf compiler - https://github.com/bufbuild/buf

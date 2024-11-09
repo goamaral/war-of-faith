@@ -1,0 +1,54 @@
+{
+  "world": {
+    "width": 0,
+    "height": 0,
+    "fields": {
+      "<x|y>": {
+        "coords": "<x|y>",
+        "kind": "wild|village|temple"
+      }
+    }
+  },
+  "players": {
+    "<id>": {
+      "id": "<uuid>"
+    }
+  },
+  "villages": {
+    "<x|y>": {
+      "coords": "<x|y>",
+      "player_id": "<uuid>",
+      "resources": {
+        "gold": 0
+      },
+      "buildings": {
+        "hall": 0,
+        "gold-mine": 0
+      },
+      "troops": {
+        "leader": 0
+      },
+      "building_upgrade_orders": [
+        {
+          "building_id": "hall|gold-mine",
+          "time_left": 0
+        }
+      ],
+      "troop_training_order": [
+        {
+          "troop_id": "leader",
+          "time_left": 0,
+          "quantity": 0
+        }
+      ]
+    }
+  },
+  "temples": {
+    "<x|y>": {
+      "coords": "<x|y>",
+      "resources": {
+        "gold": 0
+      }
+    }
+  }
+}
