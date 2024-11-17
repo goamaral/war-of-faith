@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
+	"golang.org/x/exp/maps"
 )
 
 var (
@@ -16,15 +17,10 @@ var (
 	Troop_LEADER = "leader"
 )
 
-type World serverv1.World
-
-var WorldInstance World
-var worldMutex sync.Mutex
-
-func (w *World) SafeCall(fn func(w *World)) {
-	worldMutex.Lock()
-	defer worldMutex.Unlock()
-	fn(w)
+type World struct {
+	*serverv1.World
+	sync.RWMutex
+	patchChan chan *serverv1.SubscribeToWorldResponse_Patch
 }
 
 func (w *World) Tick() {
@@ -106,6 +102,13 @@ func (w *World) Tick() {
 			return true
 		})
 	}
+
+	w.patchChan <- &serverv1.SubscribeToWorldResponse_Patch{
+		Fields:   maps.Clone(w.Fields),
+		Villages: maps.Clone(w.Villages),
+		Temples:  maps.Clone(w.Temples),
+		Attacks:  maps.Clone(w.Attacks),
+	}
 }
 
 func (w *World) CreateVillage(coords string, playerId string) {
@@ -154,7 +157,7 @@ func (w *World) IssueAttack(req *serverv1.IssueAttackRequest, playerId string) (
 		Troops:       req.Troops,
 		TimeLeft:     10, // TODO: Dynamic time left
 	}
-	world.Attacks[attack.Id] = attack
+	w.Attacks[attack.Id] = attack
 
 	return attack, nil
 }

@@ -93,6 +93,25 @@ message Player {
 }
 
 /* WORLD */
+// GetWorld
+message GetWorldRequest {}
+message GetWorldResponse {
+  World world = 1;
+}
+
+// SubscribeToWorld
+message SubscribeToWorldRequest {}
+message SubscribeToWorldResponse {
+  Patch patch = 1;
+
+  message Patch {
+    map<string, World.Field> fields = 6; // key: coords
+    map<string, Village> villages = 7; // key: village_coords, Affected by player pov
+    map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
+    map<string, Attack> attacks = 9; // key: attack_id, Affected by player pov
+  }
+}
+
 // IssueAttack
 message IssueAttackRequest {
   string source_coords = 1;
@@ -160,7 +179,8 @@ message CancelResourceTransferOrderResponse {}
 
 service Service {
   /* WORLD */
-  rpc SubscribeToWorld(google.protobuf.Empty) returns (stream World);
+  rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
+  rpc SubscribeToWorld(SubscribeToWorldRequest) returns (stream SubscribeToWorldResponse);
   rpc IssueAttack(IssueAttackRequest) returns (IssueAttackResponse);
   rpc CancelAttack(CancelAttackRequest) returns (CancelAttackResponse);
 

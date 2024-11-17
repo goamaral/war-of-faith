@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Empty, MethodKind } from "@bufbuild/protobuf";
-import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelResourceTransferOrderRequest, CancelResourceTransferOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueResourceTransferOrderRequest, IssueResourceTransferOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, World } from "./server_pb.js";
+import { CancelAttackRequest, CancelAttackResponse, CancelBuildingUpgradeOrderRequest, CancelBuildingUpgradeOrderResponse, CancelResourceTransferOrderRequest, CancelResourceTransferOrderResponse, CancelTroopTrainingOrderRequest, CancelTroopTrainingOrderResponse, GetWorldRequest, GetWorldResponse, IssueAttackRequest, IssueAttackResponse, IssueBuildingUpgradeOrderRequest, IssueBuildingUpgradeOrderResponse, IssueResourceTransferOrderRequest, IssueResourceTransferOrderResponse, IssueTroopTrainingOrderRequest, IssueTroopTrainingOrderResponse, SubscribeToWorldRequest, SubscribeToWorldResponse } from "./server_pb.js";
+import { MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service server.v1.Service
@@ -15,12 +15,21 @@ export const Service = {
     /**
      * WORLD 
      *
+     * @generated from rpc server.v1.Service.GetWorld
+     */
+    getWorld: {
+      name: "GetWorld",
+      I: GetWorldRequest,
+      O: GetWorldResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc server.v1.Service.SubscribeToWorld
      */
     subscribeToWorld: {
       name: "SubscribeToWorld",
-      I: Empty,
-      O: World,
+      I: SubscribeToWorldRequest,
+      O: SubscribeToWorldResponse,
       kind: MethodKind.ServerStreaming,
     },
     /**

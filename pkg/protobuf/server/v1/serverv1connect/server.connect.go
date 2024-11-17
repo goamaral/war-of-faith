@@ -8,7 +8,6 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	strings "strings"
 	v1 "war-of-faith/pkg/protobuf/server/v1"
@@ -34,6 +33,8 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// ServiceGetWorldProcedure is the fully-qualified name of the Service's GetWorld RPC.
+	ServiceGetWorldProcedure = "/server.v1.Service/GetWorld"
 	// ServiceSubscribeToWorldProcedure is the fully-qualified name of the Service's SubscribeToWorld
 	// RPC.
 	ServiceSubscribeToWorldProcedure = "/server.v1.Service/SubscribeToWorld"
@@ -64,7 +65,8 @@ const (
 // ServiceClient is a client for the server.v1.Service service.
 type ServiceClient interface {
 	// WORLD
-	SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World], error)
+	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	SubscribeToWorld(context.Context, *connect_go.Request[v1.SubscribeToWorldRequest]) (*connect_go.ServerStreamForClient[v1.SubscribeToWorldResponse], error)
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	// VILLAGES
@@ -86,7 +88,12 @@ type ServiceClient interface {
 func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &serviceClient{
-		subscribeToWorld: connect_go.NewClient[emptypb.Empty, v1.World](
+		getWorld: connect_go.NewClient[v1.GetWorldRequest, v1.GetWorldResponse](
+			httpClient,
+			baseURL+ServiceGetWorldProcedure,
+			opts...,
+		),
+		subscribeToWorld: connect_go.NewClient[v1.SubscribeToWorldRequest, v1.SubscribeToWorldResponse](
 			httpClient,
 			baseURL+ServiceSubscribeToWorldProcedure,
 			opts...,
@@ -136,7 +143,8 @@ func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	subscribeToWorld            *connect_go.Client[emptypb.Empty, v1.World]
+	getWorld                    *connect_go.Client[v1.GetWorldRequest, v1.GetWorldResponse]
+	subscribeToWorld            *connect_go.Client[v1.SubscribeToWorldRequest, v1.SubscribeToWorldResponse]
 	issueAttack                 *connect_go.Client[v1.IssueAttackRequest, v1.IssueAttackResponse]
 	cancelAttack                *connect_go.Client[v1.CancelAttackRequest, v1.CancelAttackResponse]
 	issueBuildingUpgradeOrder   *connect_go.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
@@ -147,8 +155,13 @@ type serviceClient struct {
 	cancelResourceTransferOrder *connect_go.Client[v1.CancelResourceTransferOrderRequest, v1.CancelResourceTransferOrderResponse]
 }
 
+// GetWorld calls server.v1.Service.GetWorld.
+func (c *serviceClient) GetWorld(ctx context.Context, req *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
+	return c.getWorld.CallUnary(ctx, req)
+}
+
 // SubscribeToWorld calls server.v1.Service.SubscribeToWorld.
-func (c *serviceClient) SubscribeToWorld(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.ServerStreamForClient[v1.World], error) {
+func (c *serviceClient) SubscribeToWorld(ctx context.Context, req *connect_go.Request[v1.SubscribeToWorldRequest]) (*connect_go.ServerStreamForClient[v1.SubscribeToWorldResponse], error) {
 	return c.subscribeToWorld.CallServerStream(ctx, req)
 }
 
@@ -195,7 +208,8 @@ func (c *serviceClient) CancelResourceTransferOrder(ctx context.Context, req *co
 // ServiceHandler is an implementation of the server.v1.Service service.
 type ServiceHandler interface {
 	// WORLD
-	SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World]) error
+	GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error)
+	SubscribeToWorld(context.Context, *connect_go.Request[v1.SubscribeToWorldRequest], *connect_go.ServerStream[v1.SubscribeToWorldResponse]) error
 	IssueAttack(context.Context, *connect_go.Request[v1.IssueAttackRequest]) (*connect_go.Response[v1.IssueAttackResponse], error)
 	CancelAttack(context.Context, *connect_go.Request[v1.CancelAttackRequest]) (*connect_go.Response[v1.CancelAttackResponse], error)
 	// VILLAGES
@@ -213,6 +227,11 @@ type ServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+	serviceGetWorldHandler := connect_go.NewUnaryHandler(
+		ServiceGetWorldProcedure,
+		svc.GetWorld,
+		opts...,
+	)
 	serviceSubscribeToWorldHandler := connect_go.NewServerStreamHandler(
 		ServiceSubscribeToWorldProcedure,
 		svc.SubscribeToWorld,
@@ -260,6 +279,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case ServiceGetWorldProcedure:
+			serviceGetWorldHandler.ServeHTTP(w, r)
 		case ServiceSubscribeToWorldProcedure:
 			serviceSubscribeToWorldHandler.ServeHTTP(w, r)
 		case ServiceIssueAttackProcedure:
@@ -287,7 +308,11 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 // UnimplementedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedServiceHandler struct{}
 
-func (UnimplementedServiceHandler) SubscribeToWorld(context.Context, *connect_go.Request[emptypb.Empty], *connect_go.ServerStream[v1.World]) error {
+func (UnimplementedServiceHandler) GetWorld(context.Context, *connect_go.Request[v1.GetWorldRequest]) (*connect_go.Response[v1.GetWorldResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.GetWorld is not implemented"))
+}
+
+func (UnimplementedServiceHandler) SubscribeToWorld(context.Context, *connect_go.Request[v1.SubscribeToWorldRequest], *connect_go.ServerStream[v1.SubscribeToWorldResponse]) error {
 	return connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.v1.Service.SubscribeToWorld is not implemented"))
 }
 

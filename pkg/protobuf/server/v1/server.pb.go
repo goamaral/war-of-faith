@@ -9,7 +9,7 @@ package serverv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	_ "google.golang.org/protobuf/types/known/emptypb"
 	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
@@ -634,6 +634,178 @@ func (x *Player) GetId() string {
 	return ""
 }
 
+// GetWorld
+type GetWorldRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetWorldRequest) Reset() {
+	*x = GetWorldRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWorldRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorldRequest) ProtoMessage() {}
+
+func (x *GetWorldRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorldRequest.ProtoReflect.Descriptor instead.
+func (*GetWorldRequest) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{8}
+}
+
+type GetWorldResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	World *World `protobuf:"bytes,1,opt,name=world,proto3" json:"world,omitempty"`
+}
+
+func (x *GetWorldResponse) Reset() {
+	*x = GetWorldResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWorldResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorldResponse) ProtoMessage() {}
+
+func (x *GetWorldResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorldResponse.ProtoReflect.Descriptor instead.
+func (*GetWorldResponse) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetWorldResponse) GetWorld() *World {
+	if x != nil {
+		return x.World
+	}
+	return nil
+}
+
+// SubscribeToWorld
+type SubscribeToWorldRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *SubscribeToWorldRequest) Reset() {
+	*x = SubscribeToWorldRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscribeToWorldRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeToWorldRequest) ProtoMessage() {}
+
+func (x *SubscribeToWorldRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeToWorldRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeToWorldRequest) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{10}
+}
+
+type SubscribeToWorldResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Patch *SubscribeToWorldResponse_Patch `protobuf:"bytes,1,opt,name=patch,proto3" json:"patch,omitempty"`
+}
+
+func (x *SubscribeToWorldResponse) Reset() {
+	*x = SubscribeToWorldResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscribeToWorldResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeToWorldResponse) ProtoMessage() {}
+
+func (x *SubscribeToWorldResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeToWorldResponse.ProtoReflect.Descriptor instead.
+func (*SubscribeToWorldResponse) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SubscribeToWorldResponse) GetPatch() *SubscribeToWorldResponse_Patch {
+	if x != nil {
+		return x.Patch
+	}
+	return nil
+}
+
 // IssueAttack
 type IssueAttackRequest struct {
 	state         protoimpl.MessageState
@@ -648,7 +820,7 @@ type IssueAttackRequest struct {
 func (x *IssueAttackRequest) Reset() {
 	*x = IssueAttackRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[8]
+		mi := &file_server_v1_server_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -661,7 +833,7 @@ func (x *IssueAttackRequest) String() string {
 func (*IssueAttackRequest) ProtoMessage() {}
 
 func (x *IssueAttackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[8]
+	mi := &file_server_v1_server_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -674,7 +846,7 @@ func (x *IssueAttackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueAttackRequest.ProtoReflect.Descriptor instead.
 func (*IssueAttackRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{8}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *IssueAttackRequest) GetSourceCoords() string {
@@ -709,7 +881,7 @@ type IssueAttackResponse struct {
 func (x *IssueAttackResponse) Reset() {
 	*x = IssueAttackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[9]
+		mi := &file_server_v1_server_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -722,7 +894,7 @@ func (x *IssueAttackResponse) String() string {
 func (*IssueAttackResponse) ProtoMessage() {}
 
 func (x *IssueAttackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[9]
+	mi := &file_server_v1_server_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +907,7 @@ func (x *IssueAttackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueAttackResponse.ProtoReflect.Descriptor instead.
 func (*IssueAttackResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{9}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *IssueAttackResponse) GetAttack() *Attack {
@@ -757,7 +929,7 @@ type CancelAttackRequest struct {
 func (x *CancelAttackRequest) Reset() {
 	*x = CancelAttackRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[10]
+		mi := &file_server_v1_server_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -770,7 +942,7 @@ func (x *CancelAttackRequest) String() string {
 func (*CancelAttackRequest) ProtoMessage() {}
 
 func (x *CancelAttackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[10]
+	mi := &file_server_v1_server_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -783,7 +955,7 @@ func (x *CancelAttackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelAttackRequest.ProtoReflect.Descriptor instead.
 func (*CancelAttackRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{10}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CancelAttackRequest) GetId() string {
@@ -802,7 +974,7 @@ type CancelAttackResponse struct {
 func (x *CancelAttackResponse) Reset() {
 	*x = CancelAttackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[11]
+		mi := &file_server_v1_server_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -815,7 +987,7 @@ func (x *CancelAttackResponse) String() string {
 func (*CancelAttackResponse) ProtoMessage() {}
 
 func (x *CancelAttackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[11]
+	mi := &file_server_v1_server_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -828,7 +1000,7 @@ func (x *CancelAttackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelAttackResponse.ProtoReflect.Descriptor instead.
 func (*CancelAttackResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{11}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{15}
 }
 
 // IssueBuildingUpgradeOrder
@@ -844,7 +1016,7 @@ type IssueBuildingUpgradeOrderRequest struct {
 func (x *IssueBuildingUpgradeOrderRequest) Reset() {
 	*x = IssueBuildingUpgradeOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[12]
+		mi := &file_server_v1_server_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -857,7 +1029,7 @@ func (x *IssueBuildingUpgradeOrderRequest) String() string {
 func (*IssueBuildingUpgradeOrderRequest) ProtoMessage() {}
 
 func (x *IssueBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[12]
+	mi := &file_server_v1_server_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -870,7 +1042,7 @@ func (x *IssueBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueBuildingUpgradeOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueBuildingUpgradeOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{12}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *IssueBuildingUpgradeOrderRequest) GetBuildingId() string {
@@ -898,7 +1070,7 @@ type IssueBuildingUpgradeOrderResponse struct {
 func (x *IssueBuildingUpgradeOrderResponse) Reset() {
 	*x = IssueBuildingUpgradeOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[13]
+		mi := &file_server_v1_server_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -911,7 +1083,7 @@ func (x *IssueBuildingUpgradeOrderResponse) String() string {
 func (*IssueBuildingUpgradeOrderResponse) ProtoMessage() {}
 
 func (x *IssueBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[13]
+	mi := &file_server_v1_server_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -924,7 +1096,7 @@ func (x *IssueBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use IssueBuildingUpgradeOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueBuildingUpgradeOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{13}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *IssueBuildingUpgradeOrderResponse) GetOrder() *Village_BuildingUpgradeOrder {
@@ -946,7 +1118,7 @@ type CancelBuildingUpgradeOrderRequest struct {
 func (x *CancelBuildingUpgradeOrderRequest) Reset() {
 	*x = CancelBuildingUpgradeOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[14]
+		mi := &file_server_v1_server_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -959,7 +1131,7 @@ func (x *CancelBuildingUpgradeOrderRequest) String() string {
 func (*CancelBuildingUpgradeOrderRequest) ProtoMessage() {}
 
 func (x *CancelBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[14]
+	mi := &file_server_v1_server_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -972,7 +1144,7 @@ func (x *CancelBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use CancelBuildingUpgradeOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelBuildingUpgradeOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{14}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CancelBuildingUpgradeOrderRequest) GetId() string {
@@ -991,7 +1163,7 @@ type CancelBuildingUpgradeOrderResponse struct {
 func (x *CancelBuildingUpgradeOrderResponse) Reset() {
 	*x = CancelBuildingUpgradeOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[15]
+		mi := &file_server_v1_server_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1004,7 +1176,7 @@ func (x *CancelBuildingUpgradeOrderResponse) String() string {
 func (*CancelBuildingUpgradeOrderResponse) ProtoMessage() {}
 
 func (x *CancelBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[15]
+	mi := &file_server_v1_server_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1017,7 +1189,7 @@ func (x *CancelBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use CancelBuildingUpgradeOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelBuildingUpgradeOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{15}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{19}
 }
 
 // IssueTroopTrainingOrder
@@ -1034,7 +1206,7 @@ type IssueTroopTrainingOrderRequest struct {
 func (x *IssueTroopTrainingOrderRequest) Reset() {
 	*x = IssueTroopTrainingOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[16]
+		mi := &file_server_v1_server_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1047,7 +1219,7 @@ func (x *IssueTroopTrainingOrderRequest) String() string {
 func (*IssueTroopTrainingOrderRequest) ProtoMessage() {}
 
 func (x *IssueTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[16]
+	mi := &file_server_v1_server_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1060,7 +1232,7 @@ func (x *IssueTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueTroopTrainingOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueTroopTrainingOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{16}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *IssueTroopTrainingOrderRequest) GetTroopId() string {
@@ -1095,7 +1267,7 @@ type IssueTroopTrainingOrderResponse struct {
 func (x *IssueTroopTrainingOrderResponse) Reset() {
 	*x = IssueTroopTrainingOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[17]
+		mi := &file_server_v1_server_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1108,7 +1280,7 @@ func (x *IssueTroopTrainingOrderResponse) String() string {
 func (*IssueTroopTrainingOrderResponse) ProtoMessage() {}
 
 func (x *IssueTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[17]
+	mi := &file_server_v1_server_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1121,7 +1293,7 @@ func (x *IssueTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueTroopTrainingOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueTroopTrainingOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{17}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *IssueTroopTrainingOrderResponse) GetOrder() *Village_TroopTrainingOrder {
@@ -1143,7 +1315,7 @@ type CancelTroopTrainingOrderRequest struct {
 func (x *CancelTroopTrainingOrderRequest) Reset() {
 	*x = CancelTroopTrainingOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[18]
+		mi := &file_server_v1_server_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1156,7 +1328,7 @@ func (x *CancelTroopTrainingOrderRequest) String() string {
 func (*CancelTroopTrainingOrderRequest) ProtoMessage() {}
 
 func (x *CancelTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[18]
+	mi := &file_server_v1_server_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1169,7 +1341,7 @@ func (x *CancelTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelTroopTrainingOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelTroopTrainingOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{18}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CancelTroopTrainingOrderRequest) GetId() string {
@@ -1188,7 +1360,7 @@ type CancelTroopTrainingOrderResponse struct {
 func (x *CancelTroopTrainingOrderResponse) Reset() {
 	*x = CancelTroopTrainingOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[19]
+		mi := &file_server_v1_server_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1201,7 +1373,7 @@ func (x *CancelTroopTrainingOrderResponse) String() string {
 func (*CancelTroopTrainingOrderResponse) ProtoMessage() {}
 
 func (x *CancelTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[19]
+	mi := &file_server_v1_server_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1214,7 +1386,7 @@ func (x *CancelTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelTroopTrainingOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelTroopTrainingOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{19}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{23}
 }
 
 // IssueResourceTransferOrder
@@ -1231,7 +1403,7 @@ type IssueResourceTransferOrderRequest struct {
 func (x *IssueResourceTransferOrderRequest) Reset() {
 	*x = IssueResourceTransferOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[20]
+		mi := &file_server_v1_server_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1244,7 +1416,7 @@ func (x *IssueResourceTransferOrderRequest) String() string {
 func (*IssueResourceTransferOrderRequest) ProtoMessage() {}
 
 func (x *IssueResourceTransferOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[20]
+	mi := &file_server_v1_server_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1257,7 +1429,7 @@ func (x *IssueResourceTransferOrderRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use IssueResourceTransferOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueResourceTransferOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{20}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *IssueResourceTransferOrderRequest) GetResources() *Resources {
@@ -1292,7 +1464,7 @@ type IssueResourceTransferOrderResponse struct {
 func (x *IssueResourceTransferOrderResponse) Reset() {
 	*x = IssueResourceTransferOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[21]
+		mi := &file_server_v1_server_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1305,7 +1477,7 @@ func (x *IssueResourceTransferOrderResponse) String() string {
 func (*IssueResourceTransferOrderResponse) ProtoMessage() {}
 
 func (x *IssueResourceTransferOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[21]
+	mi := &file_server_v1_server_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1318,7 +1490,7 @@ func (x *IssueResourceTransferOrderResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use IssueResourceTransferOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueResourceTransferOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{21}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *IssueResourceTransferOrderResponse) GetOrder() *Village_ResourceTransferOrder {
@@ -1341,7 +1513,7 @@ type CancelResourceTransferOrderRequest struct {
 func (x *CancelResourceTransferOrderRequest) Reset() {
 	*x = CancelResourceTransferOrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[22]
+		mi := &file_server_v1_server_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1354,7 +1526,7 @@ func (x *CancelResourceTransferOrderRequest) String() string {
 func (*CancelResourceTransferOrderRequest) ProtoMessage() {}
 
 func (x *CancelResourceTransferOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[22]
+	mi := &file_server_v1_server_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1367,7 +1539,7 @@ func (x *CancelResourceTransferOrderRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use CancelResourceTransferOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelResourceTransferOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{22}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CancelResourceTransferOrderRequest) GetSourceCoords() string {
@@ -1393,7 +1565,7 @@ type CancelResourceTransferOrderResponse struct {
 func (x *CancelResourceTransferOrderResponse) Reset() {
 	*x = CancelResourceTransferOrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[23]
+		mi := &file_server_v1_server_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1406,7 +1578,7 @@ func (x *CancelResourceTransferOrderResponse) String() string {
 func (*CancelResourceTransferOrderResponse) ProtoMessage() {}
 
 func (x *CancelResourceTransferOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[23]
+	mi := &file_server_v1_server_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1419,7 +1591,7 @@ func (x *CancelResourceTransferOrderResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use CancelResourceTransferOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelResourceTransferOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{23}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{27}
 }
 
 type World_Field struct {
@@ -1434,7 +1606,7 @@ type World_Field struct {
 func (x *World_Field) Reset() {
 	*x = World_Field{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[31]
+		mi := &file_server_v1_server_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1447,7 +1619,7 @@ func (x *World_Field) String() string {
 func (*World_Field) ProtoMessage() {}
 
 func (x *World_Field) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[31]
+	mi := &file_server_v1_server_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1489,7 +1661,7 @@ type Village_BuildingUpgradeOrder struct {
 func (x *Village_BuildingUpgradeOrder) Reset() {
 	*x = Village_BuildingUpgradeOrder{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[35]
+		mi := &file_server_v1_server_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1502,7 +1674,7 @@ func (x *Village_BuildingUpgradeOrder) String() string {
 func (*Village_BuildingUpgradeOrder) ProtoMessage() {}
 
 func (x *Village_BuildingUpgradeOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[35]
+	mi := &file_server_v1_server_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1545,7 +1717,7 @@ type Village_TroopTrainingOrder struct {
 func (x *Village_TroopTrainingOrder) Reset() {
 	*x = Village_TroopTrainingOrder{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[36]
+		mi := &file_server_v1_server_proto_msgTypes[40]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1558,7 +1730,7 @@ func (x *Village_TroopTrainingOrder) String() string {
 func (*Village_TroopTrainingOrder) ProtoMessage() {}
 
 func (x *Village_TroopTrainingOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[36]
+	mi := &file_server_v1_server_proto_msgTypes[40]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1609,7 +1781,7 @@ type Village_ResourceTransferOrder struct {
 func (x *Village_ResourceTransferOrder) Reset() {
 	*x = Village_ResourceTransferOrder{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_server_v1_server_proto_msgTypes[37]
+		mi := &file_server_v1_server_proto_msgTypes[41]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1622,7 +1794,7 @@ func (x *Village_ResourceTransferOrder) String() string {
 func (*Village_ResourceTransferOrder) ProtoMessage() {}
 
 func (x *Village_ResourceTransferOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[37]
+	mi := &file_server_v1_server_proto_msgTypes[41]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1664,6 +1836,77 @@ func (x *Village_ResourceTransferOrder) GetTimeLeft() uint32 {
 		return x.TimeLeft
 	}
 	return 0
+}
+
+type SubscribeToWorldResponse_Patch struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Fields   map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`     // key: coords
+	Villages map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"` // key: village_coords, Affected by player pov
+	Temples  map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`   // key: temple_coords, Affected by player pov
+	Attacks  map[string]*Attack      `protobuf:"bytes,9,rep,name=attacks,proto3" json:"attacks,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`   // key: attack_id, Affected by player pov
+}
+
+func (x *SubscribeToWorldResponse_Patch) Reset() {
+	*x = SubscribeToWorldResponse_Patch{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_server_v1_server_proto_msgTypes[42]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscribeToWorldResponse_Patch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeToWorldResponse_Patch) ProtoMessage() {}
+
+func (x *SubscribeToWorldResponse_Patch) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[42]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeToWorldResponse_Patch.ProtoReflect.Descriptor instead.
+func (*SubscribeToWorldResponse_Patch) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{11, 0}
+}
+
+func (x *SubscribeToWorldResponse_Patch) GetFields() map[string]*World_Field {
+	if x != nil {
+		return x.Fields
+	}
+	return nil
+}
+
+func (x *SubscribeToWorldResponse_Patch) GetVillages() map[string]*Village {
+	if x != nil {
+		return x.Villages
+	}
+	return nil
+}
+
+func (x *SubscribeToWorldResponse_Patch) GetTemples() map[string]*Temple {
+	if x != nil {
+		return x.Temples
+	}
+	return nil
+}
+
+func (x *SubscribeToWorldResponse_Patch) GetAttacks() map[string]*Attack {
+	if x != nil {
+		return x.Attacks
+	}
+	return nil
 }
 
 var File_server_v1_server_proto protoreflect.FileDescriptor
@@ -1844,96 +2087,156 @@ var file_server_v1_server_proto_rawDesc = []byte{
 	0x6f, 0x72, 0x64, 0x73, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x6c, 0x65, 0x66,
 	0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x4c, 0x65, 0x66,
 	0x74, 0x22, 0x18, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0xdc, 0x01, 0x0a, 0x12,
-	0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x63, 0x6f, 0x6f,
-	0x72, 0x64, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x6f, 0x75, 0x72, 0x63,
-	0x65, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x61, 0x72, 0x67, 0x65,
-	0x74, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c,
-	0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x41, 0x0a, 0x06,
-	0x74, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74,
-	0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x54, 0x72, 0x6f, 0x6f,
-	0x70, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x06, 0x74, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x1a,
-	0x39, 0x0a, 0x0b, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10,
-	0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79,
-	0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52,
-	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x40, 0x0a, 0x13, 0x49, 0x73,
-	0x73, 0x75, 0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x29, 0x0a, 0x06, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x74,
-	0x74, 0x61, 0x63, 0x6b, 0x52, 0x06, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x22, 0x25, 0x0a, 0x13,
-	0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x02, 0x69, 0x64, 0x22, 0x16, 0x0a, 0x14, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x41, 0x74, 0x74,
-	0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x62, 0x0a, 0x20, 0x49,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x11, 0x0a, 0x0f, 0x47,
+	0x65, 0x74, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x3a,
+	0x0a, 0x10, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x26, 0x0a, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f,
+	0x72, 0x6c, 0x64, 0x52, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x22, 0x19, 0x0a, 0x17, 0x53, 0x75,
+	0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xef, 0x05, 0x0a, 0x18, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72,
+	0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x3f, 0x0a, 0x05, 0x70, 0x61, 0x74, 0x63, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x29, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75,
+	0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x50, 0x61, 0x74, 0x63, 0x68, 0x52, 0x05, 0x70, 0x61,
+	0x74, 0x63, 0x68, 0x1a, 0x91, 0x05, 0x0a, 0x05, 0x50, 0x61, 0x74, 0x63, 0x68, 0x12, 0x4d, 0x0a,
+	0x06, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x35, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72,
+	0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x2e, 0x50, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x45,
+	0x6e, 0x74, 0x72, 0x79, 0x52, 0x06, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x12, 0x53, 0x0a, 0x08,
+	0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x73, 0x18, 0x07, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x37,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73, 0x63,
+	0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x2e, 0x50, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67,
+	0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x08, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65,
+	0x73, 0x12, 0x50, 0x0a, 0x07, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x65, 0x73, 0x18, 0x08, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x36, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53,
+	0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x50, 0x61, 0x74, 0x63, 0x68, 0x2e, 0x54, 0x65,
+	0x6d, 0x70, 0x6c, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x74, 0x65, 0x6d, 0x70,
+	0x6c, 0x65, 0x73, 0x12, 0x50, 0x0a, 0x07, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x73, 0x18, 0x09,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31,
+	0x2e, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c,
+	0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x50, 0x61, 0x74, 0x63, 0x68, 0x2e,
+	0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x61, 0x74,
+	0x74, 0x61, 0x63, 0x6b, 0x73, 0x1a, 0x51, 0x0a, 0x0b, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x45,
+	0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x2c, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76,
+	0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x2e, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x52, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x1a, 0x4f, 0x0a, 0x0d, 0x56, 0x69, 0x6c, 0x6c,
+	0x61, 0x67, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x28, 0x0a, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x52, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x1a, 0x4d, 0x0a, 0x0c, 0x54, 0x65, 0x6d,
+	0x70, 0x6c, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x27, 0x0a, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x6c, 0x65, 0x52, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x1a, 0x4d, 0x0a, 0x0c, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x6b, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x27, 0x0a, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0xdc, 0x01, 0x0a, 0x12, 0x49, 0x73, 0x73, 0x75,
+	0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23,
+	0x0a, 0x0d, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x43, 0x6f, 0x6f,
+	0x72, 0x64, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x5f, 0x63, 0x6f,
+	0x6f, 0x72, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x74, 0x61, 0x72, 0x67,
+	0x65, 0x74, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x41, 0x0a, 0x06, 0x74, 0x72, 0x6f, 0x6f,
+	0x70, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x45, 0x6e,
+	0x74, 0x72, 0x79, 0x52, 0x06, 0x74, 0x72, 0x6f, 0x6f, 0x70, 0x73, 0x1a, 0x39, 0x0a, 0x0b, 0x54,
+	0x72, 0x6f, 0x6f, 0x70, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65,
+	0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x76, 0x61, 0x6c,
+	0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x40, 0x0a, 0x13, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41,
+	0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x29, 0x0a,
+	0x06, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b,
+	0x52, 0x06, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x22, 0x25, 0x0a, 0x13, 0x43, 0x61, 0x6e, 0x63,
+	0x65, 0x6c, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22,
+	0x16, 0x0a, 0x14, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x62, 0x0a, 0x20, 0x49, 0x73, 0x73, 0x75, 0x65,
+	0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f,
+	0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x62,
+	0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0a, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a,
+	0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x09, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x49, 0x64, 0x22, 0x62, 0x0a, 0x21, 0x49,
 	0x73, 0x73, 0x75, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72,
-	0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x1f, 0x0a, 0x0b, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64,
-	0x12, 0x1d, 0x0a, 0x0a, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x49, 0x64, 0x22,
-	0x62, 0x0a, 0x21, 0x49, 0x73, 0x73, 0x75, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
-	0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3d, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e,
-	0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67,
-	0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x05, 0x6f, 0x72,
-	0x64, 0x65, 0x72, 0x22, 0x33, 0x0a, 0x21, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x42, 0x75, 0x69,
-	0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65,
-	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x24, 0x0a, 0x22, 0x43, 0x61, 0x6e, 0x63,
-	0x65, 0x6c, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64,
-	0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x76,
-	0x0a, 0x1e, 0x49, 0x73, 0x73, 0x75, 0x65, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72, 0x61, 0x69,
-	0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x19, 0x0a, 0x08, 0x74, 0x72, 0x6f, 0x6f, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x07, 0x74, 0x72, 0x6f, 0x6f, 0x70, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x71,
-	0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x71,
-	0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x76, 0x69, 0x6c, 0x6c, 0x61,
-	0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x76, 0x69, 0x6c,
-	0x6c, 0x61, 0x67, 0x65, 0x49, 0x64, 0x22, 0x5e, 0x0a, 0x1f, 0x49, 0x73, 0x73, 0x75, 0x65, 0x54,
+	0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x3d, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x27, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c,
+	0x61, 0x67, 0x65, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72,
+	0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x22,
+	0x33, 0x0a, 0x21, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e,
+	0x67, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x02, 0x69, 0x64, 0x22, 0x24, 0x0a, 0x22, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x42, 0x75,
+	0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x55, 0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x4f, 0x72, 0x64,
+	0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x76, 0x0a, 0x1e, 0x49, 0x73,
+	0x73, 0x75, 0x65, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67,
+	0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x19, 0x0a, 0x08,
+	0x74, 0x72, 0x6f, 0x6f, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x74, 0x72, 0x6f, 0x6f, 0x70, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74,
+	0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74,
+	0x69, 0x74, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x5f, 0x69,
+	0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x76, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65,
+	0x49, 0x64, 0x22, 0x5e, 0x0a, 0x1f, 0x49, 0x73, 0x73, 0x75, 0x65, 0x54, 0x72, 0x6f, 0x6f, 0x70,
+	0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3b, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31,
+	0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72,
+	0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x05, 0x6f, 0x72, 0x64,
+	0x65, 0x72, 0x22, 0x31, 0x0a, 0x1f, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x54, 0x72, 0x6f, 0x6f,
+	0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x22, 0x0a, 0x20, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x54,
 	0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65,
-	0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3b, 0x0a, 0x05, 0x6f, 0x72, 0x64,
-	0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x54, 0x72, 0x6f,
-	0x6f, 0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52,
-	0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x22, 0x31, 0x0a, 0x1f, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c,
-	0x54, 0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67, 0x4f, 0x72, 0x64,
-	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x22, 0x0a, 0x20, 0x43, 0x61, 0x6e,
-	0x63, 0x65, 0x6c, 0x54, 0x72, 0x6f, 0x6f, 0x70, 0x54, 0x72, 0x61, 0x69, 0x6e, 0x69, 0x6e, 0x67,
-	0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xa1, 0x01,
-	0x0a, 0x21, 0x49, 0x73, 0x73, 0x75, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54,
-	0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x32, 0x0a, 0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x09, 0x72, 0x65,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x6f, 0x75, 0x72, 0x63,
-	0x65, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x23, 0x0a, 0x0d,
-	0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x0c, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x43, 0x6f, 0x6f, 0x72, 0x64,
-	0x73, 0x22, 0x64, 0x0a, 0x22, 0x49, 0x73, 0x73, 0x75, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72,
-	0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x76, 0x31, 0x2e, 0x56, 0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75,
-	0x72, 0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72,
-	0x52, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x22, 0x59, 0x0a, 0x22, 0x43, 0x61, 0x6e, 0x63, 0x65,
-	0x6c, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65,
-	0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a,
-	0x0d, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x43, 0x6f, 0x6f, 0x72,
-	0x64, 0x73, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
-	0x69, 0x64, 0x22, 0x25, 0x0a, 0x23, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x6f,
-	0x75, 0x72, 0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65,
-	0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xbb, 0x07, 0x0a, 0x07, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3e, 0x0a, 0x10, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
-	0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
-	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74,
-	0x79, 0x1a, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f,
-	0x72, 0x6c, 0x64, 0x30, 0x01, 0x12, 0x4c, 0x0a, 0x0b, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74,
+	0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xa1, 0x01, 0x0a, 0x21, 0x49, 0x73,
+	0x73, 0x75, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73,
+	0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x32, 0x0a, 0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x52,
+	0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x52, 0x09, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x63, 0x6f,
+	0x6f, 0x72, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x61, 0x72, 0x67,
+	0x65, 0x74, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0c, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x22, 0x64, 0x0a,
+	0x22, 0x49, 0x73, 0x73, 0x75, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x72,
+	0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x28, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x56,
+	0x69, 0x6c, 0x6c, 0x61, 0x67, 0x65, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x54,
+	0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x05, 0x6f, 0x72,
+	0x64, 0x65, 0x72, 0x22, 0x59, 0x0a, 0x22, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x52, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64,
+	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x6f, 0x75,
+	0x72, 0x63, 0x65, 0x5f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0c, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x25,
+	0x0a, 0x23, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x9f, 0x08, 0x0a, 0x07, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x43, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12, 0x1a, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72,
+	0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x5d, 0x0a, 0x10, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72,
+	0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12, 0x22, 0x2e, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65,
+	0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73, 0x63,
+	0x72, 0x69, 0x62, 0x65, 0x54, 0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x30, 0x01, 0x12, 0x4c, 0x0a, 0x0b, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74,
 	0x74, 0x61, 0x63, 0x6b, 0x12, 0x1d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31,
 	0x2e, 0x49, 0x73, 0x73, 0x75, 0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e,
@@ -2007,7 +2310,7 @@ func file_server_v1_server_proto_rawDescGZIP() []byte {
 }
 
 var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 48)
 var file_server_v1_server_proto_goTypes = []interface{}{
 	(World_Field_Kind)(0),                       // 0: server.v1.World.Field.Kind
 	(*World)(nil),                               // 1: server.v1.World
@@ -2018,95 +2321,115 @@ var file_server_v1_server_proto_goTypes = []interface{}{
 	(*Temple)(nil),                              // 6: server.v1.Temple
 	(*Village)(nil),                             // 7: server.v1.Village
 	(*Player)(nil),                              // 8: server.v1.Player
-	(*IssueAttackRequest)(nil),                  // 9: server.v1.IssueAttackRequest
-	(*IssueAttackResponse)(nil),                 // 10: server.v1.IssueAttackResponse
-	(*CancelAttackRequest)(nil),                 // 11: server.v1.CancelAttackRequest
-	(*CancelAttackResponse)(nil),                // 12: server.v1.CancelAttackResponse
-	(*IssueBuildingUpgradeOrderRequest)(nil),    // 13: server.v1.IssueBuildingUpgradeOrderRequest
-	(*IssueBuildingUpgradeOrderResponse)(nil),   // 14: server.v1.IssueBuildingUpgradeOrderResponse
-	(*CancelBuildingUpgradeOrderRequest)(nil),   // 15: server.v1.CancelBuildingUpgradeOrderRequest
-	(*CancelBuildingUpgradeOrderResponse)(nil),  // 16: server.v1.CancelBuildingUpgradeOrderResponse
-	(*IssueTroopTrainingOrderRequest)(nil),      // 17: server.v1.IssueTroopTrainingOrderRequest
-	(*IssueTroopTrainingOrderResponse)(nil),     // 18: server.v1.IssueTroopTrainingOrderResponse
-	(*CancelTroopTrainingOrderRequest)(nil),     // 19: server.v1.CancelTroopTrainingOrderRequest
-	(*CancelTroopTrainingOrderResponse)(nil),    // 20: server.v1.CancelTroopTrainingOrderResponse
-	(*IssueResourceTransferOrderRequest)(nil),   // 21: server.v1.IssueResourceTransferOrderRequest
-	(*IssueResourceTransferOrderResponse)(nil),  // 22: server.v1.IssueResourceTransferOrderResponse
-	(*CancelResourceTransferOrderRequest)(nil),  // 23: server.v1.CancelResourceTransferOrderRequest
-	(*CancelResourceTransferOrderResponse)(nil), // 24: server.v1.CancelResourceTransferOrderResponse
-	nil,                                   // 25: server.v1.World.BuildingsEntry
-	nil,                                   // 26: server.v1.World.TroopsEntry
-	nil,                                   // 27: server.v1.World.PlayersEntry
-	nil,                                   // 28: server.v1.World.FieldsEntry
-	nil,                                   // 29: server.v1.World.VillagesEntry
-	nil,                                   // 30: server.v1.World.TemplesEntry
-	nil,                                   // 31: server.v1.World.AttacksEntry
-	(*World_Field)(nil),                   // 32: server.v1.World.Field
-	nil,                                   // 33: server.v1.Attack.TroopsEntry
-	nil,                                   // 34: server.v1.Village.BuildingsEntry
-	nil,                                   // 35: server.v1.Village.TroopsEntry
-	(*Village_BuildingUpgradeOrder)(nil),  // 36: server.v1.Village.BuildingUpgradeOrder
-	(*Village_TroopTrainingOrder)(nil),    // 37: server.v1.Village.TroopTrainingOrder
-	(*Village_ResourceTransferOrder)(nil), // 38: server.v1.Village.ResourceTransferOrder
-	nil,                                   // 39: server.v1.IssueAttackRequest.TroopsEntry
-	(*wrapperspb.StringValue)(nil),        // 40: google.protobuf.StringValue
-	(*emptypb.Empty)(nil),                 // 41: google.protobuf.Empty
+	(*GetWorldRequest)(nil),                     // 9: server.v1.GetWorldRequest
+	(*GetWorldResponse)(nil),                    // 10: server.v1.GetWorldResponse
+	(*SubscribeToWorldRequest)(nil),             // 11: server.v1.SubscribeToWorldRequest
+	(*SubscribeToWorldResponse)(nil),            // 12: server.v1.SubscribeToWorldResponse
+	(*IssueAttackRequest)(nil),                  // 13: server.v1.IssueAttackRequest
+	(*IssueAttackResponse)(nil),                 // 14: server.v1.IssueAttackResponse
+	(*CancelAttackRequest)(nil),                 // 15: server.v1.CancelAttackRequest
+	(*CancelAttackResponse)(nil),                // 16: server.v1.CancelAttackResponse
+	(*IssueBuildingUpgradeOrderRequest)(nil),    // 17: server.v1.IssueBuildingUpgradeOrderRequest
+	(*IssueBuildingUpgradeOrderResponse)(nil),   // 18: server.v1.IssueBuildingUpgradeOrderResponse
+	(*CancelBuildingUpgradeOrderRequest)(nil),   // 19: server.v1.CancelBuildingUpgradeOrderRequest
+	(*CancelBuildingUpgradeOrderResponse)(nil),  // 20: server.v1.CancelBuildingUpgradeOrderResponse
+	(*IssueTroopTrainingOrderRequest)(nil),      // 21: server.v1.IssueTroopTrainingOrderRequest
+	(*IssueTroopTrainingOrderResponse)(nil),     // 22: server.v1.IssueTroopTrainingOrderResponse
+	(*CancelTroopTrainingOrderRequest)(nil),     // 23: server.v1.CancelTroopTrainingOrderRequest
+	(*CancelTroopTrainingOrderResponse)(nil),    // 24: server.v1.CancelTroopTrainingOrderResponse
+	(*IssueResourceTransferOrderRequest)(nil),   // 25: server.v1.IssueResourceTransferOrderRequest
+	(*IssueResourceTransferOrderResponse)(nil),  // 26: server.v1.IssueResourceTransferOrderResponse
+	(*CancelResourceTransferOrderRequest)(nil),  // 27: server.v1.CancelResourceTransferOrderRequest
+	(*CancelResourceTransferOrderResponse)(nil), // 28: server.v1.CancelResourceTransferOrderResponse
+	nil,                                    // 29: server.v1.World.BuildingsEntry
+	nil,                                    // 30: server.v1.World.TroopsEntry
+	nil,                                    // 31: server.v1.World.PlayersEntry
+	nil,                                    // 32: server.v1.World.FieldsEntry
+	nil,                                    // 33: server.v1.World.VillagesEntry
+	nil,                                    // 34: server.v1.World.TemplesEntry
+	nil,                                    // 35: server.v1.World.AttacksEntry
+	(*World_Field)(nil),                    // 36: server.v1.World.Field
+	nil,                                    // 37: server.v1.Attack.TroopsEntry
+	nil,                                    // 38: server.v1.Village.BuildingsEntry
+	nil,                                    // 39: server.v1.Village.TroopsEntry
+	(*Village_BuildingUpgradeOrder)(nil),   // 40: server.v1.Village.BuildingUpgradeOrder
+	(*Village_TroopTrainingOrder)(nil),     // 41: server.v1.Village.TroopTrainingOrder
+	(*Village_ResourceTransferOrder)(nil),  // 42: server.v1.Village.ResourceTransferOrder
+	(*SubscribeToWorldResponse_Patch)(nil), // 43: server.v1.SubscribeToWorldResponse.Patch
+	nil,                                    // 44: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	nil,                                    // 45: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	nil,                                    // 46: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	nil,                                    // 47: server.v1.SubscribeToWorldResponse.Patch.AttacksEntry
+	nil,                                    // 48: server.v1.IssueAttackRequest.TroopsEntry
+	(*wrapperspb.StringValue)(nil),         // 49: google.protobuf.StringValue
 }
 var file_server_v1_server_proto_depIdxs = []int32{
-	25, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
-	26, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
-	27, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
-	28, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
-	29, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
-	30, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
-	31, // 6: server.v1.World.attacks:type_name -> server.v1.World.AttacksEntry
-	33, // 7: server.v1.Attack.troops:type_name -> server.v1.Attack.TroopsEntry
+	29, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
+	30, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
+	31, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
+	32, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
+	33, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
+	34, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
+	35, // 6: server.v1.World.attacks:type_name -> server.v1.World.AttacksEntry
+	37, // 7: server.v1.Attack.troops:type_name -> server.v1.Attack.TroopsEntry
 	5,  // 8: server.v1.Temple.resources:type_name -> server.v1.Resources
-	40, // 9: server.v1.Temple.player_id:type_name -> google.protobuf.StringValue
+	49, // 9: server.v1.Temple.player_id:type_name -> google.protobuf.StringValue
 	5,  // 10: server.v1.Village.resources:type_name -> server.v1.Resources
-	34, // 11: server.v1.Village.buildings:type_name -> server.v1.Village.BuildingsEntry
-	35, // 12: server.v1.Village.troops:type_name -> server.v1.Village.TroopsEntry
-	36, // 13: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
-	37, // 14: server.v1.Village.troop_training_orders:type_name -> server.v1.Village.TroopTrainingOrder
-	38, // 15: server.v1.Village.resource_transfer_orders:type_name -> server.v1.Village.ResourceTransferOrder
-	39, // 16: server.v1.IssueAttackRequest.troops:type_name -> server.v1.IssueAttackRequest.TroopsEntry
-	4,  // 17: server.v1.IssueAttackResponse.attack:type_name -> server.v1.Attack
-	36, // 18: server.v1.IssueBuildingUpgradeOrderResponse.order:type_name -> server.v1.Village.BuildingUpgradeOrder
-	37, // 19: server.v1.IssueTroopTrainingOrderResponse.order:type_name -> server.v1.Village.TroopTrainingOrder
-	5,  // 20: server.v1.IssueResourceTransferOrderRequest.resources:type_name -> server.v1.Resources
-	38, // 21: server.v1.IssueResourceTransferOrderResponse.order:type_name -> server.v1.Village.ResourceTransferOrder
-	2,  // 22: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
-	3,  // 23: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
-	8,  // 24: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
-	32, // 25: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
-	7,  // 26: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
-	6,  // 27: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
-	4,  // 28: server.v1.World.AttacksEntry.value:type_name -> server.v1.Attack
-	0,  // 29: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
-	5,  // 30: server.v1.Village.ResourceTransferOrder.resources:type_name -> server.v1.Resources
-	41, // 31: server.v1.Service.SubscribeToWorld:input_type -> google.protobuf.Empty
-	9,  // 32: server.v1.Service.IssueAttack:input_type -> server.v1.IssueAttackRequest
-	11, // 33: server.v1.Service.CancelAttack:input_type -> server.v1.CancelAttackRequest
-	13, // 34: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
-	15, // 35: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
-	17, // 36: server.v1.Service.IssueTroopTrainingOrder:input_type -> server.v1.IssueTroopTrainingOrderRequest
-	19, // 37: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
-	21, // 38: server.v1.Service.IssueResourceTransferOrder:input_type -> server.v1.IssueResourceTransferOrderRequest
-	23, // 39: server.v1.Service.CancelResourceTransferOrder:input_type -> server.v1.CancelResourceTransferOrderRequest
-	1,  // 40: server.v1.Service.SubscribeToWorld:output_type -> server.v1.World
-	10, // 41: server.v1.Service.IssueAttack:output_type -> server.v1.IssueAttackResponse
-	12, // 42: server.v1.Service.CancelAttack:output_type -> server.v1.CancelAttackResponse
-	14, // 43: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
-	16, // 44: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
-	18, // 45: server.v1.Service.IssueTroopTrainingOrder:output_type -> server.v1.IssueTroopTrainingOrderResponse
-	20, // 46: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
-	22, // 47: server.v1.Service.IssueResourceTransferOrder:output_type -> server.v1.IssueResourceTransferOrderResponse
-	24, // 48: server.v1.Service.CancelResourceTransferOrder:output_type -> server.v1.CancelResourceTransferOrderResponse
-	40, // [40:49] is the sub-list for method output_type
-	31, // [31:40] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	38, // 11: server.v1.Village.buildings:type_name -> server.v1.Village.BuildingsEntry
+	39, // 12: server.v1.Village.troops:type_name -> server.v1.Village.TroopsEntry
+	40, // 13: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
+	41, // 14: server.v1.Village.troop_training_orders:type_name -> server.v1.Village.TroopTrainingOrder
+	42, // 15: server.v1.Village.resource_transfer_orders:type_name -> server.v1.Village.ResourceTransferOrder
+	1,  // 16: server.v1.GetWorldResponse.world:type_name -> server.v1.World
+	43, // 17: server.v1.SubscribeToWorldResponse.patch:type_name -> server.v1.SubscribeToWorldResponse.Patch
+	48, // 18: server.v1.IssueAttackRequest.troops:type_name -> server.v1.IssueAttackRequest.TroopsEntry
+	4,  // 19: server.v1.IssueAttackResponse.attack:type_name -> server.v1.Attack
+	40, // 20: server.v1.IssueBuildingUpgradeOrderResponse.order:type_name -> server.v1.Village.BuildingUpgradeOrder
+	41, // 21: server.v1.IssueTroopTrainingOrderResponse.order:type_name -> server.v1.Village.TroopTrainingOrder
+	5,  // 22: server.v1.IssueResourceTransferOrderRequest.resources:type_name -> server.v1.Resources
+	42, // 23: server.v1.IssueResourceTransferOrderResponse.order:type_name -> server.v1.Village.ResourceTransferOrder
+	2,  // 24: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
+	3,  // 25: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
+	8,  // 26: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
+	36, // 27: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
+	7,  // 28: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
+	6,  // 29: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
+	4,  // 30: server.v1.World.AttacksEntry.value:type_name -> server.v1.Attack
+	0,  // 31: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
+	5,  // 32: server.v1.Village.ResourceTransferOrder.resources:type_name -> server.v1.Resources
+	44, // 33: server.v1.SubscribeToWorldResponse.Patch.fields:type_name -> server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	45, // 34: server.v1.SubscribeToWorldResponse.Patch.villages:type_name -> server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	46, // 35: server.v1.SubscribeToWorldResponse.Patch.temples:type_name -> server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	47, // 36: server.v1.SubscribeToWorldResponse.Patch.attacks:type_name -> server.v1.SubscribeToWorldResponse.Patch.AttacksEntry
+	36, // 37: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry.value:type_name -> server.v1.World.Field
+	7,  // 38: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry.value:type_name -> server.v1.Village
+	6,  // 39: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry.value:type_name -> server.v1.Temple
+	4,  // 40: server.v1.SubscribeToWorldResponse.Patch.AttacksEntry.value:type_name -> server.v1.Attack
+	9,  // 41: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
+	11, // 42: server.v1.Service.SubscribeToWorld:input_type -> server.v1.SubscribeToWorldRequest
+	13, // 43: server.v1.Service.IssueAttack:input_type -> server.v1.IssueAttackRequest
+	15, // 44: server.v1.Service.CancelAttack:input_type -> server.v1.CancelAttackRequest
+	17, // 45: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
+	19, // 46: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
+	21, // 47: server.v1.Service.IssueTroopTrainingOrder:input_type -> server.v1.IssueTroopTrainingOrderRequest
+	23, // 48: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
+	25, // 49: server.v1.Service.IssueResourceTransferOrder:input_type -> server.v1.IssueResourceTransferOrderRequest
+	27, // 50: server.v1.Service.CancelResourceTransferOrder:input_type -> server.v1.CancelResourceTransferOrderRequest
+	10, // 51: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
+	12, // 52: server.v1.Service.SubscribeToWorld:output_type -> server.v1.SubscribeToWorldResponse
+	14, // 53: server.v1.Service.IssueAttack:output_type -> server.v1.IssueAttackResponse
+	16, // 54: server.v1.Service.CancelAttack:output_type -> server.v1.CancelAttackResponse
+	18, // 55: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
+	20, // 56: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
+	22, // 57: server.v1.Service.IssueTroopTrainingOrder:output_type -> server.v1.IssueTroopTrainingOrderResponse
+	24, // 58: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
+	26, // 59: server.v1.Service.IssueResourceTransferOrder:output_type -> server.v1.IssueResourceTransferOrderResponse
+	28, // 60: server.v1.Service.CancelResourceTransferOrder:output_type -> server.v1.CancelResourceTransferOrderResponse
+	51, // [51:61] is the sub-list for method output_type
+	41, // [41:51] is the sub-list for method input_type
+	41, // [41:41] is the sub-list for extension type_name
+	41, // [41:41] is the sub-list for extension extendee
+	0,  // [0:41] is the sub-list for field type_name
 }
 
 func init() { file_server_v1_server_proto_init() }
@@ -2212,7 +2535,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueAttackRequest); i {
+			switch v := v.(*GetWorldRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2224,7 +2547,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueAttackResponse); i {
+			switch v := v.(*GetWorldResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2236,7 +2559,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelAttackRequest); i {
+			switch v := v.(*SubscribeToWorldRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2248,7 +2571,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelAttackResponse); i {
+			switch v := v.(*SubscribeToWorldResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2260,7 +2583,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueBuildingUpgradeOrderRequest); i {
+			switch v := v.(*IssueAttackRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2272,7 +2595,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueBuildingUpgradeOrderResponse); i {
+			switch v := v.(*IssueAttackResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2284,7 +2607,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelBuildingUpgradeOrderRequest); i {
+			switch v := v.(*CancelAttackRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2296,7 +2619,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelBuildingUpgradeOrderResponse); i {
+			switch v := v.(*CancelAttackResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2308,7 +2631,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueTroopTrainingOrderRequest); i {
+			switch v := v.(*IssueBuildingUpgradeOrderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2320,7 +2643,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueTroopTrainingOrderResponse); i {
+			switch v := v.(*IssueBuildingUpgradeOrderResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2332,7 +2655,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelTroopTrainingOrderRequest); i {
+			switch v := v.(*CancelBuildingUpgradeOrderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2344,7 +2667,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelTroopTrainingOrderResponse); i {
+			switch v := v.(*CancelBuildingUpgradeOrderResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2356,7 +2679,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueResourceTransferOrderRequest); i {
+			switch v := v.(*IssueTroopTrainingOrderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2368,7 +2691,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IssueResourceTransferOrderResponse); i {
+			switch v := v.(*IssueTroopTrainingOrderResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2380,7 +2703,7 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelResourceTransferOrderRequest); i {
+			switch v := v.(*CancelTroopTrainingOrderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2392,6 +2715,54 @@ func file_server_v1_server_proto_init() {
 			}
 		}
 		file_server_v1_server_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CancelTroopTrainingOrderResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IssueResourceTransferOrderRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IssueResourceTransferOrderResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CancelResourceTransferOrderRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CancelResourceTransferOrderResponse); i {
 			case 0:
 				return &v.state
@@ -2403,7 +2774,7 @@ func file_server_v1_server_proto_init() {
 				return nil
 			}
 		}
-		file_server_v1_server_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+		file_server_v1_server_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*World_Field); i {
 			case 0:
 				return &v.state
@@ -2415,7 +2786,7 @@ func file_server_v1_server_proto_init() {
 				return nil
 			}
 		}
-		file_server_v1_server_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
+		file_server_v1_server_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Village_BuildingUpgradeOrder); i {
 			case 0:
 				return &v.state
@@ -2427,7 +2798,7 @@ func file_server_v1_server_proto_init() {
 				return nil
 			}
 		}
-		file_server_v1_server_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
+		file_server_v1_server_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Village_TroopTrainingOrder); i {
 			case 0:
 				return &v.state
@@ -2439,8 +2810,20 @@ func file_server_v1_server_proto_init() {
 				return nil
 			}
 		}
-		file_server_v1_server_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+		file_server_v1_server_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Village_ResourceTransferOrder); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_server_v1_server_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SubscribeToWorldResponse_Patch); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2458,7 +2841,7 @@ func file_server_v1_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_server_v1_server_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   39,
+			NumMessages:   48,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

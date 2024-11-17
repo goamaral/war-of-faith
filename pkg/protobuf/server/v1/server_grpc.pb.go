@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,7 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceClient interface {
 	// WORLD
-	SubscribeToWorld(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToWorldClient, error)
+	GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error)
+	SubscribeToWorld(ctx context.Context, in *SubscribeToWorldRequest, opts ...grpc.CallOption) (Service_SubscribeToWorldClient, error)
 	IssueAttack(ctx context.Context, in *IssueAttackRequest, opts ...grpc.CallOption) (*IssueAttackResponse, error)
 	CancelAttack(ctx context.Context, in *CancelAttackRequest, opts ...grpc.CallOption) (*CancelAttackResponse, error)
 	// VILLAGES
@@ -44,7 +44,16 @@ func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 	return &serviceClient{cc}
 }
 
-func (c *serviceClient) SubscribeToWorld(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Service_SubscribeToWorldClient, error) {
+func (c *serviceClient) GetWorld(ctx context.Context, in *GetWorldRequest, opts ...grpc.CallOption) (*GetWorldResponse, error) {
+	out := new(GetWorldResponse)
+	err := c.cc.Invoke(ctx, "/server.v1.Service/GetWorld", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) SubscribeToWorld(ctx context.Context, in *SubscribeToWorldRequest, opts ...grpc.CallOption) (Service_SubscribeToWorldClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[0], "/server.v1.Service/SubscribeToWorld", opts...)
 	if err != nil {
 		return nil, err
@@ -60,7 +69,7 @@ func (c *serviceClient) SubscribeToWorld(ctx context.Context, in *emptypb.Empty,
 }
 
 type Service_SubscribeToWorldClient interface {
-	Recv() (*World, error)
+	Recv() (*SubscribeToWorldResponse, error)
 	grpc.ClientStream
 }
 
@@ -68,8 +77,8 @@ type serviceSubscribeToWorldClient struct {
 	grpc.ClientStream
 }
 
-func (x *serviceSubscribeToWorldClient) Recv() (*World, error) {
-	m := new(World)
+func (x *serviceSubscribeToWorldClient) Recv() (*SubscribeToWorldResponse, error) {
+	m := new(SubscribeToWorldResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -153,7 +162,8 @@ func (c *serviceClient) CancelResourceTransferOrder(ctx context.Context, in *Can
 // for forward compatibility
 type ServiceServer interface {
 	// WORLD
-	SubscribeToWorld(*emptypb.Empty, Service_SubscribeToWorldServer) error
+	GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error)
+	SubscribeToWorld(*SubscribeToWorldRequest, Service_SubscribeToWorldServer) error
 	IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error)
 	CancelAttack(context.Context, *CancelAttackRequest) (*CancelAttackResponse, error)
 	// VILLAGES
@@ -169,7 +179,10 @@ type ServiceServer interface {
 type UnimplementedServiceServer struct {
 }
 
-func (UnimplementedServiceServer) SubscribeToWorld(*emptypb.Empty, Service_SubscribeToWorldServer) error {
+func (UnimplementedServiceServer) GetWorld(context.Context, *GetWorldRequest) (*GetWorldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorld not implemented")
+}
+func (UnimplementedServiceServer) SubscribeToWorld(*SubscribeToWorldRequest, Service_SubscribeToWorldServer) error {
 	return status.Errorf(codes.Unimplemented, "method SubscribeToWorld not implemented")
 }
 func (UnimplementedServiceServer) IssueAttack(context.Context, *IssueAttackRequest) (*IssueAttackResponse, error) {
@@ -208,8 +221,26 @@ func RegisterServiceServer(s grpc.ServiceRegistrar, srv ServiceServer) {
 	s.RegisterService(&Service_ServiceDesc, srv)
 }
 
+func _Service_GetWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorldRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetWorld(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.v1.Service/GetWorld",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetWorld(ctx, req.(*GetWorldRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_SubscribeToWorld_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
+	m := new(SubscribeToWorldRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -217,7 +248,7 @@ func _Service_SubscribeToWorld_Handler(srv interface{}, stream grpc.ServerStream
 }
 
 type Service_SubscribeToWorldServer interface {
-	Send(*World) error
+	Send(*SubscribeToWorldResponse) error
 	grpc.ServerStream
 }
 
@@ -225,7 +256,7 @@ type serviceSubscribeToWorldServer struct {
 	grpc.ServerStream
 }
 
-func (x *serviceSubscribeToWorldServer) Send(m *World) error {
+func (x *serviceSubscribeToWorldServer) Send(m *SubscribeToWorldResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -380,6 +411,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "server.v1.Service",
 	HandlerType: (*ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetWorld",
+			Handler:    _Service_GetWorld_Handler,
+		},
 		{
 			MethodName: "IssueAttack",
 			Handler:    _Service_IssueAttack_Handler,

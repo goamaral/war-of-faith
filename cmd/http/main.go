@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -20,20 +22,33 @@ import (
 
 type Server struct {
 	serverv1.UnimplementedServiceServer
+	worldSubscriptionMap *WorldSubscriptionMap
+	world                *state.World
+}
+
+func NewServer() *Server {
+	wm := NewWorldSubscriptionMap()
+	return &Server{
+		worldSubscriptionMap: wm,
+		world:                state.NewWorld(wm.C),
+	}
 }
 
 func main() {
 	i := di.NewInjector()
+	srv := NewServer()
 
-	go runServer(i)
+	go runServer(i, srv)
 
 	ticker := time.NewTicker(time.Second)
 	for range ticker.C {
-		state.WorldInstance.SafeCall(func(w *state.World) { w.Tick() })
+		srv.world.Lock()
+		srv.world.Tick()
+		srv.world.Unlock()
 	}
 }
 
-func runServer(i *do.Injector) {
+func runServer(i *do.Injector, srv *Server) {
 	ginEngine := gin.Default()
 	ginEngine.SetTrustedProxies(nil)
 	ginEngine.Use(cors.New(cors.Config{
@@ -48,7 +63,7 @@ func runServer(i *do.Injector) {
 	cors.Default()
 
 	path, handler := serverv1connect.NewServiceHandler(
-		&Server{},
+		srv,
 		connect.WithInterceptors(
 			helper.GRPCStatusToConnectStatusInterceptor(),
 		),
@@ -61,32 +76,76 @@ func runServer(i *do.Injector) {
 }
 
 /* WORLD */
-func (s *Server) SubscribeToWorld(google.protobuf.Empty) returns (stream World) {
+// GetWorld
 
-}
-func (s *Server) IssueAttack(IssueAttackRequest) returns (IssueAttackResponse) {
-
-}
-func (s *Server) CancelAttack(CancelAttackRequest) returns (CancelAttackResponse) {
-
+type WorldSubscriptionMap struct {
+	sync.Mutex
+	m map[string]*connect.ServerStream[serverv1.SubscribeToWorldResponse]
+	C chan *serverv1.SubscribeToWorldResponse_Patch
 }
 
-  /* VILLAGES */
-func (s *Server) IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse) {
-
+func NewWorldSubscriptionMap() *WorldSubscriptionMap {
+	return &WorldSubscriptionMap{
+		m: map[string]*connect.ServerStream[serverv1.SubscribeToWorldResponse]{},
+		C: make(chan *serverv1.SubscribeToWorldResponse_Patch),
+	}
 }
-func (s *Server) CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse) {
 
-}
-func (s *Server) IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse) {
+func (wm *WorldSubscriptionMap) subscribe(stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) {
+	wm.Lock()
+	defer wm.Unlock()
+	wm.m[stream.Conn().Peer().Addr] = stream
 
+	go func() {
+		for p := range wm.C {
+			wm.Lock()
+			for _, stream := range wm.m {
+				err := stream.Send(&serverv1.SubscribeToWorldResponse{Patch: p})
+				if err != nil {
+					panic(err)
+				}
+			}
+			wm.Unlock()
+		}
+	}()
 }
-func (s *Server) CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse) {
 
+func (wm *WorldSubscriptionMap) unsubscribe(stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) {
+	wm.Lock()
+	defer wm.Unlock()
+	delete(wm.m, stream.Conn().Peer().Addr)
 }
-func (s *Server) IssueResourceTransferOrder(IssueResourceTransferOrderRequest) returns (IssueResourceTransferOrderResponse) {
 
+func (s *Server) SubscribeToWorld(ctx context.Context, req *connect.Request[serverv1.SubscribeToWorldRequest], stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) error {
+	s.worldSubscriptionMap.subscribe(stream)
+	defer s.worldSubscriptionMap.unsubscribe(stream)
+	<-ctx.Done()
+	return nil
 }
-func (s *Server) CancelResourceTransferOrder(CancelResourceTransferOrderRequest) returns (CancelResourceTransferOrderResponse) {
 
-}
+// func (s *Server) IssueAttack(IssueAttackRequest) returns (IssueAttackResponse) {
+
+// }
+// func (s *Server) CancelAttack(CancelAttackRequest) returns (CancelAttackResponse) {
+
+// }
+
+/* VILLAGES */
+// func (s *Server) IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse) {
+
+// }
+// func (s *Server) CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse) {
+
+// }
+// func (s *Server) IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse) {
+
+// }
+// func (s *Server) CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse) {
+
+// }
+// func (s *Server) IssueResourceTransferOrder(IssueResourceTransferOrderRequest) returns (IssueResourceTransferOrderResponse) {
+
+// }
+// func (s *Server) CancelResourceTransferOrder(CancelResourceTransferOrderRequest) returns (CancelResourceTransferOrderResponse) {
+
+// }

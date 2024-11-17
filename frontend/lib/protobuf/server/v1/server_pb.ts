@@ -685,6 +685,209 @@ export class Player extends Message<Player> {
 }
 
 /**
+ * GetWorld
+ *
+ * @generated from message server.v1.GetWorldRequest
+ */
+export class GetWorldRequest extends Message<GetWorldRequest> {
+  constructor(data?: PartialMessage<GetWorldRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetWorldRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetWorldRequest {
+    return new GetWorldRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetWorldRequest | PlainMessage<GetWorldRequest> | undefined, b: GetWorldRequest | PlainMessage<GetWorldRequest> | undefined): boolean {
+    return proto3.util.equals(GetWorldRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.GetWorldResponse
+ */
+export class GetWorldResponse extends Message<GetWorldResponse> {
+  /**
+   * @generated from field: server.v1.World world = 1;
+   */
+  world?: World;
+
+  constructor(data?: PartialMessage<GetWorldResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.GetWorldResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "world", kind: "message", T: World },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetWorldResponse {
+    return new GetWorldResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetWorldResponse | PlainMessage<GetWorldResponse> | undefined, b: GetWorldResponse | PlainMessage<GetWorldResponse> | undefined): boolean {
+    return proto3.util.equals(GetWorldResponse, a, b);
+  }
+}
+
+/**
+ * SubscribeToWorld
+ *
+ * @generated from message server.v1.SubscribeToWorldRequest
+ */
+export class SubscribeToWorldRequest extends Message<SubscribeToWorldRequest> {
+  constructor(data?: PartialMessage<SubscribeToWorldRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.SubscribeToWorldRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeToWorldRequest {
+    return new SubscribeToWorldRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeToWorldRequest {
+    return new SubscribeToWorldRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeToWorldRequest {
+    return new SubscribeToWorldRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SubscribeToWorldRequest | PlainMessage<SubscribeToWorldRequest> | undefined, b: SubscribeToWorldRequest | PlainMessage<SubscribeToWorldRequest> | undefined): boolean {
+    return proto3.util.equals(SubscribeToWorldRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.SubscribeToWorldResponse
+ */
+export class SubscribeToWorldResponse extends Message<SubscribeToWorldResponse> {
+  /**
+   * @generated from field: server.v1.SubscribeToWorldResponse.Patch patch = 1;
+   */
+  patch?: SubscribeToWorldResponse_Patch;
+
+  constructor(data?: PartialMessage<SubscribeToWorldResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.SubscribeToWorldResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "patch", kind: "message", T: SubscribeToWorldResponse_Patch },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeToWorldResponse {
+    return new SubscribeToWorldResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeToWorldResponse {
+    return new SubscribeToWorldResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeToWorldResponse {
+    return new SubscribeToWorldResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SubscribeToWorldResponse | PlainMessage<SubscribeToWorldResponse> | undefined, b: SubscribeToWorldResponse | PlainMessage<SubscribeToWorldResponse> | undefined): boolean {
+    return proto3.util.equals(SubscribeToWorldResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message server.v1.SubscribeToWorldResponse.Patch
+ */
+export class SubscribeToWorldResponse_Patch extends Message<SubscribeToWorldResponse_Patch> {
+  /**
+   * key: coords
+   *
+   * @generated from field: map<string, server.v1.World.Field> fields = 6;
+   */
+  fields: { [key: string]: World_Field } = {};
+
+  /**
+   * key: village_coords, Affected by player pov
+   *
+   * @generated from field: map<string, server.v1.Village> villages = 7;
+   */
+  villages: { [key: string]: Village } = {};
+
+  /**
+   * key: temple_coords, Affected by player pov
+   *
+   * @generated from field: map<string, server.v1.Temple> temples = 8;
+   */
+  temples: { [key: string]: Temple } = {};
+
+  /**
+   * key: attack_id, Affected by player pov
+   *
+   * @generated from field: map<string, server.v1.Attack> attacks = 9;
+   */
+  attacks: { [key: string]: Attack } = {};
+
+  constructor(data?: PartialMessage<SubscribeToWorldResponse_Patch>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "server.v1.SubscribeToWorldResponse.Patch";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 6, name: "fields", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: World_Field} },
+    { no: 7, name: "villages", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Village} },
+    { no: 8, name: "temples", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Temple} },
+    { no: 9, name: "attacks", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Attack} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeToWorldResponse_Patch {
+    return new SubscribeToWorldResponse_Patch().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeToWorldResponse_Patch {
+    return new SubscribeToWorldResponse_Patch().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeToWorldResponse_Patch {
+    return new SubscribeToWorldResponse_Patch().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SubscribeToWorldResponse_Patch | PlainMessage<SubscribeToWorldResponse_Patch> | undefined, b: SubscribeToWorldResponse_Patch | PlainMessage<SubscribeToWorldResponse_Patch> | undefined): boolean {
+    return proto3.util.equals(SubscribeToWorldResponse_Patch, a, b);
+  }
+}
+
+/**
  * IssueAttack
  *
  * @generated from message server.v1.IssueAttackRequest
