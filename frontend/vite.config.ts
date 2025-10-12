@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
-import preact from '@preact/preset-vite'
+import solid from 'vite-plugin-solid';
 import checker from 'vite-plugin-checker'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    preact(),
+    solid(),
     checker({ typescript: true }),
   ],
 })

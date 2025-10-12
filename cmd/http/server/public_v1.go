@@ -11,8 +11,7 @@ import (
 	publicv1 "war-of-faith/pkg/protobuf/public/v1"
 	publicv1connect "war-of-faith/pkg/protobuf/public/v1/publicv1connect"
 
-	"github.com/bufbuild/connect-go"
-	"github.com/bufbuild/protovalidate-go"
+	"connectrpc.com/connect"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
 )
@@ -68,7 +67,7 @@ func NewPublicV1Server(ginEngine *gin.Engine, i *do.Injector) {
 			authSvc: do.MustInvoke[service.AuthService](i),
 		},
 		connect.WithInterceptors(
-			helper.ValidationInterceptor(do.MustInvoke[*protovalidate.Validator](i)),
+			// helper.ValidationInterceptor(do.MustInvoke[*protovalidate.Validator](i)),
 			helper.GRPCStatusToConnectStatusInterceptor(),
 		),
 	)

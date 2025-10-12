@@ -18,3 +18,6 @@ Players compete to conquer the 4 mighty temples.
 
 ### Other
 - Protobuf compiler - https://github.com/bufbuild/buf
+
+## Ideas
+- Skill tree

@@ -1,8 +1,12 @@
-import { createConnectTransport } from "@bufbuild/connect-web"
-import { createPromiseClient } from "@bufbuild/connect"
+import { createClient } from "@connectrpc/connect"
+import { createConnectTransport } from "@connectrpc/connect-web"
 
-import * as publicV1Connect from '../lib/protobuf/public/v1/public_connect'
-import * as serverV1Connect from '../lib/protobuf/server/v1/server_connect'
+import { Service as PublicService } from '../lib/protobuf/public/v1/public_pb'
+import { Service as ServerService } from '../lib/protobuf/server/v1/server_pb'
 
-export const publicV1Client = createPromiseClient(publicV1Connect.Service, createConnectTransport({ baseUrl: "http://localhost:3000", credentials: "include" }))
-export const serverV1Client = createPromiseClient(serverV1Connect.Service, createConnectTransport({ baseUrl: "http://localhost:3000", credentials: "include" }))
+const transport = createConnectTransport({
+  baseUrl: "http://localhost:3000",
+})
+
+export const publicCli = createClient(PublicService, transport)
+export const serverCli = createClient(ServerService, transport)

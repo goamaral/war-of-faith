@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals"
-import { publicV1Client } from "./api"
+import { publicCli } from "./api"
 
 export default () => {
   const email = useSignal("")
@@ -8,7 +8,7 @@ export default () => {
   async function login(ev: Event) {
     ev.preventDefault()
     try {
-      await publicV1Client.login({ email: email.value, password: password.value })
+      await publicCli.login({ email: email.value, password: password.value })
       // TODO: redirect
     } catch(err) {
       alert(err)

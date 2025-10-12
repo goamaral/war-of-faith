@@ -1,6 +1,7 @@
 package state
 
 import (
+	"slices"
 	"sync"
 	"war-of-faith/pkg/option"
 	serverv1 "war-of-faith/pkg/protobuf/server/v1"
@@ -25,7 +26,7 @@ type World struct {
 
 func (w *World) Tick() {
 	// Process attacks
-	for _, attack := range w.Attacks {
+	for _, attack := range w.TroopMovementOrders {
 		attack.TimeLeft--
 		if attack.TimeLeft == 0 {
 			// Update world field
@@ -34,7 +35,7 @@ func (w *World) Tick() {
 			switch targetField.Kind {
 			case serverv1.World_Field_KIND_WILD:
 				w.CreateVillage(attack.TargetCoords, sourceVillage.PlayerId)
-				delete(w.Attacks, attack.Id)
+				// delete(w.TroopMovementOrders, attack.Id)
 
 			case serverv1.World_Field_KIND_VILLAGE:
 				targetVillage := w.Villages[attack.TargetCoords]
@@ -47,10 +48,10 @@ func (w *World) Tick() {
 						targetVillage.PlayerId = sourceVillage.PlayerId
 					}
 				}
-				delete(w.Attacks, attack.Id)
+				// delete(w.TroopMovementOrders, attack.Id)
 
 			case serverv1.World_Field_KIND_TEMPLE:
-				w.CancelAttack(attack.Id, sourceVillage.PlayerId) // TODO: Handle error
+				w.CancelTroopMovementOrder(attack.Id, sourceVillage.PlayerId) // TODO: Handle error
 			}
 		}
 	}
@@ -104,10 +105,10 @@ func (w *World) Tick() {
 	}
 
 	w.patchChan <- &serverv1.SubscribeToWorldResponse_Patch{
-		Fields:   maps.Clone(w.Fields),
-		Villages: maps.Clone(w.Villages),
-		Temples:  maps.Clone(w.Temples),
-		Attacks:  maps.Clone(w.Attacks),
+		Fields:              maps.Clone(w.Fields),
+		Villages:            maps.Clone(w.Villages),
+		Temples:             maps.Clone(w.Temples),
+		TroopMovementOrders: slices.Clone(w.TroopMovementOrders),
 	}
 }
 
@@ -124,10 +125,24 @@ func (w *World) CreateVillage(coords string, playerId string) {
 			Building_HALL:      1,
 			Building_GOLD_MINE: 1,
 		},
+		Troops: map[string]uint32{
+			Troop_LEADER: 0,
+		},
 	}
 }
 
-func (w *World) IssueAttack(req *serverv1.IssueAttackRequest, playerId string) (*serverv1.Attack, error) {
+func (w *World) CreateTemple(coords string) {
+	w.Fields[coords] = &serverv1.World_Field{
+		Coords: coords,
+		Kind:   serverv1.World_Field_KIND_TEMPLE,
+	}
+	w.Temples[coords] = &serverv1.Temple{
+		Coords:    coords,
+		Resources: &serverv1.Resources{},
+	}
+}
+
+func (w *World) IssueTroopMovementOrder(req *serverv1.IssueTroopMovementOrderRequest, playerId string) (*serverv1.TroopMovementOrder, error) {
 	sourceVillage, ok := w.Villages[req.SourceCoords]
 	if !ok {
 		return nil, ErrVillageNotFound
@@ -146,26 +161,28 @@ func (w *World) IssueAttack(req *serverv1.IssueAttackRequest, playerId string) (
 		}
 	}
 
-	// Attack
+	// TroopMovementOrder
 	for troopId, quantity := range req.Troops {
 		sourceVillage.Troops[troopId] -= quantity
 	}
-	attack := &serverv1.Attack{
+	attack := &serverv1.TroopMovementOrder{
 		Id:           uuid.NewString(), // TODO: Use uuid v7
 		SourceCoords: req.SourceCoords,
 		TargetCoords: req.TargetCoords,
 		Troops:       req.Troops,
 		TimeLeft:     10, // TODO: Dynamic time left
 	}
-	w.Attacks[attack.Id] = attack
+	w.TroopMovementOrders = append(w.TroopMovementOrders, attack)
 
 	return attack, nil
 }
 
-func (w *World) CancelAttack(id string, playerId string) error {
-	attack, ok := w.Attacks[id]
+func (w *World) CancelTroopMovementOrder(id string, playerId string) error {
+	attack, ok := lo.Find(w.TroopMovementOrders, func(order *serverv1.TroopMovementOrder) bool {
+		return order.Id == id
+	})
 	if !ok {
-		// TODO: Attack not found
+		// TODO: TroopMovementOrder not found
 	}
 	sourceVillage, ok := w.Villages[attack.SourceCoords]
 	if !ok {
@@ -178,8 +195,8 @@ func (w *World) CancelAttack(id string, playerId string) error {
 	}
 
 	// Return
-	w.Attacks[id].TargetCoords = attack.SourceCoords
-	w.Attacks[id].TimeLeft = 10 - w.Attacks[id].TimeLeft // TODO: Dynamic time left
+	attack.TargetCoords = attack.SourceCoords
+	attack.TimeLeft = 10 - attack.TimeLeft // TODO: Dynamic time left
 
 	return nil
 }
@@ -216,7 +233,7 @@ func (w *World) IssueResourceTransferOrder(req *serverv1.IssueResourceTransferOr
 func (w *World) CancelResourceTransferOrder(sourceCoords string, id string, playerId string) error {
 	sourceVillage, ok := w.Villages[sourceCoords]
 	if !ok {
-		// TODO: Attack not found
+		// TODO: TroopMovementOrder not found
 	}
 
 	// Do you own the source village?

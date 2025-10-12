@@ -5,9 +5,9 @@
 package publicv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "war-of-faith/pkg/protobuf/public/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// ServiceName is the fully-qualified name of the Service service.
@@ -39,7 +39,7 @@ const (
 
 // ServiceClient is a client for the public.v1.Service service.
 type ServiceClient interface {
-	Login(context.Context, *connect_go.Request[v1.LoginRequest]) (*connect_go.Response[v1.LoginResponse], error)
+	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 }
 
 // NewServiceClient constructs a client for the public.v1.Service service. By default, it uses the
@@ -49,30 +49,32 @@ type ServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ServiceClient {
+func NewServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	serviceMethods := v1.File_public_v1_public_proto.Services().ByName("Service").Methods()
 	return &serviceClient{
-		login: connect_go.NewClient[v1.LoginRequest, v1.LoginResponse](
+		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
 			httpClient,
 			baseURL+ServiceLoginProcedure,
-			opts...,
+			connect.WithSchema(serviceMethods.ByName("Login")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // serviceClient implements ServiceClient.
 type serviceClient struct {
-	login *connect_go.Client[v1.LoginRequest, v1.LoginResponse]
+	login *connect.Client[v1.LoginRequest, v1.LoginResponse]
 }
 
 // Login calls public.v1.Service.Login.
-func (c *serviceClient) Login(ctx context.Context, req *connect_go.Request[v1.LoginRequest]) (*connect_go.Response[v1.LoginResponse], error) {
+func (c *serviceClient) Login(ctx context.Context, req *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return c.login.CallUnary(ctx, req)
 }
 
 // ServiceHandler is an implementation of the public.v1.Service service.
 type ServiceHandler interface {
-	Login(context.Context, *connect_go.Request[v1.LoginRequest]) (*connect_go.Response[v1.LoginResponse], error)
+	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -80,11 +82,13 @@ type ServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	serviceLoginHandler := connect_go.NewUnaryHandler(
+func NewServiceHandler(svc ServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	serviceMethods := v1.File_public_v1_public_proto.Services().ByName("Service").Methods()
+	serviceLoginHandler := connect.NewUnaryHandler(
 		ServiceLoginProcedure,
 		svc.Login,
-		opts...,
+		connect.WithSchema(serviceMethods.ByName("Login")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/public.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -99,6 +103,6 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect_go.HandlerOption) (st
 // UnimplementedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedServiceHandler struct{}
 
-func (UnimplementedServiceHandler) Login(context.Context, *connect_go.Request[v1.LoginRequest]) (*connect_go.Response[v1.LoginResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("public.v1.Service.Login is not implemented"))
+func (UnimplementedServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("public.v1.Service.Login is not implemented"))
 }

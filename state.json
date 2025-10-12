@@ -3,8 +3,8 @@
     "width": 0,
     "height": 0,
     "fields": {
-      "<x|y>": {
-        "coords": "<x|y>",
+      "<x,y>": {
+        "coords": "<x,y>",
         "kind": "wild|village|temple"
       }
     }
@@ -15,8 +15,8 @@
     }
   },
   "villages": {
-    "<x|y>": {
-      "coords": "<x|y>",
+    "<x,y>": {
+      "coords": "<x,y>",
       "player_id": "<uuid>",
       "resources": {
         "gold": 0
@@ -44,8 +44,8 @@
     }
   },
   "temples": {
-    "<x|y>": {
-      "coords": "<x|y>",
+    "<x,y>": {
+      "coords": "<x,y>",
       "resources": {
         "gold": 0
       }

@@ -4,7 +4,7 @@ package public.v1;
 
 option go_package = "war-of-faith/pkg/protobuf/public/v1;publicv1";
 
-import "buf/validate/validate.proto";
+// import "buf/validate/validate.proto";
 
 // Login
 message LoginRequest {

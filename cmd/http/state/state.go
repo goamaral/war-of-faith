@@ -11,37 +11,51 @@ func NewWorld(patchChan chan *serverv1.SubscribeToWorldResponse_Patch) *World {
 				Building_HALL: {
 					Id:   Building_HALL,
 					Name: "Village Hall",
+					Cost: []*serverv1.Resources{
+						{Gold: 10, Time: 10},
+						{Gold: 20, Time: 10},
+						{Gold: 30, Time: 10},
+					},
 				},
 				Building_GOLD_MINE: {
 					Id:   Building_GOLD_MINE,
 					Name: "Gold Mine",
+					Cost: []*serverv1.Resources{
+						{Gold: 10, Time: 10},
+						{Gold: 20, Time: 10},
+						{Gold: 30, Time: 10},
+					},
 				},
 			},
 			Troops: map[string]*serverv1.Troop{
 				Troop_LEADER: {
 					Id:   Troop_LEADER,
 					Name: "Leader",
+					Cost: &serverv1.Resources{
+						Gold: 10,
+						Time: 10,
+					},
 				},
 			},
 			Players: map[string]*serverv1.Player{
 				"1": {Id: "1"},
 				"2": {Id: "2"},
 			},
-			Fields:   map[string]*serverv1.World_Field{},
-			Villages: map[string]*serverv1.Village{},
-			Temples: map[string]*serverv1.Temple{
-				"1,1": {Coords: "1,1", Resources: &serverv1.Resources{}},
-				"8,1": {Coords: "8,1", Resources: &serverv1.Resources{}},
-				"8,8": {Coords: "8,8", Resources: &serverv1.Resources{}},
-				"1,8": {Coords: "1,8", Resources: &serverv1.Resources{}},
-			},
-			Attacks: map[string]*serverv1.Attack{},
+			Fields:              map[string]*serverv1.World_Field{},
+			Villages:            map[string]*serverv1.Village{},
+			Temples:             map[string]*serverv1.Temple{},
+			TroopMovementOrders: []*serverv1.TroopMovementOrder{},
 		},
 		patchChan: patchChan,
 	}
 
-	world.CreateVillage("3,4", "1")
-	world.CreateVillage("6,5", "2")
+	world.CreateVillage("3_4", "1")
+	world.CreateVillage("6_5", "2")
+
+	world.CreateTemple("1_1")
+	world.CreateTemple("8_1")
+	world.CreateTemple("8_8")
+	world.CreateTemple("1_8")
 
 	return world
 }

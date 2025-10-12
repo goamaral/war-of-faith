@@ -1,313 +1,172 @@
-import { useParams } from 'react-router-dom'
-import { useEffect } from 'preact/hooks'
-import { useSignal } from '@preact/signals'
-import { create } from 'zustand'
+import { createSignal, Show, For, Switch, Match } from "solid-js"
+import { useParams } from "@solidjs/router"
 
-import * as serverV1 from "../lib/protobuf/server/v1/server_pb"
-import * as entities from './entities'
-import { serverV1Client } from './api'
+import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
+import {
+  StoreLoader, store, playerId, mulResources,
+  issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
+  issueTroopTrainingOrder, cancelTroopTrainingOrder
+} from './store'
 
-interface Store {
-  village: entities.Village
-  buildings: entities.Building[],
-  troops: entities.Troop[],
-  trainableLeaders: number,
-  load: (villageId: number) => Promise<void>
-  consumeVillageEvent: (event: serverV1.Village_Event) => void
-  consumePlayerEvent: (event: serverV1.Player) => void
-  cancelBuildingUpgradeOrder: (order: serverV1.Building_UpgradeOrder) => Promise<void>
-  issueUpgradeOrder: (building: entities.Building) => Promise<void>
-  cancelTrainingOrder: (order: serverV1.Troop_TrainingOrder) => Promise<void>
-  issueTrainingOrder: (troopKind: entities.TroopKind, quantity: number) => Promise<void>
+const LEADER = "leader"
+
+let villageCoords = ""
+
+function village() {
+  return store.world.villages[villageCoords]
 }
 
-const useStore = create<Store>((set, get) => ({
-  village: new entities.Village(),
-  buildings: [],
-  troops: [],
-  trainableLeaders: 0,
-
-  async load(villageId: number) {
-    const results = await Promise.all([
-      serverV1Client.getVillage({ id: villageId }),
-      serverV1Client.getBuildings({}),
-      serverV1Client.getTroops({}),
-      serverV1Client.getPlayer({}),
-    ])
-
-    set({
-      village: new entities.Village(results[0].village),
-      buildings: results[1].buildings.map(b => new entities.Building(b)),
-      troops: results[2].troops.map(t => new entities.Troop(t)),
-      trainableLeaders: results[3].player!.trainableLeaders,
-    })
-  },
-
-  consumeVillageEvent(event: serverV1.Village_Event) {
-    console.debug("New village event", event)
-    if (event.action == serverV1.Village_Event_Action.UPDATE) {
-      set({ village: new entities.Village(event.village!) })
-    } else {
-      alert("Action not supported")
-    }
-  },
-
-  consumePlayerEvent(player: serverV1.Player) {
-    console.debug("New player event", player)
-    set({ trainableLeaders: player.trainableLeaders })
-  },
-
-  async cancelBuildingUpgradeOrder(order: serverV1.Building_UpgradeOrder) {
-    try {
-      const village = get().village
-      await serverV1Client.cancelBuildingUpgradeOrder({ id: order.id })
-      village.removeBuildingUpgradeOrder(order.id)
-      village.addGold(order.cost!.gold)
-      set({ village: new entities.Village(village) })
-    } catch(err) {
-      alert(`Failed to cancel building upgrade order (id: ${order.id}): ${err}`)
-    }
-  },
-
-  async issueUpgradeOrder(building: entities.Building) {
-    try {
-      const village = get().village
-      const { order } = await serverV1Client.issueBuildingUpgradeOrder({ buildingKind: building.kind, villageId: village.id })
-      village.addBuildingUpgradeOrder(order!)
-      village.addGold(-order!.cost!.gold!)
-      set({ village: new entities.Village(village) })
-    } catch (err) {
-      alert(`Failed to issue building upgrade order for ${building.name}: ${err}`)
-    }
-  },
-
-  async cancelTrainingOrder(order: serverV1.Troop_TrainingOrder) {
-    try {
-      const { village, trainableLeaders } = get()
-      await serverV1Client.cancelTroopTrainingOrder({ id: order.id })
-      village.removeTroopTrainingOrder(order.id)
-      village.addGold(order.cost!.gold)
-
-      set({
-        village: new entities.Village(village), 
-        trainableLeaders: order.troopKind == entities.TroopKind.LEADER ? trainableLeaders + 1 : trainableLeaders,
-      })
-    } catch (err) {
-      alert(`Failed to cancel troop training order (id: ${order.id}): ${err}`)
-    }
-  },
-
-  async issueTrainingOrder(troopKind: entities.TroopKind, quantity: number) {
-    try {
-      const { village, trainableLeaders } = get()
-      const { order } = await serverV1Client.issueTroopTrainingOrder({ troopKind, quantity, villageId: village.id })
-      village.addTroopTrainingOrder(order!)
-      village.addGold(-order?.cost?.gold!)
-
-      set({
-        village: new entities.Village(village),
-        trainableLeaders: troopKind == entities.TroopKind.LEADER ? trainableLeaders - 1 : trainableLeaders,
-      })
-    } catch (err) {
-      alert(`Failed to issue troop training order (troopKind: ${troopKind}, quantity: ${quantity}): ${err}`)
-    }
-  }
-}))
-
-export default () => <VillageLoader />
-
-const VillageLoader = () => {
-  const { id } = useParams() as { id: string }
-  const loaded = useSignal(false)
-  const load = useStore(state => state.load)
-  useEffect(() => {
-    load(+id)
-      .then(() => loaded.value = true)
-      .catch(err => alert(err))
-  }, [])
-
-  if (!loaded.value) return <div>Loading...</div>
-
-  const consumeVillageEvent = useStore(state => state.consumeVillageEvent)
-  const consumePlayerEvent = useStore(state => state.consumePlayerEvent)
-
-  useEffect(() => {
-    const villagesStream = serverV1Client.subscribeToVillages({ ids: [+id] })
-    async function subscribeToVillages() {
-      try {
-        
-        for await (const villageEvent of villagesStream) consumeVillageEvent(villageEvent)
-      } catch (err) {
-        console.error(err)
-        subscribeToVillages()
-      }
-    }
-    subscribeToVillages()
-  }, [])
-
-  useEffect(() => {
-    const playerStream = serverV1Client.subscribeToPlayer({})
-    async function subscribeToPlayer() {
-      try {
-        for await (const playerEvent of playerStream) consumePlayerEvent(playerEvent)
-      } catch (err) {
-        console.error(err)
-        subscribeToPlayer()
-      }
-    }
-    subscribeToPlayer()
-  }, [])
-
-  return <Village />
+// TODO: Take into consideration dependencies
+function buildingUpgradeOrderCancelable(order: serverV1.Village_BuildingUpgradeOrder) {
+  const orders = village().buildingUpgradeOrders
+  const lastOrder = orders[orders.length - 1]
+  return lastOrder.buildingId == order.buildingId && lastOrder.level == order.level
 }
 
-const Village = () => {
-  const village = useStore(store => store.village)
-
-  return (
-    <div>
-      <h1>{village.name}</h1>
-      <h2>Resources</h2>
-      <ul>
-        <li>{village.resources!.gold} Gold</li>
-      </ul>
-      <VillageBuildings />
-      <VillageTroops />
-    </div>
-  )
+function getBuildingNextLevel(buildingId: string): number {
+  const v = village()
+  const orders = v.buildingUpgradeOrders.filter(o => o.buildingId == buildingId)
+  return v.buildings[buildingId] + orders.length + 1
 }
 
-const VillageBuildings = () => {
-  function orderCancelable(order: serverV1.Building_UpgradeOrder): boolean {
-    const orders = village.buildingUpgradeOrders
-    const index = orders.findIndex(o => o.id === order.id)
-    return index == orders.length - 1
-  }
+function canAfford(cost: serverV1.Resources) {
+  if (cost.gold > village().resources!.gold) return false
+  return true
+}
 
-  const village = useStore(store => store.village)
-  const buildings = useStore(store => store.buildings)
-  const cancelBuildingUpgradeOrder = useStore(store => store.cancelBuildingUpgradeOrder)
+// TODO: Hide village details if you're not the player
+export default function VillagePage() {
+  const { coords } = useParams() as { coords: string }
+  villageCoords = coords
 
+  return <StoreLoader>
+    {() =>
+      <div>
+        <h1>Village {villageCoords}</h1>
+        <h2>Resources</h2>
+        <ul>
+          <li>{village().resources!.gold} Gold</li>
+        </ul>
+        <VillageBuildings />
+        <VillageTroops />
+      </div>
+    }
+  </StoreLoader>
+}
+
+function VillageBuildings() {
   return (
     <div>
       <h2>Buildings</h2>
       <ul>
-        {buildings.map(building => <VillageBuilding building={building} />)}
+        <For each={Object.keys(village().buildings)}>
+          {buildingId => {
+            const building = store.world.buildings[buildingId]
+            const maxLevel = building.cost.length
+
+            const nextLevel = () => getBuildingNextLevel(buildingId)
+            const cost = () => building.cost[nextLevel()-1]
+            const level = () => village().buildings[buildingId]
+
+            const description = () => `upgrade (lvl ${nextLevel()}, ${cost().time}s, ${cost().gold} gold)`
+
+            return <li>
+              <span>{building.name} - lvl {level()} (max level: {maxLevel}) - </span>
+              <Switch>
+                <Match when={nextLevel() > maxLevel}>
+                  <span>max level</span>
+                </Match>
+                <Match when={!canAfford(cost())}>
+                  <button disabled={true}>{description()}</button>
+                </Match>
+                <Match when={true}>
+                  <button onClick={() => issueBuildingUpgradeOrder(villageCoords, buildingId, nextLevel())}>{description()}</button>
+                </Match>
+              </Switch>
+            </li>
+          }}
+        </For>
       </ul>
       <h4>Orders</h4>
       <ul>
-        {village.buildingUpgradeOrders.map(order => {
-          const building = buildings.find(b => b.kind == order.buildingKind)!
-          return (<li>
-            {building.name} (lvl {order.level}) - {order.timeLeft}s {
-              orderCancelable(order) ? <button onClick={() => cancelBuildingUpgradeOrder(order)}>cancel</button> : <></>
-            }
-          </li>)
-        })}
+        <For each={village().buildingUpgradeOrders}>
+          {order => {
+            return (<li>
+              <span>{order.buildingId} (lvl {order.level}) - {order.timeLeft}s </span>
+              <Show when={buildingUpgradeOrderCancelable(order)}>
+                <button onClick={() => cancelBuildingUpgradeOrder(villageCoords, order)}>cancel</button>
+              </Show>
+            </li>)
+          }}
+        </For>
       </ul>
     </div>
   )
 }
 
-function VillageBuilding({ building }: { building: entities.Building }) {
-  const village = useStore(store => store.village)
-  const issueUpgradeOrder = useStore(store => store.issueUpgradeOrder)
-
-  const level = village.buildingLevel[building.kind]
-  const nextLevel = village.getBuildingNextLevel(building.kind)
-  const upgradeCost = building.upgradeCost(nextLevel)
-  const upgradeStatus = village.getBuildingUpgradeStatus(building)
-
-  const children = []
-  switch (upgradeStatus) {
-    case entities.BuildingUpgradeStatus.UPGRADABLE:
-      children.push(
-        <button onClick={() => issueUpgradeOrder(building)}>upgrade (lvl {nextLevel}, {upgradeCost.time}s, {upgradeCost.gold} gold)</button>
-      )
-      break
-
-    case entities.BuildingUpgradeStatus.MAX_LEVEL:
-      break
-
-    case entities.BuildingUpgradeStatus.INSUFFICIENT_RESOURCES:
-      children.push(
-        <button disabled={true}>upgrade (lvl {nextLevel}, {upgradeCost.time}s, {upgradeCost.gold} gold)</button>
-      )
-      break
-
-    default:
-      throw new Error(`Unknown building upgrade status: ${upgradeStatus}`)
-  }
-
-  return <li>
-    {building.name} - lvl {level}
-    {children}
-  </li>
-}
-
-const VillageTroops = () => {
-  const village = useStore(store => store.village)
-  const troops = useStore(store => store.troops)
-  const cancelTrainingOrder = useStore(store => store.cancelTrainingOrder)
-
+function VillageTroops() {
   return (
     <div>
       <h2>Troops</h2>
       <ul>
-        {troops.map(troop => <VillageTroop troop={troop} />)}
+        <For each={Object.keys(store.world.troops)}>
+          {(troopId) => {
+            const troop = store.world.troops[troopId]
+
+            const [quantityToTrain, setQuantityToTrain] = createSignal(1)
+
+            const quantity = () => village().troops[troopId]
+            const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
+              return acc + (troopId == order.troopId ? order.quantity : 0)
+            }, 0)
+            const trainableTroops = () => {
+              if (troopId == LEADER) {
+                const maxLeaders = Object.values(store.world.villages).filter(v => v.playerId == playerId).length
+                return maxLeaders - quantity() - quantityInTraining()
+              }
+              return undefined
+            }
+            const cost = () => mulResources(troop.cost!, quantityToTrain())
+
+            const description = () => `train (${cost().time}s, ${cost().gold} gold)`
+
+            function Counter() {
+              return <input type="number" min={0} max={trainableTroops()}
+                value={quantityToTrain()}
+                onChange={e => setQuantityToTrain(+e.currentTarget.value)}
+              />
+            }
+
+            return <li>
+              <span>{troop.name} - {quantity()} units ({quantityInTraining()} training)</span>
+              <Switch>
+                <Match when={trainableTroops() == 0}>
+                  <></>
+                </Match>
+                <Match when={!canAfford(cost())}>
+                  <Counter />
+                  <button disabled={true}>{description()}</button>
+                </Match>
+                <Match when={true}>
+                  <Counter />
+                  <button onClick={() => issueTroopTrainingOrder(villageCoords, troopId, quantityToTrain())}>{description()}</button>
+                </Match>
+              </Switch>
+            </li>
+          }}
+        </For>
       </ul>
       <h4>Orders</h4>
       <ul>
-        {village.troopTrainingOrders.map(order => {
-          const troop = troops.find(t => t.kind == order.troopKind)!
-          return (<li>
-            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTrainingOrder(order)}>cancel</button>
-          </li>)
-        })}
+        <For each={village().troopTrainingOrders}>
+          {order => {
+            const troop = store.world.troops[order.troopId]
+            return <li>
+              {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(villageCoords, order)}>cancel</button>
+            </li>
+          }}
+        </For>
       </ul>
     </div>
   )
-}
-
-function VillageTroop({ troop }: { troop: entities.Troop }) {
-  const village = useStore(store => store.village)
-  const trainableLeaders = useStore(store => store.trainableLeaders)
-  const issueTrainingOrder = useStore(store => store.issueTrainingOrder)
-
-  const quantityToTrain = useSignal(1)
-
-  const quantity = village.troopQuantity[troop.kind] ?? 0
-  const quantityInTraining = village.troopTrainingOrders.reduce((acc, order) => {
-    return acc + (troop.kind == troop.kind ? order.quantity : 0)
-  }, 0)
-  const trainableTroops = troop.kind == entities.TroopKind.LEADER ? trainableLeaders : undefined
-  const trainingStatus = village.getTroopTrainingStatus(troop, quantityToTrain.value, trainableTroops)
-
-  const children = []
-  switch (trainingStatus) {
-    case entities.TroopTrainingStatus.TRAINABLE:
-      children.push(
-        <input type="number" value={quantityToTrain} min={0} max={trainableTroops} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
-        <button onClick={() => issueTrainingOrder(troop.kind as entities.TroopKind, quantityToTrain.value)}>train ({troop.trainCost(quantityToTrain.value).time}s, {troop.trainCost(quantityToTrain.value).gold} gold)</button>
-      )
-      break
-
-    case entities.TroopTrainingStatus.INSUFFICIENT_RESOURCES:
-      children.push(
-        <input type="number" value={quantityToTrain} min={0} max={trainableTroops} onChange={e => quantityToTrain.value = +e.currentTarget.value} />,
-        <button disabled={true}>train ({troop.trainCost(quantityToTrain.value).time}s, {troop.trainCost(quantityToTrain.value).gold} gold)</button>
-      )
-      break
-
-    case entities.TroopTrainingStatus.MAX_TRAINABLE:
-      break
-
-    default:
-      throw new Error(`Unknown village troop train status: ${trainingStatus}`)
-  }
-
-  return <li>
-    {troop.name} - {quantity} ({quantityInTraining})
-    {children}
-  </li>
 }

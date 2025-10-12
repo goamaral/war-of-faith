@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
@@ -21,7 +21,8 @@ import (
 )
 
 type Server struct {
-	serverv1.UnimplementedServiceServer
+	// serverv1.UnimplementedServiceServer
+	serverv1connect.UnimplementedServiceHandler
 	worldSubscriptionMap *WorldSubscriptionMap
 	world                *state.World
 }
@@ -77,6 +78,19 @@ func runServer(i *do.Injector, srv *Server) {
 
 /* WORLD */
 // GetWorld
+func (s *Server) GetWorld(ctx context.Context, req *connect.Request[serverv1.GetWorldRequest]) (*connect.Response[serverv1.GetWorldResponse], error) {
+	s.world.RLock()
+	defer s.world.RUnlock()
+	return connect.NewResponse(&serverv1.GetWorldResponse{World: s.world.World}), nil
+}
+
+// SubscribeToWorld
+func (s *Server) SubscribeToWorld(ctx context.Context, req *connect.Request[serverv1.SubscribeToWorldRequest], stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) error {
+	s.worldSubscriptionMap.subscribe(stream)
+	defer s.worldSubscriptionMap.unsubscribe(stream)
+	<-ctx.Done()
+	return nil
+}
 
 type WorldSubscriptionMap struct {
 	sync.Mutex
@@ -85,16 +99,10 @@ type WorldSubscriptionMap struct {
 }
 
 func NewWorldSubscriptionMap() *WorldSubscriptionMap {
-	return &WorldSubscriptionMap{
+	wm := &WorldSubscriptionMap{
 		m: map[string]*connect.ServerStream[serverv1.SubscribeToWorldResponse]{},
 		C: make(chan *serverv1.SubscribeToWorldResponse_Patch),
 	}
-}
-
-func (wm *WorldSubscriptionMap) subscribe(stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) {
-	wm.Lock()
-	defer wm.Unlock()
-	wm.m[stream.Conn().Peer().Addr] = stream
 
 	go func() {
 		for p := range wm.C {
@@ -108,19 +116,20 @@ func (wm *WorldSubscriptionMap) subscribe(stream *connect.ServerStream[serverv1.
 			wm.Unlock()
 		}
 	}()
+
+	return wm
+}
+
+func (wm *WorldSubscriptionMap) subscribe(stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) {
+	wm.Lock()
+	defer wm.Unlock()
+	wm.m[stream.Conn().Peer().Addr] = stream
 }
 
 func (wm *WorldSubscriptionMap) unsubscribe(stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) {
 	wm.Lock()
 	defer wm.Unlock()
 	delete(wm.m, stream.Conn().Peer().Addr)
-}
-
-func (s *Server) SubscribeToWorld(ctx context.Context, req *connect.Request[serverv1.SubscribeToWorldRequest], stream *connect.ServerStream[serverv1.SubscribeToWorldResponse]) error {
-	s.worldSubscriptionMap.subscribe(stream)
-	defer s.worldSubscriptionMap.unsubscribe(stream)
-	<-ctx.Done()
-	return nil
 }
 
 // func (s *Server) IssueAttack(IssueAttackRequest) returns (IssueAttackResponse) {

@@ -1,30 +1,19 @@
-import { useSignal, useSignalEffect } from '@preact/signals'
-import { Link } from "react-router-dom"
+import { For } from 'solid-js'
+import { A } from "@solidjs/router"
 
-import * as entities from './entities'
-import { serverV1Client } from './api'
+import { StoreLoader, playerVillages } from './store'
 
-export default () => {
-  const loading = useSignal(true)
-  const villages = useSignal<entities.Village[]>([])
-
-  useSignalEffect(() => {
-    serverV1Client.getVillages({ playerId: 1 }) // TODO: Get player id from auth
-      .then(res => {
-        villages.value = res.villages.map(village => new entities.Village(village))
-        loading.value = false
-      })
-      .catch(err => alert(err))
-  })
-
-  if (loading.value) {
-    return <div>Loading...</div>
-  } else {
-    return <div>
-      <h1>Villages</h1>
-      <ul>
-        {villages.value.map(v => <li><Link to={`/villages/${v.id}`}>{v.name}</Link></li>)}
-      </ul>
-    </div>
-  }
+export default function VillagesPage() {
+  return <StoreLoader>
+    {() =>
+      <div>
+        <h1>Villages</h1>
+        <ul>
+          <For each={playerVillages()}>
+            {v => <li><A href={`/villages/${v.coords}`}>Village {v.coords}</A></li>}
+          </For>
+        </ul>
+      </div>
+    }
+  </StoreLoader>
 }
