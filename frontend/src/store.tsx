@@ -4,6 +4,7 @@ import { createStore, SetStoreFunction } from "solid-js/store"
 import { batch, createUniqueId, onCleanup, onMount, Show } from "solid-js"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
+import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE } from './entities'
 
 export const playerId = "1"
 
@@ -11,6 +12,17 @@ export const [store, setStore] = createStore({
   loaded: false,
   world: {} as serverV1.World
 })
+
+declare global {
+  interface Window {
+    resetStore: () => void
+  }
+}
+window.resetStore = function() {
+  localStorage.removeItem("store")
+  setStore("loaded", false)
+  location.reload()
+}
 
 // Persistence
 function persistStore() {
@@ -31,28 +43,37 @@ async function loadStore() {
 }
 
 // Helpers
-export const playerVillages = () => Object.values(store.world.villages).filter(v => v!.playerId == playerId)
+export function playerFields(filter?: (f: serverV1.World_Field) => boolean) {
+  return Object.values(store.world.fields).filter(f => f?.playerId == playerId && (!filter || filter(f)))
+}
+export function playerVillageFields(filter?: (f: serverV1.World_Field) => boolean) {
+  return playerFields(filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
+}
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
-  onMount(async () => {
-    if (store.loaded) return
+  onMount(() => {
+    let intervalId = undefined as undefined | number
+    
+    async function setup() {
+      if (!store.loaded) await loadStore()
 
-    // async function subscribeToWorld() {
-    //   try {
-    //     for await (const { patch } of serverCli.subscribeToWorld({})) {
-    //       applyWorldPatch(patch!)
-    //     }
-    //   } catch (err) {
-    //     alert(`Failed to subscribe to world: ${err}`)
-    //     subscribeToWorld()
-    //   }
-    // }
-    // subscribeToWorld()
+      // async function subscribeToWorld() {
+      //   try {
+      //     for await (const { patch } of serverCli.subscribeToWorld({})) {
+      //       applyWorldPatch(patch!)
+      //     }
+      //   } catch (err) {
+      //     alert(`Failed to subscribe to world: ${err}`)
+      //     subscribeToWorld()
+      //   }
+      // }
+      // subscribeToWorld()
 
-    const intervalId = setInterval(state_tick, 1000)
+      intervalId = setInterval(state_tick, 1000)
+    }
+  
+    setup()
     onCleanup(() => clearInterval(intervalId))
-
-    await loadStore()
   })
 
   return <Show when={store.loaded} fallback={<p>Loading...</p>} keyed>
@@ -71,194 +92,256 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 //       attacks: patch.attacks,
 //     }))
 
-// Troop movement orders
-export async function issueTroopMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
+// Movement orders
+export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
   const id = crypto.randomUUID()
-  state_issueTroopMovementOrder(id, sourceCoords, targetCoords, troops)
-  // serverCli.issueTroopMovementOrder({ id, sourceCoords, targetCoords, troops })
+  state_issueMovementOrder(id, sourceCoords, targetCoords, troops)
+  // serverCli.issueMovementOrder({ id, sourceCoords, targetCoords, troops })
   //   .catch(err => {
-  //     alert(`Failed to issue troop movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${err}`)
-  //     state_cancelTroopMovementOrder(id)
+  //     alert(`Failed to issue movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${err}`)
+  //     state_cancelMovementOrder(id)
   //   })
 }
-export async function cancelTroopMovementOrder(order: serverV1.TroopMovementOrder) {
-  state_cancelTroopMovementOrder(order.id)
-  // serverCli.cancelTroopMovementOrder({ id: order.id })
+export async function cancelMovementOrder(order: serverV1.MovementOrder) {
+  state_cancelMovementOrder(order.id)
+  // serverCli.cancelMovementOrder({ id: order.id })
   //   .catch(err => {
-  //     alert(`Failed to cancel troop movement order (id: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${err}`)
-  //     state_issueTroopMovementOrder(order.id, order.sourceCoords, order.targetCoords, order.troops)
+  //     alert(`Failed to cancel movement order (id: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${err}`)
+  //     state_issueMovementOrder(order.id, order.sourceCoords, order.targetCoords, order.troops)
   //   })
 }
 
 // Building upgrade orders
-export function issueBuildingUpgradeOrder(villageCoords: string, buildingId: string, level: number) {
-  const order = state_issueBuildingUpgradeOrder(villageCoords, buildingId, level)
-  // serverCli.issueBuildingUpgradeOrder({ villageCoords, buildingId: buildingId, level: level })
+export function issueBuildingUpgradeOrder(coords: string, buildingId: string, level: number) {
+  const order = state_issueBuildingUpgradeOrder(coords, buildingId, level)
+  // serverCli.issueBuildingUpgradeOrder({ coords, buildingId: buildingId, level: level })
   //   .catch(err => {
   //     alert(`Failed to issue building upgrade order (buildingId: ${buildingId}, level: ${level}): ${err}`)
-  //     state_cancelBuildingUpgradeOrder(villageCoords, order)
+  //     state_cancelBuildingUpgradeOrder(coords, order)
   //   })
 }
-export async function cancelBuildingUpgradeOrder(villageCoords: string, order: serverV1.Village_BuildingUpgradeOrder) {
-  state_cancelBuildingUpgradeOrder(villageCoords, order)
-  // serverCli.cancelBuildingUpgradeOrder({ villageCoords, buildingId: order.buildingId, level: order.level })
+export async function cancelBuildingUpgradeOrder(coords: string, order: serverV1.Village_BuildingUpgradeOrder) {
+  state_cancelBuildingUpgradeOrder(coords, order)
+  // serverCli.cancelBuildingUpgradeOrder({ coords, buildingId: order.buildingId, level: order.level })
   //   .catch(err => {
   //     alert(`Failed to cancel building upgrade order (buildingId: ${order.buildingId}, level: ${order.level}): ${err}`)
-  //     state_issueBuildingUpgradeOrder(villageCoords, order.buildingId, order.level)
+  //     state_issueBuildingUpgradeOrder(coords, order.buildingId, order.level)
   //   })
 }
 
 // Troop training orders
-export function issueTroopTrainingOrder(villageCoords: string, troopId: string, quantity: number) {
-  const order = state_issueTroopTrainingOrder(villageCoords, troopId, quantity)
-  // serverCli.issueTroopTrainingOrder({ villageCoords, troopId: troopId, quantity: quantity })
+export function issueTroopTrainingOrder(coords: string, troopId: string, quantity: number) {
+  const order = state_issueTroopTrainingOrder(coords, troopId, quantity)
+  // serverCli.issueTroopTrainingOrder({ coords, troopId: troopId, quantity: quantity })
   //   .catch(err => {
   //     alert(`Failed to issue troop training order (troopId: ${troopId}, quantity: ${quantity}): ${err}`)
-  //     state_cancelTroopTrainingOrder(villageCoords, order)
+  //     state_cancelTroopTrainingOrder(coords, order)
   //   })
 }
-export async function cancelTroopTrainingOrder(villageCoords: string, order: serverV1.Village_TroopTrainingOrder) {
-  state_cancelTroopTrainingOrder(villageCoords, order)
-  // serverCli.cancelTroopTrainingOrder({ villageCoords, troopId: order.troopId, quantity: order.quantity })
+export async function cancelTroopTrainingOrder(coords: string, order: serverV1.Village_TroopTrainingOrder) {
+  state_cancelTroopTrainingOrder(coords, order)
+  // serverCli.cancelTroopTrainingOrder({ coords, troopId: order.troopId, quantity: order.quantity })
   //   .catch(err => {
   //     alert(`Failed to cancel troop training order (troopId: ${order.troopId}, quantity: ${order.quantity}): ${err}`)
-  //     state_issueTroopTrainingOrder(villageCoords, order.troopId, order.quantity)
+  //     state_issueTroopTrainingOrder(coords, order.troopId, order.quantity)
   //   })
 }
 
-// Resources
-export function addResources(a: serverV1.Resources, b: serverV1.Resources) {
-  return {
-    gold: a.gold + b.gold,
-    time: a.time + b.time,
-  } as serverV1.Resources
+// Helpers
+export function add<T extends Record<string, any>>(a: T, b: T): T {
+  const res = { ...a } as Record<string, any>
+  for (const [k, v] of Object.entries(b)) {
+    res[k] += v
+  }
+  return res as T
 }
-export function subResources(a: serverV1.Resources, b: serverV1.Resources) {
-  return {
-    gold: a.gold - b.gold,
-    time: a.time - b.time,
-  } as serverV1.Resources
+export function sub<T extends Record<string, any>>(a: T, b: T): T {
+  const res = { ...a } as Record<string, any>
+  for (const [k, v] of Object.entries(b)) {
+    res[k] -= v
+  }
+  return res as T
 }
-export function mulResources(a: serverV1.Resources, n: number) {
-  return {
-    gold: a.gold * n,
-    time: a.time * n,
-  } as serverV1.Resources
+export function mul<T extends Record<string, any>>(a: T, n: any): T {
+  const res = {} as Record<string, any>
+  for (const [k, v] of Object.entries(a)) {
+    res[k] = v * n
+  }
+  return res as T
+}
+export function decodeCoords(coords: string) {
+  const [x, y] = coords.split('_').map(Number)
+  return { x, y }
+}
+export function encodeCoords(x: number, y: number) {
+  return `${x}_${y}`
+}
+function calculateDistance(sourceCoords: string, targetCoords: string) {
+  const { x: srcX, y: srcY } = decodeCoords(sourceCoords)
+  const { x: trgX, y: trgY } = decodeCoords(targetCoords)
+  return Math.abs(srcX - trgX) + Math.abs(srcY - trgY)
 }
 
 /* State machine */
 function state_tick() {
   batch(() => {
-    // Move troops
-    const newTroopMovementOrders: serverV1.TroopMovementOrder[] = []
-    store.world.troopMovementOrders.forEach(order => {
+    // Move orders
+    const newMovementOrders: serverV1.MovementOrder[] = []
+    store.world.movementOrders.forEach(order => {
       const timeLeft = order.timeLeft - 1
       if (timeLeft == 0) {
-        // TODO: Combat
+        const targetField = store.world.fields[order.targetCoords] || newWildField(order.targetCoords)
+        if (targetField.playerId != order.playerId) {
+          // TODO: Combat
+
+          const troopsLeft = Object.values(order.troops).reduce((a, b) => a + b, 0)
+          if (troopsLeft > 0) {
+            // Conquer
+            if (order.troops[LEADER] > 0) {
+              if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
+                setStore("world", "fields", order.targetCoords, f => ({
+                  ...f,
+                  kind: serverV1.World_Field_Kind.VILLAGE,
+                  buildings: { ...f.buildings, [HALL]: 1 },
+                  troops: add(f.troops, order.troops),
+                  resources: add(f.resources!, order.resources!),
+                  playerId: order.playerId,
+                }) as serverV1.World_Field)
+                setStore("world", "villages", order.targetCoords, newVillage())
+      
+              } else {
+                setStore("world", "fields", order.targetCoords, f => ({
+                  ...f,
+                  troops: add(f.troops, order.troops),
+                  resources: add(f.resources!, order.resources!),
+                  playerId: order.playerId,
+                }) as serverV1.World_Field)
+              }
+
+            } else {
+              // Pillage
+              const pillage = Math.min(targetField.resources!.gold, troopsLeft)
+              setStore("world", "fields", order.targetCoords, "resources", r => sub(r!, { gold: pillage } as serverV1.Resources))
+              newMovementOrders.push({
+                ...order,
+                timeLeft: calculateDistance(order.sourceCoords, order.targetCoords),
+                comeback: true,
+              } as serverV1.MovementOrder)
+            }
+          }
+
+        } else {
+          // Deliver
+          setStore("world", "fields", order.targetCoords, f => ({
+            ...f,
+            troops: add(f.troops, order.troops),
+            resources: add(f.resources!, order.resources!),
+          }) as serverV1.World_Field)
+        }
+
       } else {
-        newTroopMovementOrders.push({ ...order, timeLeft })
+        newMovementOrders.push({ ...order, timeLeft })
       }
     })
-    setStore("world", "troopMovementOrders", newTroopMovementOrders)
+    setStore("world", "movementOrders", newMovementOrders)
 
-    Object.entries(store.world.villages).forEach(([villageCoords, village]) => {
+    Object.entries(store.world.villages).forEach(([coords, village]) => {
+      const field = store.world.fields[coords]
+
       // Increase resources
-      setStore("world", "villages", villageCoords, "resources", r => ({ gold: r!.gold + 1 }))
+      setStore("world", "fields", coords, "resources", r => ({ gold: r!.gold + field.buildings[GOLD_MINE] }))
 
       // Upgrade buildings
       const newBuildingUpgradeOrders: serverV1.Village_BuildingUpgradeOrder[] = []
       village.buildingUpgradeOrders.forEach(order => {
         const timeLeft = order.timeLeft - 1
         if (timeLeft == 0) {
-          setStore("world", "villages", villageCoords, "buildings", order.buildingId, b => b + 1)
+          setStore("world", "fields", coords, "buildings", order.buildingId, b => b + 1)
         } else {
           newBuildingUpgradeOrders.push({ ...order, timeLeft })
         }
       })
-      setStore("world", "villages", villageCoords, "buildingUpgradeOrders", newBuildingUpgradeOrders)
+      setStore("world", "villages", coords, "buildingUpgradeOrders", newBuildingUpgradeOrders)
 
       // Train troops
       const newTroopTrainingOrders: serverV1.Village_TroopTrainingOrder[] = []
       village.troopTrainingOrders.forEach((order, index) => {
         const timeLeft = order.timeLeft - 1
         if (timeLeft == 0) {
-          setStore("world", "villages", villageCoords, "troops", order.troopId, t => t + 1)
+          setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
         } else {
           newTroopTrainingOrders.push({ ...order, timeLeft })
         }
       })
-      setStore("world", "villages", villageCoords, "troopTrainingOrders", newTroopTrainingOrders)
+      setStore("world", "villages", coords, "troopTrainingOrders", newTroopTrainingOrders)
     })
   })
   persistStore()
 }
 
 // Troop movement orders
-function state_issueTroopMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
-  const timeCost = 10 // TODO: Dynamic time cost based on distance
-  const order = { id, sourceCoords, targetCoords, troops, timeLeft: timeCost } as serverV1.TroopMovementOrder
+function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
+  const dst = calculateDistance(sourceCoords, targetCoords)
+  const order = { id, sourceCoords, targetCoords, troops, resources: newResources(), timeLeft: dst, playerId } as serverV1.MovementOrder
   batch(() => {
-    // TODO: Remove troops from source village
-    setStore("world", "troopMovementOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    setStore("world", "fields", sourceCoords, "troops", r => sub(r!, troops))
+    setStore("world", "movementOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
   })
   persistStore()
 }
-function state_cancelTroopMovementOrder(id: string) {
+function state_cancelMovementOrder(id: string) {
   batch(() => {
-    // TODO: Comeback
-    setStore("world", "troopMovementOrders", orders => orders.filter(o => o.id !== id))
+    setStore("world", "movementOrders", orders => {
+      const order = orders.find(o => o.id == id)!
+      const dst = calculateDistance(order.sourceCoords, order.targetCoords)
+      order.timeLeft = dst - order.timeLeft
+      order.comeback = true
+      return orders.sort((a, b) => a.timeLeft - b.timeLeft)
+    })
   })
   persistStore()
 }
 
 // Building upgrade orders
-function state_issueBuildingUpgradeOrder(villageCoords: string, buildingId: string, level: number) {
+function state_issueBuildingUpgradeOrder(coords: string, buildingId: string, level: number) {
   const building = store.world.buildings[buildingId]
   const cost = building.cost[level-1]
   const order = { level, buildingId, timeLeft: cost.time } as serverV1.Village_BuildingUpgradeOrder
   batch(() => {
-    setStore("world", "villages", villageCoords, "buildingUpgradeOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
-    state_subResources(villageCoords, cost)
+    setStore("world", "villages", coords, "buildingUpgradeOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    setStore("world", "fields", coords, "resources", r => sub(r!, cost))
   })
   persistStore()
   return order
 }
-function state_cancelBuildingUpgradeOrder(villageCoords: string, order: serverV1.Village_BuildingUpgradeOrder) {
+function state_cancelBuildingUpgradeOrder(coords: string, order: serverV1.Village_BuildingUpgradeOrder) {
   const building = store.world.buildings[order.buildingId]
   const cost = building.cost[order.level-1]
   batch(() => {
-    setStore("world", "villages", villageCoords, "buildingUpgradeOrders", orders => orders.filter(o => !(o.buildingId == order.buildingId && o.level == order.level)))
-    state_addResources(villageCoords, cost)
+    setStore("world", "villages", coords, "buildingUpgradeOrders", orders => orders.filter(o => !(o.buildingId == order.buildingId && o.level == order.level)))
+    setStore("world", "fields", coords, "resources", r => add(r!, cost))
   })
   persistStore()
 }
 
 // Troop training orders
-function state_issueTroopTrainingOrder(villageCoords: string, troopId: string, quantity: number) {
+function state_issueTroopTrainingOrder(coords: string, troopId: string, quantity: number) {
   const troop = store.world.troops[troopId]
-  const cost = mulResources(troop.cost!, quantity)
+  const cost = mul(troop.cost!, quantity) as serverV1.Resources
   const order = { quantity, troopId, timeLeft: cost.time } as serverV1.Village_TroopTrainingOrder
   batch(() => {
-    setStore("world", "villages", villageCoords, "troopTrainingOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
-    state_subResources(villageCoords, cost)
+    setStore("world", "villages", coords, "troopTrainingOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    setStore("world", "fields", coords, "resources", r => sub(r!, cost))
   })
   persistStore()
   return order
 }
-function state_cancelTroopTrainingOrder(villageCoords: string, order: serverV1.Village_TroopTrainingOrder) {
+function state_cancelTroopTrainingOrder(coords: string, order: serverV1.Village_TroopTrainingOrder) {
   const troop = store.world.troops[order.troopId]
-  const cost = mulResources(troop.cost!, order.quantity)
+  const cost = mul(troop.cost!, order.quantity) as serverV1.Resources
   batch(() => {
-    setStore("world", "villages", villageCoords, "troopTrainingOrders", orders => orders.filter(o => !(o.troopId == order.troopId && o.quantity == order.quantity)))
-    state_addResources(villageCoords, cost)
+    setStore("world", "villages", coords, "troopTrainingOrders", orders => orders.filter(o => !(o.troopId == order.troopId && o.quantity == order.quantity)))
+    setStore("world", "fields", coords, "resources", r => add(r!, cost))
   })
   persistStore()
-}
-
-// Resources
-function state_addResources(villageCoords: string, resources: serverV1.Resources) {
-  setStore("world", "villages", villageCoords, "resources", r => addResources(r!, resources))
-}
-function state_subResources(villageCoords: string, resources: serverV1.Resources) {
-  setStore("world", "villages", villageCoords, "resources", r => subResources(r!, resources))
 }

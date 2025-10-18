@@ -3,14 +3,18 @@ import { useParams } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import {
-  StoreLoader, store, playerId, mulResources,
+  StoreLoader, store, mul,
   issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
-  issueTroopTrainingOrder, cancelTroopTrainingOrder
+  issueTroopTrainingOrder, cancelTroopTrainingOrder,
+  playerVillageFields
 } from './store'
-
-const LEADER = "leader"
+import { LEADER } from "./entities"
 
 let villageCoords = ""
+
+function field() {
+  return store.world.fields[villageCoords]
+}
 
 function village() {
   return store.world.villages[villageCoords]
@@ -24,13 +28,14 @@ function buildingUpgradeOrderCancelable(order: serverV1.Village_BuildingUpgradeO
 }
 
 function getBuildingNextLevel(buildingId: string): number {
+  const f = field()
   const v = village()
   const orders = v.buildingUpgradeOrders.filter(o => o.buildingId == buildingId)
-  return v.buildings[buildingId] + orders.length + 1
+  return f.buildings[buildingId] + orders.length + 1
 }
 
 function canAfford(cost: serverV1.Resources) {
-  if (cost.gold > village().resources!.gold) return false
+  if (cost.gold > field().resources!.gold) return false
   return true
 }
 
@@ -45,7 +50,7 @@ export default function VillagePage() {
         <h1>Village {villageCoords}</h1>
         <h2>Resources</h2>
         <ul>
-          <li>{village().resources!.gold} Gold</li>
+          <li>{field().resources!.gold} Gold</li>
         </ul>
         <VillageBuildings />
         <VillageTroops />
@@ -59,14 +64,14 @@ function VillageBuildings() {
     <div>
       <h2>Buildings</h2>
       <ul>
-        <For each={Object.keys(village().buildings)}>
+        <For each={Object.keys(field().buildings)}>
           {buildingId => {
             const building = store.world.buildings[buildingId]
             const maxLevel = building.cost.length
 
             const nextLevel = () => getBuildingNextLevel(buildingId)
             const cost = () => building.cost[nextLevel()-1]
-            const level = () => village().buildings[buildingId]
+            const level = () => field().buildings[buildingId]
 
             const description = () => `upgrade (lvl ${nextLevel()}, ${cost().time}s, ${cost().gold} gold)`
 
@@ -115,18 +120,18 @@ function VillageTroops() {
 
             const [quantityToTrain, setQuantityToTrain] = createSignal(1)
 
-            const quantity = () => village().troops[troopId]
+            const quantity = () => field().troops[troopId]
             const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
               return acc + (troopId == order.troopId ? order.quantity : 0)
             }, 0)
             const trainableTroops = () => {
               if (troopId == LEADER) {
-                const maxLeaders = Object.values(store.world.villages).filter(v => v.playerId == playerId).length
+                const maxLeaders = playerVillageFields().length
                 return maxLeaders - quantity() - quantityInTraining()
               }
               return undefined
             }
-            const cost = () => mulResources(troop.cost!, quantityToTrain())
+            const cost = () => mul(troop.cost!, quantityToTrain())
 
             const description = () => `train (${cost().time}s, ${cost().gold} gold)`
 

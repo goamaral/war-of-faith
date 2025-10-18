@@ -21,3 +21,4 @@ Players compete to conquer the 4 mighty temples.
 
 ## Ideas
 - Skill tree
+- Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel

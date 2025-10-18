@@ -43,9 +43,9 @@ func main() {
 
 	ticker := time.NewTicker(time.Second)
 	for range ticker.C {
-		srv.world.Lock()
-		srv.world.Tick()
-		srv.world.Unlock()
+		// srv.world.Lock()
+		// srv.world.Tick()
+		// srv.world.Unlock()
 	}
 }
 

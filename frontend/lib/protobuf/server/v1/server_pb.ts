@@ -11,7 +11,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file server/v1/server.proto.
  */
 export const file_server_v1_server: GenFile = /*@__PURE__*/
-  fileDesc("ChZzZXJ2ZXIvdjEvc2VydmVyLnByb3RvEglzZXJ2ZXIudjEirQcKBVdvcmxkEg0KBXdpZHRoGAEgASgNEg4KBmhlaWdodBgCIAEoDRIyCglidWlsZGluZ3MYAyADKAsyHy5zZXJ2ZXIudjEuV29ybGQuQnVpbGRpbmdzRW50cnkSLAoGdHJvb3BzGAQgAygLMhwuc2VydmVyLnYxLldvcmxkLlRyb29wc0VudHJ5Ei4KB3BsYXllcnMYBSADKAsyHS5zZXJ2ZXIudjEuV29ybGQuUGxheWVyc0VudHJ5EiwKBmZpZWxkcxgGIAMoCzIcLnNlcnZlci52MS5Xb3JsZC5GaWVsZHNFbnRyeRIwCgh2aWxsYWdlcxgHIAMoCzIeLnNlcnZlci52MS5Xb3JsZC5WaWxsYWdlc0VudHJ5Ei4KB3RlbXBsZXMYCCADKAsyHS5zZXJ2ZXIudjEuV29ybGQuVGVtcGxlc0VudHJ5EjwKFXRyb29wX21vdmVtZW50X29yZGVycxgJIAMoCzIdLnNlcnZlci52MS5Ucm9vcE1vdmVtZW50T3JkZXIaRQoOQnVpbGRpbmdzRW50cnkSCwoDa2V5GAEgASgJEiIKBXZhbHVlGAIgASgLMhMuc2VydmVyLnYxLkJ1aWxkaW5nOgI4ARo/CgtUcm9vcHNFbnRyeRILCgNrZXkYASABKAkSHwoFdmFsdWUYAiABKAsyEC5zZXJ2ZXIudjEuVHJvb3A6AjgBGkEKDFBsYXllcnNFbnRyeRILCgNrZXkYASABKAkSIAoFdmFsdWUYAiABKAsyES5zZXJ2ZXIudjEuUGxheWVyOgI4ARpFCgtGaWVsZHNFbnRyeRILCgNrZXkYASABKAkSJQoFdmFsdWUYAiABKAsyFi5zZXJ2ZXIudjEuV29ybGQuRmllbGQ6AjgBGkMKDVZpbGxhZ2VzRW50cnkSCwoDa2V5GAEgASgJEiEKBXZhbHVlGAIgASgLMhIuc2VydmVyLnYxLlZpbGxhZ2U6AjgBGkEKDFRlbXBsZXNFbnRyeRILCgNrZXkYASABKAkSIAoFdmFsdWUYAiABKAsyES5zZXJ2ZXIudjEuVGVtcGxlOgI4ARqKAQoFRmllbGQSDgoGY29vcmRzGAEgASgJEikKBGtpbmQYAiABKA4yGy5zZXJ2ZXIudjEuV29ybGQuRmllbGQuS2luZCJGCgRLaW5kEgwKCEtJTkRfRk9HEAASDQoJS0lORF9XSUxEEAESEAoMS0lORF9WSUxMQUdFEAISDwoLS0lORF9URU1QTEUQAyJICghCdWlsZGluZxIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEiIKBGNvc3QYAyADKAsyFC5zZXJ2ZXIudjEuUmVzb3VyY2VzIkUKBVRyb29wEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSIgoEY29zdBgDIAEoCzIULnNlcnZlci52MS5SZXNvdXJjZXMiywEKElRyb29wTW92ZW1lbnRPcmRlchIKCgJpZBgBIAEoCRIVCg1zb3VyY2VfY29vcmRzGAIgASgJEhUKDXRhcmdldF9jb29yZHMYAyABKAkSOQoGdHJvb3BzGAQgAygLMikuc2VydmVyLnYxLlRyb29wTW92ZW1lbnRPcmRlci5Ucm9vcHNFbnRyeRIRCgl0aW1lX2xlZnQYBSABKA0aLQoLVHJvb3BzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgNOgI4ASInCglSZXNvdXJjZXMSDAoEZ29sZBgBIAEoDRIMCgR0aW1lGAIgASgNInIKBlRlbXBsZRIOCgZjb29yZHMYASABKAkSJwoJcmVzb3VyY2VzGAIgASgLMhQuc2VydmVyLnYxLlJlc291cmNlcxIvCglwbGF5ZXJfaWQYAyABKAsyHC5nb29nbGUucHJvdG9idWYuU3RyaW5nVmFsdWUijAYKB1ZpbGxhZ2USDgoGY29vcmRzGAEgASgJEhEKCXBsYXllcl9pZBgCIAEoCRInCglyZXNvdXJjZXMYAyABKAsyFC5zZXJ2ZXIudjEuUmVzb3VyY2VzEjQKCWJ1aWxkaW5ncxgEIAMoCzIhLnNlcnZlci52MS5WaWxsYWdlLkJ1aWxkaW5nc0VudHJ5Ei4KBnRyb29wcxgFIAMoCzIeLnNlcnZlci52MS5WaWxsYWdlLlRyb29wc0VudHJ5EkgKF2J1aWxkaW5nX3VwZ3JhZGVfb3JkZXJzGAYgAygLMicuc2VydmVyLnYxLlZpbGxhZ2UuQnVpbGRpbmdVcGdyYWRlT3JkZXISRAoVdHJvb3BfdHJhaW5pbmdfb3JkZXJzGAcgAygLMiUuc2VydmVyLnYxLlZpbGxhZ2UuVHJvb3BUcmFpbmluZ09yZGVyEkoKGHJlc291cmNlX3RyYW5zZmVyX29yZGVycxgIIAMoCzIoLnNlcnZlci52MS5WaWxsYWdlLlJlc291cmNlVHJhbnNmZXJPcmRlchowCg5CdWlsZGluZ3NFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKA06AjgBGi0KC1Ryb29wc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoDToCOAEaTQoUQnVpbGRpbmdVcGdyYWRlT3JkZXISDQoFbGV2ZWwYASABKA0SEwoLYnVpbGRpbmdfaWQYAiABKAkSEQoJdGltZV9sZWZ0GAMgASgNGksKElRyb29wVHJhaW5pbmdPcmRlchIQCgh0cm9vcF9pZBgBIAEoCRIQCghxdWFudGl0eRgCIAEoDRIRCgl0aW1lX2xlZnQYAyABKA0adgoVUmVzb3VyY2VUcmFuc2Zlck9yZGVyEgoKAmlkGAEgASgJEicKCXJlc291cmNlcxgCIAEoCzIULnNlcnZlci52MS5SZXNvdXJjZXMSFQoNdGFyZ2V0X2Nvb3JkcxgDIAEoCRIRCgl0aW1lX2xlZnQYBCABKA0iFAoGUGxheWVyEgoKAmlkGAEgASgJIhEKD0dldFdvcmxkUmVxdWVzdCIzChBHZXRXb3JsZFJlc3BvbnNlEh8KBXdvcmxkGAEgASgLMhAuc2VydmVyLnYxLldvcmxkIhkKF1N1YnNjcmliZVRvV29ybGRSZXF1ZXN0IsYEChhTdWJzY3JpYmVUb1dvcmxkUmVzcG9uc2USOAoFcGF0Y2gYASABKAsyKS5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlc3BvbnNlLlBhdGNoGu8DCgVQYXRjaBJFCgZmaWVsZHMYBiADKAsyNS5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlc3BvbnNlLlBhdGNoLkZpZWxkc0VudHJ5EkkKCHZpbGxhZ2VzGAcgAygLMjcuc2VydmVyLnYxLlN1YnNjcmliZVRvV29ybGRSZXNwb25zZS5QYXRjaC5WaWxsYWdlc0VudHJ5EkcKB3RlbXBsZXMYCCADKAsyNi5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlc3BvbnNlLlBhdGNoLlRlbXBsZXNFbnRyeRI8ChV0cm9vcF9tb3ZlbWVudF9vcmRlcnMYCSADKAsyHS5zZXJ2ZXIudjEuVHJvb3BNb3ZlbWVudE9yZGVyGkUKC0ZpZWxkc0VudHJ5EgsKA2tleRgBIAEoCRIlCgV2YWx1ZRgCIAEoCzIWLnNlcnZlci52MS5Xb3JsZC5GaWVsZDoCOAEaQwoNVmlsbGFnZXNFbnRyeRILCgNrZXkYASABKAkSIQoFdmFsdWUYAiABKAsyEi5zZXJ2ZXIudjEuVmlsbGFnZToCOAEaQQoMVGVtcGxlc0VudHJ5EgsKA2tleRgBIAEoCRIgCgV2YWx1ZRgCIAEoCzIRLnNlcnZlci52MS5UZW1wbGU6AjgBItABCh5Jc3N1ZVRyb29wTW92ZW1lbnRPcmRlclJlcXVlc3QSCgoCaWQYASABKAkSFQoNc291cmNlX2Nvb3JkcxgCIAEoCRIVCg10YXJnZXRfY29vcmRzGAMgASgJEkUKBnRyb29wcxgEIAMoCzI1LnNlcnZlci52MS5Jc3N1ZVRyb29wTW92ZW1lbnRPcmRlclJlcXVlc3QuVHJvb3BzRW50cnkaLQoLVHJvb3BzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgNOgI4ASIhCh9Jc3N1ZVRyb29wTW92ZW1lbnRPcmRlclJlc3BvbnNlIi0KH0NhbmNlbFRyb29wTW92ZW1lbnRPcmRlclJlcXVlc3QSCgoCaWQYASABKAkiIgogQ2FuY2VsVHJvb3BNb3ZlbWVudE9yZGVyUmVzcG9uc2UiXgogSXNzdWVCdWlsZGluZ1VwZ3JhZGVPcmRlclJlcXVlc3QSFgoOdmlsbGFnZV9jb29yZHMYASABKAkSEwoLYnVpbGRpbmdfaWQYAiABKAkSDQoFbGV2ZWwYAyABKA0iIwohSXNzdWVCdWlsZGluZ1VwZ3JhZGVPcmRlclJlc3BvbnNlIl8KIUNhbmNlbEJ1aWxkaW5nVXBncmFkZU9yZGVyUmVxdWVzdBIWCg52aWxsYWdlX2Nvb3JkcxgBIAEoCRITCgtidWlsZGluZ19pZBgCIAEoCRINCgVsZXZlbBgDIAEoDSIkCiJDYW5jZWxCdWlsZGluZ1VwZ3JhZGVPcmRlclJlc3BvbnNlIlwKHklzc3VlVHJvb3BUcmFpbmluZ09yZGVyUmVxdWVzdBIWCg52aWxsYWdlX2Nvb3JkcxgBIAEoCRIQCgh0cm9vcF9pZBgCIAEoCRIQCghxdWFudGl0eRgDIAEoDSIhCh9Jc3N1ZVRyb29wVHJhaW5pbmdPcmRlclJlc3BvbnNlIl0KH0NhbmNlbFRyb29wVHJhaW5pbmdPcmRlclJlcXVlc3QSFgoOdmlsbGFnZV9jb29yZHMYASABKAkSEAoIdHJvb3BfaWQYAiABKAkSEAoIcXVhbnRpdHkYAyABKA0iIgogQ2FuY2VsVHJvb3BUcmFpbmluZ09yZGVyUmVzcG9uc2UiegohSXNzdWVSZXNvdXJjZVRyYW5zZmVyT3JkZXJSZXF1ZXN0EicKCXJlc291cmNlcxgBIAEoCzIULnNlcnZlci52MS5SZXNvdXJjZXMSFQoNc291cmNlX2Nvb3JkcxgCIAEoCRIVCg10YXJnZXRfY29vcmRzGAMgASgJIl0KIklzc3VlUmVzb3VyY2VUcmFuc2Zlck9yZGVyUmVzcG9uc2USNwoFb3JkZXIYASABKAsyKC5zZXJ2ZXIudjEuVmlsbGFnZS5SZXNvdXJjZVRyYW5zZmVyT3JkZXIiRwoiQ2FuY2VsUmVzb3VyY2VUcmFuc2Zlck9yZGVyUmVxdWVzdBIVCg1zb3VyY2VfY29vcmRzGAEgASgJEgoKAmlkGAIgASgJIiUKI0NhbmNlbFJlc291cmNlVHJhbnNmZXJPcmRlclJlc3BvbnNlMucICgdTZXJ2aWNlEkMKCEdldFdvcmxkEhouc2VydmVyLnYxLkdldFdvcmxkUmVxdWVzdBobLnNlcnZlci52MS5HZXRXb3JsZFJlc3BvbnNlEl0KEFN1YnNjcmliZVRvV29ybGQSIi5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlcXVlc3QaIy5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlc3BvbnNlMAEScAoXSXNzdWVUcm9vcE1vdmVtZW50T3JkZXISKS5zZXJ2ZXIudjEuSXNzdWVUcm9vcE1vdmVtZW50T3JkZXJSZXF1ZXN0Giouc2VydmVyLnYxLklzc3VlVHJvb3BNb3ZlbWVudE9yZGVyUmVzcG9uc2UScwoYQ2FuY2VsVHJvb3BNb3ZlbWVudE9yZGVyEiouc2VydmVyLnYxLkNhbmNlbFRyb29wTW92ZW1lbnRPcmRlclJlcXVlc3QaKy5zZXJ2ZXIudjEuQ2FuY2VsVHJvb3BNb3ZlbWVudE9yZGVyUmVzcG9uc2USdgoZSXNzdWVCdWlsZGluZ1VwZ3JhZGVPcmRlchIrLnNlcnZlci52MS5Jc3N1ZUJ1aWxkaW5nVXBncmFkZU9yZGVyUmVxdWVzdBosLnNlcnZlci52MS5Jc3N1ZUJ1aWxkaW5nVXBncmFkZU9yZGVyUmVzcG9uc2USeQoaQ2FuY2VsQnVpbGRpbmdVcGdyYWRlT3JkZXISLC5zZXJ2ZXIudjEuQ2FuY2VsQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXF1ZXN0Gi0uc2VydmVyLnYxLkNhbmNlbEJ1aWxkaW5nVXBncmFkZU9yZGVyUmVzcG9uc2UScAoXSXNzdWVUcm9vcFRyYWluaW5nT3JkZXISKS5zZXJ2ZXIudjEuSXNzdWVUcm9vcFRyYWluaW5nT3JkZXJSZXF1ZXN0Giouc2VydmVyLnYxLklzc3VlVHJvb3BUcmFpbmluZ09yZGVyUmVzcG9uc2UScwoYQ2FuY2VsVHJvb3BUcmFpbmluZ09yZGVyEiouc2VydmVyLnYxLkNhbmNlbFRyb29wVHJhaW5pbmdPcmRlclJlcXVlc3QaKy5zZXJ2ZXIudjEuQ2FuY2VsVHJvb3BUcmFpbmluZ09yZGVyUmVzcG9uc2USeQoaSXNzdWVSZXNvdXJjZVRyYW5zZmVyT3JkZXISLC5zZXJ2ZXIudjEuSXNzdWVSZXNvdXJjZVRyYW5zZmVyT3JkZXJSZXF1ZXN0Gi0uc2VydmVyLnYxLklzc3VlUmVzb3VyY2VUcmFuc2Zlck9yZGVyUmVzcG9uc2USfAobQ2FuY2VsUmVzb3VyY2VUcmFuc2Zlck9yZGVyEi0uc2VydmVyLnYxLkNhbmNlbFJlc291cmNlVHJhbnNmZXJPcmRlclJlcXVlc3QaLi5zZXJ2ZXIudjEuQ2FuY2VsUmVzb3VyY2VUcmFuc2Zlck9yZGVyUmVzcG9uc2VCLlosd2FyLW9mLWZhaXRoL3BrZy9wcm90b2J1Zi9zZXJ2ZXIvdjE7c2VydmVydjFiBnByb3RvMw", [file_google_protobuf_wrappers]);
+  fileDesc("ChZzZXJ2ZXIvdjEvc2VydmVyLnByb3RvEglzZXJ2ZXIudjEiywkKBVdvcmxkEg0KBXdpZHRoGAEgASgNEg4KBmhlaWdodBgCIAEoDRIyCglidWlsZGluZ3MYAyADKAsyHy5zZXJ2ZXIudjEuV29ybGQuQnVpbGRpbmdzRW50cnkSLAoGdHJvb3BzGAQgAygLMhwuc2VydmVyLnYxLldvcmxkLlRyb29wc0VudHJ5Ei4KB3BsYXllcnMYBSADKAsyHS5zZXJ2ZXIudjEuV29ybGQuUGxheWVyc0VudHJ5EiwKBmZpZWxkcxgGIAMoCzIcLnNlcnZlci52MS5Xb3JsZC5GaWVsZHNFbnRyeRIwCgh2aWxsYWdlcxgHIAMoCzIeLnNlcnZlci52MS5Xb3JsZC5WaWxsYWdlc0VudHJ5Ei4KB3RlbXBsZXMYCCADKAsyHS5zZXJ2ZXIudjEuV29ybGQuVGVtcGxlc0VudHJ5EjEKD21vdmVtZW50X29yZGVycxgJIAMoCzIYLnNlcnZlci52MS5Nb3ZlbWVudE9yZGVyGkUKDkJ1aWxkaW5nc0VudHJ5EgsKA2tleRgBIAEoCRIiCgV2YWx1ZRgCIAEoCzITLnNlcnZlci52MS5CdWlsZGluZzoCOAEaPwoLVHJvb3BzRW50cnkSCwoDa2V5GAEgASgJEh8KBXZhbHVlGAIgASgLMhAuc2VydmVyLnYxLlRyb29wOgI4ARpBCgxQbGF5ZXJzRW50cnkSCwoDa2V5GAEgASgJEiAKBXZhbHVlGAIgASgLMhEuc2VydmVyLnYxLlBsYXllcjoCOAEaRQoLRmllbGRzRW50cnkSCwoDa2V5GAEgASgJEiUKBXZhbHVlGAIgASgLMhYuc2VydmVyLnYxLldvcmxkLkZpZWxkOgI4ARpDCg1WaWxsYWdlc0VudHJ5EgsKA2tleRgBIAEoCRIhCgV2YWx1ZRgCIAEoCzISLnNlcnZlci52MS5WaWxsYWdlOgI4ARpBCgxUZW1wbGVzRW50cnkSCwoDa2V5GAEgASgJEiAKBXZhbHVlGAIgASgLMhEuc2VydmVyLnYxLlRlbXBsZToCOAEaswMKBUZpZWxkEg4KBmNvb3JkcxgBIAEoCRIpCgRraW5kGAIgASgOMhsuc2VydmVyLnYxLldvcmxkLkZpZWxkLktpbmQSJwoJcmVzb3VyY2VzGAMgASgLMhQuc2VydmVyLnYxLlJlc291cmNlcxI4CglidWlsZGluZ3MYBCADKAsyJS5zZXJ2ZXIudjEuV29ybGQuRmllbGQuQnVpbGRpbmdzRW50cnkSMgoGdHJvb3BzGAUgAygLMiIuc2VydmVyLnYxLldvcmxkLkZpZWxkLlRyb29wc0VudHJ5Ei8KCXBsYXllcl9pZBgGIAEoCzIcLmdvb2dsZS5wcm90b2J1Zi5TdHJpbmdWYWx1ZRowCg5CdWlsZGluZ3NFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKA06AjgBGi0KC1Ryb29wc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoDToCOAEiRgoES2luZBIMCghLSU5EX0ZPRxAAEg0KCUtJTkRfV0lMRBABEhAKDEtJTkRfVklMTEFHRRACEg8KC0tJTkRfVEVNUExFEAMiSAoIQnVpbGRpbmcSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIiCgRjb3N0GAMgAygLMhQuc2VydmVyLnYxLlJlc291cmNlcyJFCgVUcm9vcBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEiIKBGNvc3QYAyABKAsyFC5zZXJ2ZXIudjEuUmVzb3VyY2VzIo8CCg1Nb3ZlbWVudE9yZGVyEgoKAmlkGAEgASgJEhUKDXNvdXJjZV9jb29yZHMYAiABKAkSFQoNdGFyZ2V0X2Nvb3JkcxgDIAEoCRI0CgZ0cm9vcHMYBCADKAsyJC5zZXJ2ZXIudjEuTW92ZW1lbnRPcmRlci5Ucm9vcHNFbnRyeRInCglyZXNvdXJjZXMYBSABKAsyFC5zZXJ2ZXIudjEuUmVzb3VyY2VzEhEKCXRpbWVfbGVmdBgGIAEoDRIRCglwbGF5ZXJfaWQYByABKAkSEAoIY29tZWJhY2sYCCABKAgaLQoLVHJvb3BzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgNOgI4ASInCglSZXNvdXJjZXMSDAoEZ29sZBgBIAEoDRIMCgR0aW1lGAIgASgNIggKBlRlbXBsZSK1AgoHVmlsbGFnZRJIChdidWlsZGluZ191cGdyYWRlX29yZGVycxgBIAMoCzInLnNlcnZlci52MS5WaWxsYWdlLkJ1aWxkaW5nVXBncmFkZU9yZGVyEkQKFXRyb29wX3RyYWluaW5nX29yZGVycxgCIAMoCzIlLnNlcnZlci52MS5WaWxsYWdlLlRyb29wVHJhaW5pbmdPcmRlchpNChRCdWlsZGluZ1VwZ3JhZGVPcmRlchINCgVsZXZlbBgBIAEoDRITCgtidWlsZGluZ19pZBgCIAEoCRIRCgl0aW1lX2xlZnQYAyABKA0aSwoSVHJvb3BUcmFpbmluZ09yZGVyEhAKCHRyb29wX2lkGAEgASgJEhAKCHF1YW50aXR5GAIgASgNEhEKCXRpbWVfbGVmdBgDIAEoDSIUCgZQbGF5ZXISCgoCaWQYASABKAkiEQoPR2V0V29ybGRSZXF1ZXN0IjMKEEdldFdvcmxkUmVzcG9uc2USHwoFd29ybGQYASABKAsyEC5zZXJ2ZXIudjEuV29ybGQiGQoXU3Vic2NyaWJlVG9Xb3JsZFJlcXVlc3QiuwQKGFN1YnNjcmliZVRvV29ybGRSZXNwb25zZRI4CgVwYXRjaBgBIAEoCzIpLnNlcnZlci52MS5TdWJzY3JpYmVUb1dvcmxkUmVzcG9uc2UuUGF0Y2ga5AMKBVBhdGNoEkUKBmZpZWxkcxgGIAMoCzI1LnNlcnZlci52MS5TdWJzY3JpYmVUb1dvcmxkUmVzcG9uc2UuUGF0Y2guRmllbGRzRW50cnkSSQoIdmlsbGFnZXMYByADKAsyNy5zZXJ2ZXIudjEuU3Vic2NyaWJlVG9Xb3JsZFJlc3BvbnNlLlBhdGNoLlZpbGxhZ2VzRW50cnkSRwoHdGVtcGxlcxgIIAMoCzI2LnNlcnZlci52MS5TdWJzY3JpYmVUb1dvcmxkUmVzcG9uc2UuUGF0Y2guVGVtcGxlc0VudHJ5EjEKD21vdmVtZW50X29yZGVycxgJIAMoCzIYLnNlcnZlci52MS5Nb3ZlbWVudE9yZGVyGkUKC0ZpZWxkc0VudHJ5EgsKA2tleRgBIAEoCRIlCgV2YWx1ZRgCIAEoCzIWLnNlcnZlci52MS5Xb3JsZC5GaWVsZDoCOAEaQwoNVmlsbGFnZXNFbnRyeRILCgNrZXkYASABKAkSIQoFdmFsdWUYAiABKAsyEi5zZXJ2ZXIudjEuVmlsbGFnZToCOAEaQQoMVGVtcGxlc0VudHJ5EgsKA2tleRgBIAEoCRIgCgV2YWx1ZRgCIAEoCzIRLnNlcnZlci52MS5UZW1wbGU6AjgBIu8BChlJc3N1ZU1vdmVtZW50T3JkZXJSZXF1ZXN0EgoKAmlkGAEgASgJEhUKDXNvdXJjZV9jb29yZHMYAiABKAkSFQoNdGFyZ2V0X2Nvb3JkcxgDIAEoCRJACgZ0cm9vcHMYBCADKAsyMC5zZXJ2ZXIudjEuSXNzdWVNb3ZlbWVudE9yZGVyUmVxdWVzdC5Ucm9vcHNFbnRyeRInCglyZXNvdXJjZXMYBSABKAsyFC5zZXJ2ZXIudjEuUmVzb3VyY2VzGi0KC1Ryb29wc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoDToCOAEiHAoaSXNzdWVNb3ZlbWVudE9yZGVyUmVzcG9uc2UiKAoaQ2FuY2VsTW92ZW1lbnRPcmRlclJlcXVlc3QSCgoCaWQYASABKAkiHQobQ2FuY2VsTW92ZW1lbnRPcmRlclJlc3BvbnNlIl4KIElzc3VlQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXF1ZXN0EhYKDnZpbGxhZ2VfY29vcmRzGAEgASgJEhMKC2J1aWxkaW5nX2lkGAIgASgJEg0KBWxldmVsGAMgASgNIiMKIUlzc3VlQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXNwb25zZSJfCiFDYW5jZWxCdWlsZGluZ1VwZ3JhZGVPcmRlclJlcXVlc3QSFgoOdmlsbGFnZV9jb29yZHMYASABKAkSEwoLYnVpbGRpbmdfaWQYAiABKAkSDQoFbGV2ZWwYAyABKA0iJAoiQ2FuY2VsQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXNwb25zZSJXChlJc3N1ZVRyYWluaW5nT3JkZXJSZXF1ZXN0EhYKDnZpbGxhZ2VfY29vcmRzGAEgASgJEhAKCHRyb29wX2lkGAIgASgJEhAKCHF1YW50aXR5GAMgASgNIhwKGklzc3VlVHJhaW5pbmdPcmRlclJlc3BvbnNlIl0KH0NhbmNlbFRyb29wVHJhaW5pbmdPcmRlclJlcXVlc3QSFgoOdmlsbGFnZV9jb29yZHMYASABKAkSEAoIdHJvb3BfaWQYAiABKAkSEAoIcXVhbnRpdHkYAyABKA0iIgogQ2FuY2VsVHJvb3BUcmFpbmluZ09yZGVyUmVzcG9uc2UywQYKB1NlcnZpY2USQwoIR2V0V29ybGQSGi5zZXJ2ZXIudjEuR2V0V29ybGRSZXF1ZXN0Ghsuc2VydmVyLnYxLkdldFdvcmxkUmVzcG9uc2USXQoQU3Vic2NyaWJlVG9Xb3JsZBIiLnNlcnZlci52MS5TdWJzY3JpYmVUb1dvcmxkUmVxdWVzdBojLnNlcnZlci52MS5TdWJzY3JpYmVUb1dvcmxkUmVzcG9uc2UwARJhChJJc3N1ZU1vdmVtZW50T3JkZXISJC5zZXJ2ZXIudjEuSXNzdWVNb3ZlbWVudE9yZGVyUmVxdWVzdBolLnNlcnZlci52MS5Jc3N1ZU1vdmVtZW50T3JkZXJSZXNwb25zZRJkChNDYW5jZWxNb3ZlbWVudE9yZGVyEiUuc2VydmVyLnYxLkNhbmNlbE1vdmVtZW50T3JkZXJSZXF1ZXN0GiYuc2VydmVyLnYxLkNhbmNlbE1vdmVtZW50T3JkZXJSZXNwb25zZRJ2ChlJc3N1ZUJ1aWxkaW5nVXBncmFkZU9yZGVyEisuc2VydmVyLnYxLklzc3VlQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXF1ZXN0Giwuc2VydmVyLnYxLklzc3VlQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXNwb25zZRJ5ChpDYW5jZWxCdWlsZGluZ1VwZ3JhZGVPcmRlchIsLnNlcnZlci52MS5DYW5jZWxCdWlsZGluZ1VwZ3JhZGVPcmRlclJlcXVlc3QaLS5zZXJ2ZXIudjEuQ2FuY2VsQnVpbGRpbmdVcGdyYWRlT3JkZXJSZXNwb25zZRJhChJJc3N1ZVRyYWluaW5nT3JkZXISJC5zZXJ2ZXIudjEuSXNzdWVUcmFpbmluZ09yZGVyUmVxdWVzdBolLnNlcnZlci52MS5Jc3N1ZVRyYWluaW5nT3JkZXJSZXNwb25zZRJzChhDYW5jZWxUcm9vcFRyYWluaW5nT3JkZXISKi5zZXJ2ZXIudjEuQ2FuY2VsVHJvb3BUcmFpbmluZ09yZGVyUmVxdWVzdBorLnNlcnZlci52MS5DYW5jZWxUcm9vcFRyYWluaW5nT3JkZXJSZXNwb25zZUIuWix3YXItb2YtZmFpdGgvcGtnL3Byb3RvYnVmL3NlcnZlci92MTtzZXJ2ZXJ2MWIGcHJvdG8z", [file_google_protobuf_wrappers]);
 
 /**
  * @generated from message server.v1.World
@@ -72,9 +72,9 @@ export type World = Message<"server.v1.World"> & {
   /**
    * Affected by player pov
    *
-   * @generated from field: repeated server.v1.TroopMovementOrder troop_movement_orders = 9;
+   * @generated from field: repeated server.v1.MovementOrder movement_orders = 9;
    */
-  troopMovementOrders: TroopMovementOrder[];
+  movementOrders: MovementOrder[];
 };
 
 /**
@@ -99,6 +99,34 @@ export type World_Field = Message<"server.v1.World.Field"> & {
    * @generated from field: server.v1.World.Field.Kind kind = 2;
    */
   kind: World_Field_Kind;
+
+  /**
+   * Affected by player pov
+   *
+   * @generated from field: server.v1.Resources resources = 3;
+   */
+  resources?: Resources;
+
+  /**
+   * key: building_id, Affected by player pov
+   *
+   * @generated from field: map<string, uint32> buildings = 4;
+   */
+  buildings: { [key: string]: number };
+
+  /**
+   * key: troop_id, Affected by player pov
+   *
+   * @generated from field: map<string, uint32> troops = 5;
+   */
+  troops: { [key: string]: number };
+
+  /**
+   * Affected by player pov
+   *
+   * @generated from field: google.protobuf.StringValue player_id = 6;
+   */
+  playerId?: string;
 };
 
 /**
@@ -198,9 +226,9 @@ export const TroopSchema: GenMessage<Troop> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 2);
 
 /**
- * @generated from message server.v1.TroopMovementOrder
+ * @generated from message server.v1.MovementOrder
  */
-export type TroopMovementOrder = Message<"server.v1.TroopMovementOrder"> & {
+export type MovementOrder = Message<"server.v1.MovementOrder"> & {
   /**
    * @generated from field: string id = 1;
    */
@@ -224,16 +252,31 @@ export type TroopMovementOrder = Message<"server.v1.TroopMovementOrder"> & {
   troops: { [key: string]: number };
 
   /**
-   * @generated from field: uint32 time_left = 5;
+   * @generated from field: server.v1.Resources resources = 5;
+   */
+  resources?: Resources;
+
+  /**
+   * @generated from field: uint32 time_left = 6;
    */
   timeLeft: number;
+
+  /**
+   * @generated from field: string player_id = 7;
+   */
+  playerId: string;
+
+  /**
+   * @generated from field: bool comeback = 8;
+   */
+  comeback: boolean;
 };
 
 /**
- * Describes the message server.v1.TroopMovementOrder.
- * Use `create(TroopMovementOrderSchema)` to create a new message.
+ * Describes the message server.v1.MovementOrder.
+ * Use `create(MovementOrderSchema)` to create a new message.
  */
-export const TroopMovementOrderSchema: GenMessage<TroopMovementOrder> = /*@__PURE__*/
+export const MovementOrderSchema: GenMessage<MovementOrder> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 3);
 
 /**
@@ -262,20 +305,6 @@ export const ResourcesSchema: GenMessage<Resources> = /*@__PURE__*/
  * @generated from message server.v1.Temple
  */
 export type Temple = Message<"server.v1.Temple"> & {
-  /**
-   * @generated from field: string coords = 1;
-   */
-  coords: string;
-
-  /**
-   * @generated from field: server.v1.Resources resources = 2;
-   */
-  resources?: Resources;
-
-  /**
-   * @generated from field: google.protobuf.StringValue player_id = 3;
-   */
-  playerId?: string;
 };
 
 /**
@@ -290,48 +319,14 @@ export const TempleSchema: GenMessage<Temple> = /*@__PURE__*/
  */
 export type Village = Message<"server.v1.Village"> & {
   /**
-   * @generated from field: string coords = 1;
-   */
-  coords: string;
-
-  /**
-   * @generated from field: string player_id = 2;
-   */
-  playerId: string;
-
-  /**
-   * @generated from field: server.v1.Resources resources = 3;
-   */
-  resources?: Resources;
-
-  /**
-   * key: building_id
-   *
-   * @generated from field: map<string, uint32> buildings = 4;
-   */
-  buildings: { [key: string]: number };
-
-  /**
-   * key: troop_id
-   *
-   * @generated from field: map<string, uint32> troops = 5;
-   */
-  troops: { [key: string]: number };
-
-  /**
-   * @generated from field: repeated server.v1.Village.BuildingUpgradeOrder building_upgrade_orders = 6;
+   * @generated from field: repeated server.v1.Village.BuildingUpgradeOrder building_upgrade_orders = 1;
    */
   buildingUpgradeOrders: Village_BuildingUpgradeOrder[];
 
   /**
-   * @generated from field: repeated server.v1.Village.TroopTrainingOrder troop_training_orders = 7;
+   * @generated from field: repeated server.v1.Village.TroopTrainingOrder troop_training_orders = 2;
    */
   troopTrainingOrders: Village_TroopTrainingOrder[];
-
-  /**
-   * @generated from field: repeated server.v1.Village.ResourceTransferOrder resource_transfer_orders = 8;
-   */
-  resourceTransferOrders: Village_ResourceTransferOrder[];
 };
 
 /**
@@ -394,38 +389,6 @@ export type Village_TroopTrainingOrder = Message<"server.v1.Village.TroopTrainin
  */
 export const Village_TroopTrainingOrderSchema: GenMessage<Village_TroopTrainingOrder> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 6, 1);
-
-/**
- * @generated from message server.v1.Village.ResourceTransferOrder
- */
-export type Village_ResourceTransferOrder = Message<"server.v1.Village.ResourceTransferOrder"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: server.v1.Resources resources = 2;
-   */
-  resources?: Resources;
-
-  /**
-   * @generated from field: string target_coords = 3;
-   */
-  targetCoords: string;
-
-  /**
-   * @generated from field: uint32 time_left = 4;
-   */
-  timeLeft: number;
-};
-
-/**
- * Describes the message server.v1.Village.ResourceTransferOrder.
- * Use `create(Village_ResourceTransferOrderSchema)` to create a new message.
- */
-export const Village_ResourceTransferOrderSchema: GenMessage<Village_ResourceTransferOrder> = /*@__PURE__*/
-  messageDesc(file_server_v1_server, 6, 2);
 
 /**
  * @generated from message server.v1.Player
@@ -536,9 +499,9 @@ export type SubscribeToWorldResponse_Patch = Message<"server.v1.SubscribeToWorld
   /**
    * Affected by player pov
    *
-   * @generated from field: repeated server.v1.TroopMovementOrder troop_movement_orders = 9;
+   * @generated from field: repeated server.v1.MovementOrder movement_orders = 9;
    */
-  troopMovementOrders: TroopMovementOrder[];
+  movementOrders: MovementOrder[];
 };
 
 /**
@@ -549,11 +512,11 @@ export const SubscribeToWorldResponse_PatchSchema: GenMessage<SubscribeToWorldRe
   messageDesc(file_server_v1_server, 11, 0);
 
 /**
- * IssueTroopMovementOrder
+ * IssueMovementOrder
  *
- * @generated from message server.v1.IssueTroopMovementOrderRequest
+ * @generated from message server.v1.IssueMovementOrderRequest
  */
-export type IssueTroopMovementOrderRequest = Message<"server.v1.IssueTroopMovementOrderRequest"> & {
+export type IssueMovementOrderRequest = Message<"server.v1.IssueMovementOrderRequest"> & {
   /**
    * @generated from field: string id = 1;
    */
@@ -575,34 +538,39 @@ export type IssueTroopMovementOrderRequest = Message<"server.v1.IssueTroopMoveme
    * @generated from field: map<string, uint32> troops = 4;
    */
   troops: { [key: string]: number };
+
+  /**
+   * @generated from field: server.v1.Resources resources = 5;
+   */
+  resources?: Resources;
 };
 
 /**
- * Describes the message server.v1.IssueTroopMovementOrderRequest.
- * Use `create(IssueTroopMovementOrderRequestSchema)` to create a new message.
+ * Describes the message server.v1.IssueMovementOrderRequest.
+ * Use `create(IssueMovementOrderRequestSchema)` to create a new message.
  */
-export const IssueTroopMovementOrderRequestSchema: GenMessage<IssueTroopMovementOrderRequest> = /*@__PURE__*/
+export const IssueMovementOrderRequestSchema: GenMessage<IssueMovementOrderRequest> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 12);
 
 /**
- * @generated from message server.v1.IssueTroopMovementOrderResponse
+ * @generated from message server.v1.IssueMovementOrderResponse
  */
-export type IssueTroopMovementOrderResponse = Message<"server.v1.IssueTroopMovementOrderResponse"> & {
+export type IssueMovementOrderResponse = Message<"server.v1.IssueMovementOrderResponse"> & {
 };
 
 /**
- * Describes the message server.v1.IssueTroopMovementOrderResponse.
- * Use `create(IssueTroopMovementOrderResponseSchema)` to create a new message.
+ * Describes the message server.v1.IssueMovementOrderResponse.
+ * Use `create(IssueMovementOrderResponseSchema)` to create a new message.
  */
-export const IssueTroopMovementOrderResponseSchema: GenMessage<IssueTroopMovementOrderResponse> = /*@__PURE__*/
+export const IssueMovementOrderResponseSchema: GenMessage<IssueMovementOrderResponse> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 13);
 
 /**
- * CancelTroopMovementOrder
+ * CancelMovementOrder
  *
- * @generated from message server.v1.CancelTroopMovementOrderRequest
+ * @generated from message server.v1.CancelMovementOrderRequest
  */
-export type CancelTroopMovementOrderRequest = Message<"server.v1.CancelTroopMovementOrderRequest"> & {
+export type CancelMovementOrderRequest = Message<"server.v1.CancelMovementOrderRequest"> & {
   /**
    * @generated from field: string id = 1;
    */
@@ -610,23 +578,23 @@ export type CancelTroopMovementOrderRequest = Message<"server.v1.CancelTroopMove
 };
 
 /**
- * Describes the message server.v1.CancelTroopMovementOrderRequest.
- * Use `create(CancelTroopMovementOrderRequestSchema)` to create a new message.
+ * Describes the message server.v1.CancelMovementOrderRequest.
+ * Use `create(CancelMovementOrderRequestSchema)` to create a new message.
  */
-export const CancelTroopMovementOrderRequestSchema: GenMessage<CancelTroopMovementOrderRequest> = /*@__PURE__*/
+export const CancelMovementOrderRequestSchema: GenMessage<CancelMovementOrderRequest> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 14);
 
 /**
- * @generated from message server.v1.CancelTroopMovementOrderResponse
+ * @generated from message server.v1.CancelMovementOrderResponse
  */
-export type CancelTroopMovementOrderResponse = Message<"server.v1.CancelTroopMovementOrderResponse"> & {
+export type CancelMovementOrderResponse = Message<"server.v1.CancelMovementOrderResponse"> & {
 };
 
 /**
- * Describes the message server.v1.CancelTroopMovementOrderResponse.
- * Use `create(CancelTroopMovementOrderResponseSchema)` to create a new message.
+ * Describes the message server.v1.CancelMovementOrderResponse.
+ * Use `create(CancelMovementOrderResponseSchema)` to create a new message.
  */
-export const CancelTroopMovementOrderResponseSchema: GenMessage<CancelTroopMovementOrderResponse> = /*@__PURE__*/
+export const CancelMovementOrderResponseSchema: GenMessage<CancelMovementOrderResponse> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 15);
 
 /**
@@ -714,11 +682,11 @@ export const CancelBuildingUpgradeOrderResponseSchema: GenMessage<CancelBuilding
   messageDesc(file_server_v1_server, 19);
 
 /**
- * IssueTroopTrainingOrder
+ * IssueTrainingOrder
  *
- * @generated from message server.v1.IssueTroopTrainingOrderRequest
+ * @generated from message server.v1.IssueTrainingOrderRequest
  */
-export type IssueTroopTrainingOrderRequest = Message<"server.v1.IssueTroopTrainingOrderRequest"> & {
+export type IssueTrainingOrderRequest = Message<"server.v1.IssueTrainingOrderRequest"> & {
   /**
    * @generated from field: string village_coords = 1;
    */
@@ -736,23 +704,23 @@ export type IssueTroopTrainingOrderRequest = Message<"server.v1.IssueTroopTraini
 };
 
 /**
- * Describes the message server.v1.IssueTroopTrainingOrderRequest.
- * Use `create(IssueTroopTrainingOrderRequestSchema)` to create a new message.
+ * Describes the message server.v1.IssueTrainingOrderRequest.
+ * Use `create(IssueTrainingOrderRequestSchema)` to create a new message.
  */
-export const IssueTroopTrainingOrderRequestSchema: GenMessage<IssueTroopTrainingOrderRequest> = /*@__PURE__*/
+export const IssueTrainingOrderRequestSchema: GenMessage<IssueTrainingOrderRequest> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 20);
 
 /**
- * @generated from message server.v1.IssueTroopTrainingOrderResponse
+ * @generated from message server.v1.IssueTrainingOrderResponse
  */
-export type IssueTroopTrainingOrderResponse = Message<"server.v1.IssueTroopTrainingOrderResponse"> & {
+export type IssueTrainingOrderResponse = Message<"server.v1.IssueTrainingOrderResponse"> & {
 };
 
 /**
- * Describes the message server.v1.IssueTroopTrainingOrderResponse.
- * Use `create(IssueTroopTrainingOrderResponseSchema)` to create a new message.
+ * Describes the message server.v1.IssueTrainingOrderResponse.
+ * Use `create(IssueTrainingOrderResponseSchema)` to create a new message.
  */
-export const IssueTroopTrainingOrderResponseSchema: GenMessage<IssueTroopTrainingOrderResponse> = /*@__PURE__*/
+export const IssueTrainingOrderResponseSchema: GenMessage<IssueTrainingOrderResponse> = /*@__PURE__*/
   messageDesc(file_server_v1_server, 21);
 
 /**
@@ -798,89 +766,6 @@ export const CancelTroopTrainingOrderResponseSchema: GenMessage<CancelTroopTrain
   messageDesc(file_server_v1_server, 23);
 
 /**
- * IssueResourceTransferOrder
- *
- * @generated from message server.v1.IssueResourceTransferOrderRequest
- */
-export type IssueResourceTransferOrderRequest = Message<"server.v1.IssueResourceTransferOrderRequest"> & {
-  /**
-   * @generated from field: server.v1.Resources resources = 1;
-   */
-  resources?: Resources;
-
-  /**
-   * @generated from field: string source_coords = 2;
-   */
-  sourceCoords: string;
-
-  /**
-   * @generated from field: string target_coords = 3;
-   */
-  targetCoords: string;
-};
-
-/**
- * Describes the message server.v1.IssueResourceTransferOrderRequest.
- * Use `create(IssueResourceTransferOrderRequestSchema)` to create a new message.
- */
-export const IssueResourceTransferOrderRequestSchema: GenMessage<IssueResourceTransferOrderRequest> = /*@__PURE__*/
-  messageDesc(file_server_v1_server, 24);
-
-/**
- * @generated from message server.v1.IssueResourceTransferOrderResponse
- */
-export type IssueResourceTransferOrderResponse = Message<"server.v1.IssueResourceTransferOrderResponse"> & {
-  /**
-   * @generated from field: server.v1.Village.ResourceTransferOrder order = 1;
-   */
-  order?: Village_ResourceTransferOrder;
-};
-
-/**
- * Describes the message server.v1.IssueResourceTransferOrderResponse.
- * Use `create(IssueResourceTransferOrderResponseSchema)` to create a new message.
- */
-export const IssueResourceTransferOrderResponseSchema: GenMessage<IssueResourceTransferOrderResponse> = /*@__PURE__*/
-  messageDesc(file_server_v1_server, 25);
-
-/**
- * CancelResourceTransferOrder
- *
- * @generated from message server.v1.CancelResourceTransferOrderRequest
- */
-export type CancelResourceTransferOrderRequest = Message<"server.v1.CancelResourceTransferOrderRequest"> & {
-  /**
-   * @generated from field: string source_coords = 1;
-   */
-  sourceCoords: string;
-
-  /**
-   * @generated from field: string id = 2;
-   */
-  id: string;
-};
-
-/**
- * Describes the message server.v1.CancelResourceTransferOrderRequest.
- * Use `create(CancelResourceTransferOrderRequestSchema)` to create a new message.
- */
-export const CancelResourceTransferOrderRequestSchema: GenMessage<CancelResourceTransferOrderRequest> = /*@__PURE__*/
-  messageDesc(file_server_v1_server, 26);
-
-/**
- * @generated from message server.v1.CancelResourceTransferOrderResponse
- */
-export type CancelResourceTransferOrderResponse = Message<"server.v1.CancelResourceTransferOrderResponse"> & {
-};
-
-/**
- * Describes the message server.v1.CancelResourceTransferOrderResponse.
- * Use `create(CancelResourceTransferOrderResponseSchema)` to create a new message.
- */
-export const CancelResourceTransferOrderResponseSchema: GenMessage<CancelResourceTransferOrderResponse> = /*@__PURE__*/
-  messageDesc(file_server_v1_server, 27);
-
-/**
  * @generated from service server.v1.Service
  */
 export const Service: GenService<{
@@ -903,20 +788,20 @@ export const Service: GenService<{
     output: typeof SubscribeToWorldResponseSchema;
   },
   /**
-   * @generated from rpc server.v1.Service.IssueTroopMovementOrder
+   * @generated from rpc server.v1.Service.IssueMovementOrder
    */
-  issueTroopMovementOrder: {
+  issueMovementOrder: {
     methodKind: "unary";
-    input: typeof IssueTroopMovementOrderRequestSchema;
-    output: typeof IssueTroopMovementOrderResponseSchema;
+    input: typeof IssueMovementOrderRequestSchema;
+    output: typeof IssueMovementOrderResponseSchema;
   },
   /**
-   * @generated from rpc server.v1.Service.CancelTroopMovementOrder
+   * @generated from rpc server.v1.Service.CancelMovementOrder
    */
-  cancelTroopMovementOrder: {
+  cancelMovementOrder: {
     methodKind: "unary";
-    input: typeof CancelTroopMovementOrderRequestSchema;
-    output: typeof CancelTroopMovementOrderResponseSchema;
+    input: typeof CancelMovementOrderRequestSchema;
+    output: typeof CancelMovementOrderResponseSchema;
   },
   /**
    * VILLAGES 
@@ -937,12 +822,12 @@ export const Service: GenService<{
     output: typeof CancelBuildingUpgradeOrderResponseSchema;
   },
   /**
-   * @generated from rpc server.v1.Service.IssueTroopTrainingOrder
+   * @generated from rpc server.v1.Service.IssueTrainingOrder
    */
-  issueTroopTrainingOrder: {
+  issueTrainingOrder: {
     methodKind: "unary";
-    input: typeof IssueTroopTrainingOrderRequestSchema;
-    output: typeof IssueTroopTrainingOrderResponseSchema;
+    input: typeof IssueTrainingOrderRequestSchema;
+    output: typeof IssueTrainingOrderResponseSchema;
   },
   /**
    * @generated from rpc server.v1.Service.CancelTroopTrainingOrder
@@ -951,22 +836,6 @@ export const Service: GenService<{
     methodKind: "unary";
     input: typeof CancelTroopTrainingOrderRequestSchema;
     output: typeof CancelTroopTrainingOrderResponseSchema;
-  },
-  /**
-   * @generated from rpc server.v1.Service.IssueResourceTransferOrder
-   */
-  issueResourceTransferOrder: {
-    methodKind: "unary";
-    input: typeof IssueResourceTransferOrderRequestSchema;
-    output: typeof IssueResourceTransferOrderResponseSchema;
-  },
-  /**
-   * @generated from rpc server.v1.Service.CancelResourceTransferOrder
-   */
-  cancelResourceTransferOrder: {
-    methodKind: "unary";
-    input: typeof CancelResourceTransferOrderRequestSchema;
-    output: typeof CancelResourceTransferOrderResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_server_v1_server, 0);

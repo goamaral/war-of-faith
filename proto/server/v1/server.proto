@@ -15,11 +15,15 @@ message World {
   map<string, World.Field> fields = 6; // key: coords
   map<string, Village> villages = 7; // key: village_coords, Affected by player pov
   map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
-  repeated TroopMovementOrder troop_movement_orders = 9; // Affected by player pov
+  repeated MovementOrder movement_orders = 9; // Affected by player pov
 
   message Field {
     string coords = 1;
     Kind kind = 2; // Affected by player pov
+    Resources resources = 3; // Affected by player pov
+    map<string, uint32> buildings = 4; // key: building_id, Affected by player pov
+    map<string, uint32> troops = 5; // key: troop_id, Affected by player pov
+    google.protobuf.StringValue player_id = 6; // Affected by player pov
 
     // buf:lint:ignore ENUM_ZERO_VALUE_SUFFIX
     enum Kind {
@@ -43,12 +47,15 @@ message Troop {
   Resources cost = 3;
 }
 
-message TroopMovementOrder {
+message MovementOrder {
   string id = 1;
   string source_coords = 2;
   string target_coords = 3;
   map<string, uint32> troops = 4; // key: troop_id
-  uint32 time_left = 5;
+  Resources resources = 5;
+  uint32 time_left = 6;
+  string player_id = 7;
+  bool comeback = 8;
 }
 
 message Resources {
@@ -56,21 +63,11 @@ message Resources {
   uint32 time = 2;
 }
 
-message Temple {
-  string coords = 1;
-  Resources resources = 2;
-  google.protobuf.StringValue player_id = 3;
-}
+message Temple {}
 
 message Village {
-  string coords = 1;
-  string player_id = 2;
-  Resources resources = 3;
-  map<string, uint32> buildings = 4; // key: building_id
-  map<string, uint32> troops = 5; // key: troop_id
-  repeated BuildingUpgradeOrder building_upgrade_orders = 6;
-  repeated TroopTrainingOrder troop_training_orders = 7;
-  repeated ResourceTransferOrder resource_transfer_orders = 8;
+  repeated BuildingUpgradeOrder building_upgrade_orders = 1;
+  repeated TroopTrainingOrder troop_training_orders = 2;
 
   message BuildingUpgradeOrder {
     uint32 level = 1;
@@ -82,13 +79,6 @@ message Village {
     string troop_id = 1;
     uint32 quantity = 2;
     uint32 time_left = 3;
-  }
-
-  message ResourceTransferOrder {
-    string id = 1;
-    Resources resources = 2;
-    string target_coords = 3;
-    uint32 time_left = 4;
   }
 }
 
@@ -112,24 +102,25 @@ message SubscribeToWorldResponse {
     map<string, World.Field> fields = 6; // key: coords
     map<string, Village> villages = 7; // key: village_coords, Affected by player pov
     map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
-    repeated TroopMovementOrder troop_movement_orders = 9; // Affected by player pov
+    repeated MovementOrder movement_orders = 9; // Affected by player pov
   }
 }
 
-// IssueTroopMovementOrder
-message IssueTroopMovementOrderRequest {
+// IssueMovementOrder
+message IssueMovementOrderRequest {
   string id = 1;
   string source_coords = 2;
   string target_coords = 3;
   map<string, uint32> troops = 4; // <troop_id, quantity>
+  Resources resources = 5;
 }
-message IssueTroopMovementOrderResponse {}
+message IssueMovementOrderResponse {}
 
-// CancelTroopMovementOrder
-message CancelTroopMovementOrderRequest {
+// CancelMovementOrder
+message CancelMovementOrderRequest {
   string id = 1;
 }
-message CancelTroopMovementOrderResponse {}
+message CancelMovementOrderResponse {}
 
 /* VILLAGES */
 // IssueBuildingUpgradeOrder
@@ -148,13 +139,13 @@ message CancelBuildingUpgradeOrderRequest {
 }
 message CancelBuildingUpgradeOrderResponse {}
 
-// IssueTroopTrainingOrder
-message IssueTroopTrainingOrderRequest {
+// IssueTrainingOrder
+message IssueTrainingOrderRequest {
   string village_coords = 1;
   string troop_id = 2;
   uint32 quantity = 3;
 }
-message IssueTroopTrainingOrderResponse {}
+message IssueTrainingOrderResponse {}
 
 // CancelTroopTrainingOrder
 message CancelTroopTrainingOrderRequest {
@@ -164,35 +155,16 @@ message CancelTroopTrainingOrderRequest {
 }
 message CancelTroopTrainingOrderResponse {}
 
-// IssueResourceTransferOrder
-message IssueResourceTransferOrderRequest {
-  Resources resources = 1;
-  string source_coords = 2;
-  string target_coords = 3;
-}
-message IssueResourceTransferOrderResponse {
-  Village.ResourceTransferOrder order = 1;
-}
-
-// CancelResourceTransferOrder
-message CancelResourceTransferOrderRequest {
-  string source_coords = 1;
-  string id = 2;
-}
-message CancelResourceTransferOrderResponse {}
-
 service Service {
   /* WORLD */
   rpc GetWorld(GetWorldRequest) returns (GetWorldResponse);
   rpc SubscribeToWorld(SubscribeToWorldRequest) returns (stream SubscribeToWorldResponse);
-  rpc IssueTroopMovementOrder(IssueTroopMovementOrderRequest) returns (IssueTroopMovementOrderResponse);
-  rpc CancelTroopMovementOrder(CancelTroopMovementOrderRequest) returns (CancelTroopMovementOrderResponse);
+  rpc IssueMovementOrder(IssueMovementOrderRequest) returns (IssueMovementOrderResponse);
+  rpc CancelMovementOrder(CancelMovementOrderRequest) returns (CancelMovementOrderResponse);
 
   /* VILLAGES */
   rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
   rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
-  rpc IssueTroopTrainingOrder(IssueTroopTrainingOrderRequest) returns (IssueTroopTrainingOrderResponse);
+  rpc IssueTrainingOrder(IssueTrainingOrderRequest) returns (IssueTrainingOrderResponse);
   rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
-  rpc IssueResourceTransferOrder(IssueResourceTransferOrderRequest) returns (IssueResourceTransferOrderResponse);
-  rpc CancelResourceTransferOrder(CancelResourceTransferOrderRequest) returns (CancelResourceTransferOrderResponse);
 }

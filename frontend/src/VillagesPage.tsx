@@ -1,7 +1,7 @@
 import { For } from 'solid-js'
 import { A } from "@solidjs/router"
 
-import { StoreLoader, playerVillages } from './store'
+import { StoreLoader, playerVillageFields } from './store'
 
 export default function VillagesPage() {
   return <StoreLoader>
@@ -9,8 +9,8 @@ export default function VillagesPage() {
       <div>
         <h1>Villages</h1>
         <ul>
-          <For each={playerVillages()}>
-            {v => <li><A href={`/villages/${v.coords}`}>Village {v.coords}</A></li>}
+          <For each={playerVillageFields()}>
+            {f => <li><A href={`/villages/${f.coords}`}>fillage {f.coords}</A></li>}
           </For>
         </ul>
       </div>

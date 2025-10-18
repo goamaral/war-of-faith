@@ -2,15 +2,20 @@ import type { JSX, ParentProps } from "solid-js"
 
 import {
   createSignal, Accessor, Setter,
-  Show, For, Switch, Match
+  Show, For, Switch, Match,
+  createEffect
 } from "solid-js"
 import { useNavigate, A } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import {
-  StoreLoader, store, playerId, playerVillages,
-  issueTroopMovementOrder, cancelTroopMovementOrder
+  StoreLoader, store, playerId, decodeCoords,
+  issueMovementOrder, cancelMovementOrder,
+  playerFields,
+  encodeCoords,
+  playerVillageFields,
 } from './store'
+import { newFieldTroops, newWildField } from "./entities"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -18,14 +23,14 @@ export default function WorldPage() {
       <div>
         <h1>World Map</h1>
         <World />
-        <TroopMovements />
+        <Movements />
       </div>
     }
   </StoreLoader>
 }
 
 function World() {
-  const [selectedField, setSelectedField] = createSignal<serverV1.World_Field | undefined>(undefined)
+  const [targetField, setTargetField] = createSignal<serverV1.World_Field | undefined>(undefined)
 
   // TODO: Convert to tailwind
   const gridStyle = {
@@ -37,33 +42,36 @@ function World() {
     'border-right': '1px solid black',
   } as JSX.CSSProperties
 
-  const fields = Array(store.world.width).fill(undefined)
-  fields.forEach((_, y) => {
-    fields[y] = Array(store.world.height).fill(undefined).map((_, x) => ({ coords: `${x}_${y}` } as serverV1.World_Field))
-  })
-  for (const coords in store.world.fields) {
-    const [x, y] = coords.split('_').map(Number)
-    fields[y][x] = store.world.fields[coords]
+
+  const cells = () => {
+    const fields = Array(store.world.width).fill(undefined)
+    fields.forEach((_, y) => {
+      fields[y] = Array(store.world.height).fill(undefined).map((_, x) => newWildField(encodeCoords(x, y)))
+    })
+    for (const coords in store.world.fields) {
+      const { x, y } = decodeCoords(coords)
+      fields[y][x] = store.world.fields[coords]
+    }
+    return fields.flat()
   }
 
   return (<div class="flex">
     <div style={gridStyle}>
-      <For each={fields.flat()}>
-        {(field) => <Field field={field} setSelectedField={setSelectedField} />}
+      <For each={cells()}>
+        {(field) => <Field field={field} setField={setTargetField} />}
       </For>
     </div>
-    <FieldInfo selectedField={selectedField} />
+    <FieldInfo targetField={targetField} />
   </div>)
 }
 
-function Field({ field, setSelectedField }: { field: serverV1.World_Field, setSelectedField: Setter<serverV1.World_Field | undefined> }) {
+function Field({ field, setField }: { field: serverV1.World_Field, setField: Setter<serverV1.World_Field | undefined> }) {
   const navigate = useNavigate()
 
   function kindStyle(): JSX.CSSProperties {
     switch (field.kind) {
       case serverV1.World_Field_Kind.VILLAGE:
-        const village = store.world.villages[field.coords]
-        return { 'background-color': village?.playerId == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
+        return { 'background-color': field.playerId! == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
 
       case serverV1.World_Field_Kind.TEMPLE:
         return { 'background-color': 'yellow' }
@@ -86,48 +94,43 @@ function Field({ field, setSelectedField }: { field: serverV1.World_Field, setSe
   }
 
   // TODO: Convert to tailwind
-  const fieldStyle = {
+  const fieldStyle = () => ({
     'position': 'relative',
     'border-top': '1px solid black',
     'border-left': '1px solid black',
     ...kindStyle(),
-  } as JSX.CSSProperties
+  } as JSX.CSSProperties)
 
   return (
-    <div style={fieldStyle} onClick={() => setSelectedField(field)} onDblClick={open}></div>
+    <div style={fieldStyle()} onClick={() => setField(field)} onDblClick={open}></div>
   )
 }
 
-function FieldInfo({ selectedField }: { selectedField: Accessor<serverV1.World_Field | undefined> }) {
+function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field | undefined> }) {
   function Wrapper({ children }: ParentProps<{}>) {
-    const coords = () => {
-      const [x, y] = selectedField()!.coords.split('_').map(Number)
-      return { x, y }
-    }
+    const targetCoords = () => decodeCoords(targetField()!.coords)
     
     return <div>
-      <h2>{World_Field_EntityKindToString(selectedField()!.kind)}</h2>
-      <p><span>Coords</span> {coords().x},{coords().y}</p>
+      <h2>{World_Field_EntityKindToString(targetField()!.kind)}</h2>
+      <p><span>Coords</span> {targetCoords().x},{targetCoords().y}</p>
       {children}
     </div>
   }
 
   function Village() {
-    const village = () => store.world.villages[selectedField()!.coords]
     const troops = () => Object.values(store.world.troops)
-    const otherPlayerVillages = () => playerVillages().filter(v => v.coords != village().coords)
+    const sourceFields = () => playerVillageFields(f => f.coords != targetField()!.coords)
 
     function Attackable() {
-      const [selectedVillageCoords, setSelectedVillageCoords] = createSignal(otherPlayerVillages()[0].coords)
-      const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(Object.fromEntries(troops().map(t => ([t.id, 0]))))
-
-      const selectedVillage = () => otherPlayerVillages().find(v => v.coords == selectedVillageCoords())
-
+      const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
+      createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
+      const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
+      
       return <div>
         <label>Village</label>
-        <select value={selectedVillageCoords()} onChange={ev => setSelectedVillageCoords(ev.currentTarget.value)}>
-          <For each={otherPlayerVillages()}>
-            {v => <option value={v.coords}>{v.coords}</option>}
+        <select value={selectedSourceCoords()} onChange={ev => setSelectedSourceCoords(ev.currentTarget.value)}>
+          <For each={sourceFields()}>
+            {f => <option value={f.coords}>{f.coords}</option>}
           </For>
         </select>
 
@@ -135,11 +138,11 @@ function FieldInfo({ selectedField }: { selectedField: Accessor<serverV1.World_F
         <div>
           <For each={troops()}>
             {t => {
-              const maxQuantity = selectedVillage()!.troops[t.id]
+              const maxQuantity = () => store.world.fields[selectedSourceCoords()].troops[t.id]
 
               return <div>
-                <span>{t.name} ({maxQuantity})</span>
-                <input type="number" min={0} max={maxQuantity}
+                <span>{t.name} ({maxQuantity()})</span>
+                <input type="number" min={0} max={maxQuantity()}
                   value={selectedTroopQuantity()[t.id]}
                   onChange={ev => setSelectedTroopQuantity({ [t.id]: +ev.currentTarget.value })}
                 />
@@ -148,23 +151,26 @@ function FieldInfo({ selectedField }: { selectedField: Accessor<serverV1.World_F
           </For>
         </div>
 
-        <button onClick={() => issueTroopMovementOrder(selectedVillageCoords(), selectedField()!.coords, selectedTroopQuantity())}>Attack</button>
+        <button onClick={() => {
+          issueMovementOrder(selectedSourceCoords(), targetField()!.coords, selectedTroopQuantity())
+          setSelectedTroopQuantity(newFieldTroops())
+        }}>Attack</button>
       </div>
     }
 
     return <Wrapper>
-      <Show when={otherPlayerVillages().length > 0}>
+      <Show when={sourceFields().length > 0}>
         <Attackable />
       </Show>
     </Wrapper>
   }
 
   function Temple() {
-    const temple = () => store.world.temples[selectedField()!.coords]
-    const [selectedVillageCoords, setSelectedVillageCoords] = createSignal(Object.values(store.world.villages)[0]!.coords)
+    const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(playerVillageFields()[0].coords)
+    createEffect(() => setSelectedSourceCoords(playerVillageFields()[0].coords))
     const [goldToDonate, setGoldToDonate] = createSignal(0)
 
-    const selectedVillage = () => playerVillages().find(v => v.coords == selectedVillageCoords())!
+    const selectedSourceField = () => playerFields().find(v => v.coords == selectedSourceCoords())!
 
     async function donate() {
       alert("TODO: FieldInfo.Temple.donate")
@@ -172,13 +178,13 @@ function FieldInfo({ selectedField }: { selectedField: Accessor<serverV1.World_F
 
     return <Wrapper>
       <div>
-        <p>{temple().resources!.gold} gold left</p>
+        <p>{targetField()!.resources!.gold} gold left</p>
 
         <label>Village</label>
-        <select value={selectedVillageCoords()} onChange={ev => setSelectedVillageCoords(ev.currentTarget.value)}>
-          {Object.values(playerVillages()).map(v => (<option value={v.coords}>{v.coords}</option>))}
+        <select value={selectedSourceCoords()} onChange={ev => setSelectedSourceCoords(ev.currentTarget.value)}>
+          {Object.values(playerVillageFields()).map(f => (<option value={f.coords}>{f.coords}</option>))}
         </select>
-        <input type="number" min={0} max={selectedVillage().resources!.gold}
+        <input type="number" min={0} max={selectedSourceField().resources!.gold}
           value={goldToDonate()}
           onChange={ev => setGoldToDonate(+ev.currentTarget.value)}
         />
@@ -190,13 +196,13 @@ function FieldInfo({ selectedField }: { selectedField: Accessor<serverV1.World_F
 
   return <>
     <Switch fallback={<Wrapper/>}>
-      <Match when={selectedField() == undefined}>
+      <Match when={targetField() == undefined}>
         <div><h2>No field selected</h2></div>
       </Match>
-      <Match when={selectedField()?.kind == serverV1.World_Field_Kind.VILLAGE}>
+      <Match when={targetField()?.kind == serverV1.World_Field_Kind.VILLAGE}>
         <Village />
       </Match>
-      <Match when={selectedField()?.kind == serverV1.World_Field_Kind.TEMPLE}>
+      <Match when={targetField()?.kind == serverV1.World_Field_Kind.TEMPLE}>
         <Temple/>
       </Match>
     </Switch>
@@ -216,34 +222,27 @@ function World_Field_EntityKindToString(entityKind: serverV1.World_Field_Kind): 
   }
 }
 
-function TroopMovements() {
-  function fieldPlayerId(coords: string) {
-    const field = store.world.fields[coords]
-    if (field.kind == serverV1.World_Field_Kind.VILLAGE) {
-      return store.world.villages[coords].playerId
-    }
-    return undefined
-  }
-  const outgoingAttacks = () => Object.values(store.world.troopMovementOrders).filter(o => {
-    const sourcePlayerId = fieldPlayerId(o.sourceCoords)
-    const targetPlayerId = fieldPlayerId(o.targetCoords)
+function Movements() {
+  const outgoing = () => store.world.movementOrders.filter(o => {
+    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId == playerId && targetPlayerId != playerId
   })
-  const incomingAttacks = () => Object.values(store.world.troopMovementOrders).filter(o => {
-    const sourcePlayerId = fieldPlayerId(o.sourceCoords)
-    const targetPlayerId = fieldPlayerId(o.targetCoords)
+  const incoming = () => store.world.movementOrders.filter(o => {
+    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId != playerId && targetPlayerId == playerId
   })
-  const supports = () => Object.values(store.world.troopMovementOrders).filter(o => {
-    const sourcePlayerId = fieldPlayerId(o.sourceCoords)
-    const targetPlayerId = fieldPlayerId(o.targetCoords)
+  const support = () => store.world.movementOrders.filter(o => {
+    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId == playerId && targetPlayerId == playerId
   })
 
-  function Movements({ title, orders }: {title: string, orders: Accessor<serverV1.TroopMovementOrder[]>}) {
+  function Movements({ title, orders }: {title: string, orders: Accessor<serverV1.MovementOrder[]>}) {
     return <>
       <h3>{title}</h3>
-      <Show when={orders().length > 0} fallback={<p>No troop movements</p>}>
+      <Show when={orders().length > 0} fallback={<p>No movements</p>}>
         <div>
           <For each={orders()}>
             {order => {
@@ -257,7 +256,7 @@ function TroopMovements() {
                 <span> -&gt; </span>
                 <A href={`/world/fields/${order.targetCoords}`}>{World_Field_EntityKindToString(targetField().kind)} ({targetX},{targetY})</A>
                 <span> - {order.timeLeft}s </span>
-                <button onClick={() => cancelTroopMovementOrder(order)}>Cancel</button>
+                <button onClick={() => cancelMovementOrder(order)}>Cancel</button>
               </div>)
             }}
           </For>
@@ -268,8 +267,8 @@ function TroopMovements() {
 
   return <div>
     <h2>Troop Movements</h2>
-    <Movements title="Outgoing" orders={outgoingAttacks} />
-    <h3>Incoming</h3>
-    <p>(TODO)</p>
+    <Movements title="Outgoing" orders={outgoing} />
+    <Movements title="Incoming" orders={incoming} />
+    <Movements title="Support" orders={support} />
   </div>
 }

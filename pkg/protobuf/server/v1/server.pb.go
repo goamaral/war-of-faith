@@ -76,18 +76,18 @@ func (World_Field_Kind) EnumDescriptor() ([]byte, []int) {
 }
 
 type World struct {
-	state               protoimpl.MessageState  `protogen:"open.v1"`
-	Width               uint32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`
-	Height              uint32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
-	Buildings           map[string]*Building    `protobuf:"bytes,3,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: building_id
-	Troops              map[string]*Troop       `protobuf:"bytes,4,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: troop_id
-	Players             map[string]*Player      `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: player_id
-	Fields              map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: coords
-	Villages            map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: village_coords, Affected by player pov
-	Temples             map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: temple_coords, Affected by player pov
-	TroopMovementOrders []*TroopMovementOrder   `protobuf:"bytes,9,rep,name=troop_movement_orders,json=troopMovementOrders,proto3" json:"troop_movement_orders,omitempty"`                          // Affected by player pov
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state          protoimpl.MessageState  `protogen:"open.v1"`
+	Width          uint32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`
+	Height         uint32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
+	Buildings      map[string]*Building    `protobuf:"bytes,3,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: building_id
+	Troops         map[string]*Troop       `protobuf:"bytes,4,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: troop_id
+	Players        map[string]*Player      `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: player_id
+	Fields         map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: coords
+	Villages       map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: village_coords, Affected by player pov
+	Temples        map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: temple_coords, Affected by player pov
+	MovementOrders []*MovementOrder        `protobuf:"bytes,9,rep,name=movement_orders,json=movementOrders,proto3" json:"movement_orders,omitempty"`                                           // Affected by player pov
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *World) Reset() {
@@ -176,9 +176,9 @@ func (x *World) GetTemples() map[string]*Temple {
 	return nil
 }
 
-func (x *World) GetTroopMovementOrders() []*TroopMovementOrder {
+func (x *World) GetMovementOrders() []*MovementOrder {
 	if x != nil {
-		return x.TroopMovementOrders
+		return x.MovementOrders
 	}
 	return nil
 }
@@ -303,31 +303,34 @@ func (x *Troop) GetCost() *Resources {
 	return nil
 }
 
-type TroopMovementOrder struct {
+type MovementOrder struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	SourceCoords  string                 `protobuf:"bytes,2,opt,name=source_coords,json=sourceCoords,proto3" json:"source_coords,omitempty"`
 	TargetCoords  string                 `protobuf:"bytes,3,opt,name=target_coords,json=targetCoords,proto3" json:"target_coords,omitempty"`
 	Troops        map[string]uint32      `protobuf:"bytes,4,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // key: troop_id
-	TimeLeft      uint32                 `protobuf:"varint,5,opt,name=time_left,json=timeLeft,proto3" json:"time_left,omitempty"`
+	Resources     *Resources             `protobuf:"bytes,5,opt,name=resources,proto3" json:"resources,omitempty"`
+	TimeLeft      uint32                 `protobuf:"varint,6,opt,name=time_left,json=timeLeft,proto3" json:"time_left,omitempty"`
+	PlayerId      string                 `protobuf:"bytes,7,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	Comeback      bool                   `protobuf:"varint,8,opt,name=comeback,proto3" json:"comeback,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TroopMovementOrder) Reset() {
-	*x = TroopMovementOrder{}
+func (x *MovementOrder) Reset() {
+	*x = MovementOrder{}
 	mi := &file_server_v1_server_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TroopMovementOrder) String() string {
+func (x *MovementOrder) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TroopMovementOrder) ProtoMessage() {}
+func (*MovementOrder) ProtoMessage() {}
 
-func (x *TroopMovementOrder) ProtoReflect() protoreflect.Message {
+func (x *MovementOrder) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -339,44 +342,65 @@ func (x *TroopMovementOrder) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TroopMovementOrder.ProtoReflect.Descriptor instead.
-func (*TroopMovementOrder) Descriptor() ([]byte, []int) {
+// Deprecated: Use MovementOrder.ProtoReflect.Descriptor instead.
+func (*MovementOrder) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *TroopMovementOrder) GetId() string {
+func (x *MovementOrder) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *TroopMovementOrder) GetSourceCoords() string {
+func (x *MovementOrder) GetSourceCoords() string {
 	if x != nil {
 		return x.SourceCoords
 	}
 	return ""
 }
 
-func (x *TroopMovementOrder) GetTargetCoords() string {
+func (x *MovementOrder) GetTargetCoords() string {
 	if x != nil {
 		return x.TargetCoords
 	}
 	return ""
 }
 
-func (x *TroopMovementOrder) GetTroops() map[string]uint32 {
+func (x *MovementOrder) GetTroops() map[string]uint32 {
 	if x != nil {
 		return x.Troops
 	}
 	return nil
 }
 
-func (x *TroopMovementOrder) GetTimeLeft() uint32 {
+func (x *MovementOrder) GetResources() *Resources {
+	if x != nil {
+		return x.Resources
+	}
+	return nil
+}
+
+func (x *MovementOrder) GetTimeLeft() uint32 {
 	if x != nil {
 		return x.TimeLeft
 	}
 	return 0
+}
+
+func (x *MovementOrder) GetPlayerId() string {
+	if x != nil {
+		return x.PlayerId
+	}
+	return ""
+}
+
+func (x *MovementOrder) GetComeback() bool {
+	if x != nil {
+		return x.Comeback
+	}
+	return false
 }
 
 type Resources struct {
@@ -432,10 +456,7 @@ func (x *Resources) GetTime() uint32 {
 }
 
 type Temple struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	Coords        string                  `protobuf:"bytes,1,opt,name=coords,proto3" json:"coords,omitempty"`
-	Resources     *Resources              `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
-	PlayerId      *wrapperspb.StringValue `protobuf:"bytes,3,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -470,39 +491,12 @@ func (*Temple) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Temple) GetCoords() string {
-	if x != nil {
-		return x.Coords
-	}
-	return ""
-}
-
-func (x *Temple) GetResources() *Resources {
-	if x != nil {
-		return x.Resources
-	}
-	return nil
-}
-
-func (x *Temple) GetPlayerId() *wrapperspb.StringValue {
-	if x != nil {
-		return x.PlayerId
-	}
-	return nil
-}
-
 type Village struct {
-	state                  protoimpl.MessageState           `protogen:"open.v1"`
-	Coords                 string                           `protobuf:"bytes,1,opt,name=coords,proto3" json:"coords,omitempty"`
-	PlayerId               string                           `protobuf:"bytes,2,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
-	Resources              *Resources                       `protobuf:"bytes,3,opt,name=resources,proto3" json:"resources,omitempty"`
-	Buildings              map[string]uint32                `protobuf:"bytes,4,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // key: building_id
-	Troops                 map[string]uint32                `protobuf:"bytes,5,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`       // key: troop_id
-	BuildingUpgradeOrders  []*Village_BuildingUpgradeOrder  `protobuf:"bytes,6,rep,name=building_upgrade_orders,json=buildingUpgradeOrders,proto3" json:"building_upgrade_orders,omitempty"`
-	TroopTrainingOrders    []*Village_TroopTrainingOrder    `protobuf:"bytes,7,rep,name=troop_training_orders,json=troopTrainingOrders,proto3" json:"troop_training_orders,omitempty"`
-	ResourceTransferOrders []*Village_ResourceTransferOrder `protobuf:"bytes,8,rep,name=resource_transfer_orders,json=resourceTransferOrders,proto3" json:"resource_transfer_orders,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                 protoimpl.MessageState          `protogen:"open.v1"`
+	BuildingUpgradeOrders []*Village_BuildingUpgradeOrder `protobuf:"bytes,1,rep,name=building_upgrade_orders,json=buildingUpgradeOrders,proto3" json:"building_upgrade_orders,omitempty"`
+	TroopTrainingOrders   []*Village_TroopTrainingOrder   `protobuf:"bytes,2,rep,name=troop_training_orders,json=troopTrainingOrders,proto3" json:"troop_training_orders,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *Village) Reset() {
@@ -535,41 +529,6 @@ func (*Village) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Village) GetCoords() string {
-	if x != nil {
-		return x.Coords
-	}
-	return ""
-}
-
-func (x *Village) GetPlayerId() string {
-	if x != nil {
-		return x.PlayerId
-	}
-	return ""
-}
-
-func (x *Village) GetResources() *Resources {
-	if x != nil {
-		return x.Resources
-	}
-	return nil
-}
-
-func (x *Village) GetBuildings() map[string]uint32 {
-	if x != nil {
-		return x.Buildings
-	}
-	return nil
-}
-
-func (x *Village) GetTroops() map[string]uint32 {
-	if x != nil {
-		return x.Troops
-	}
-	return nil
-}
-
 func (x *Village) GetBuildingUpgradeOrders() []*Village_BuildingUpgradeOrder {
 	if x != nil {
 		return x.BuildingUpgradeOrders
@@ -580,13 +539,6 @@ func (x *Village) GetBuildingUpgradeOrders() []*Village_BuildingUpgradeOrder {
 func (x *Village) GetTroopTrainingOrders() []*Village_TroopTrainingOrder {
 	if x != nil {
 		return x.TroopTrainingOrders
-	}
-	return nil
-}
-
-func (x *Village) GetResourceTransferOrders() []*Village_ResourceTransferOrder {
-	if x != nil {
-		return x.ResourceTransferOrders
 	}
 	return nil
 }
@@ -797,31 +749,32 @@ func (x *SubscribeToWorldResponse) GetPatch() *SubscribeToWorldResponse_Patch {
 	return nil
 }
 
-// IssueTroopMovementOrder
-type IssueTroopMovementOrderRequest struct {
+// IssueMovementOrder
+type IssueMovementOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	SourceCoords  string                 `protobuf:"bytes,2,opt,name=source_coords,json=sourceCoords,proto3" json:"source_coords,omitempty"`
 	TargetCoords  string                 `protobuf:"bytes,3,opt,name=target_coords,json=targetCoords,proto3" json:"target_coords,omitempty"`
 	Troops        map[string]uint32      `protobuf:"bytes,4,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // <troop_id, quantity>
+	Resources     *Resources             `protobuf:"bytes,5,opt,name=resources,proto3" json:"resources,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *IssueTroopMovementOrderRequest) Reset() {
-	*x = IssueTroopMovementOrderRequest{}
+func (x *IssueMovementOrderRequest) Reset() {
+	*x = IssueMovementOrderRequest{}
 	mi := &file_server_v1_server_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IssueTroopMovementOrderRequest) String() string {
+func (x *IssueMovementOrderRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IssueTroopMovementOrderRequest) ProtoMessage() {}
+func (*IssueMovementOrderRequest) ProtoMessage() {}
 
-func (x *IssueTroopMovementOrderRequest) ProtoReflect() protoreflect.Message {
+func (x *IssueMovementOrderRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -833,59 +786,66 @@ func (x *IssueTroopMovementOrderRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IssueTroopMovementOrderRequest.ProtoReflect.Descriptor instead.
-func (*IssueTroopMovementOrderRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use IssueMovementOrderRequest.ProtoReflect.Descriptor instead.
+func (*IssueMovementOrderRequest) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *IssueTroopMovementOrderRequest) GetId() string {
+func (x *IssueMovementOrderRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *IssueTroopMovementOrderRequest) GetSourceCoords() string {
+func (x *IssueMovementOrderRequest) GetSourceCoords() string {
 	if x != nil {
 		return x.SourceCoords
 	}
 	return ""
 }
 
-func (x *IssueTroopMovementOrderRequest) GetTargetCoords() string {
+func (x *IssueMovementOrderRequest) GetTargetCoords() string {
 	if x != nil {
 		return x.TargetCoords
 	}
 	return ""
 }
 
-func (x *IssueTroopMovementOrderRequest) GetTroops() map[string]uint32 {
+func (x *IssueMovementOrderRequest) GetTroops() map[string]uint32 {
 	if x != nil {
 		return x.Troops
 	}
 	return nil
 }
 
-type IssueTroopMovementOrderResponse struct {
+func (x *IssueMovementOrderRequest) GetResources() *Resources {
+	if x != nil {
+		return x.Resources
+	}
+	return nil
+}
+
+type IssueMovementOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *IssueTroopMovementOrderResponse) Reset() {
-	*x = IssueTroopMovementOrderResponse{}
+func (x *IssueMovementOrderResponse) Reset() {
+	*x = IssueMovementOrderResponse{}
 	mi := &file_server_v1_server_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IssueTroopMovementOrderResponse) String() string {
+func (x *IssueMovementOrderResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IssueTroopMovementOrderResponse) ProtoMessage() {}
+func (*IssueMovementOrderResponse) ProtoMessage() {}
 
-func (x *IssueTroopMovementOrderResponse) ProtoReflect() protoreflect.Message {
+func (x *IssueMovementOrderResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -897,33 +857,33 @@ func (x *IssueTroopMovementOrderResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IssueTroopMovementOrderResponse.ProtoReflect.Descriptor instead.
-func (*IssueTroopMovementOrderResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use IssueMovementOrderResponse.ProtoReflect.Descriptor instead.
+func (*IssueMovementOrderResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{13}
 }
 
-// CancelTroopMovementOrder
-type CancelTroopMovementOrderRequest struct {
+// CancelMovementOrder
+type CancelMovementOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CancelTroopMovementOrderRequest) Reset() {
-	*x = CancelTroopMovementOrderRequest{}
+func (x *CancelMovementOrderRequest) Reset() {
+	*x = CancelMovementOrderRequest{}
 	mi := &file_server_v1_server_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CancelTroopMovementOrderRequest) String() string {
+func (x *CancelMovementOrderRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CancelTroopMovementOrderRequest) ProtoMessage() {}
+func (*CancelMovementOrderRequest) ProtoMessage() {}
 
-func (x *CancelTroopMovementOrderRequest) ProtoReflect() protoreflect.Message {
+func (x *CancelMovementOrderRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -935,38 +895,38 @@ func (x *CancelTroopMovementOrderRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CancelTroopMovementOrderRequest.ProtoReflect.Descriptor instead.
-func (*CancelTroopMovementOrderRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CancelMovementOrderRequest.ProtoReflect.Descriptor instead.
+func (*CancelMovementOrderRequest) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *CancelTroopMovementOrderRequest) GetId() string {
+func (x *CancelMovementOrderRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-type CancelTroopMovementOrderResponse struct {
+type CancelMovementOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CancelTroopMovementOrderResponse) Reset() {
-	*x = CancelTroopMovementOrderResponse{}
+func (x *CancelMovementOrderResponse) Reset() {
+	*x = CancelMovementOrderResponse{}
 	mi := &file_server_v1_server_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CancelTroopMovementOrderResponse) String() string {
+func (x *CancelMovementOrderResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CancelTroopMovementOrderResponse) ProtoMessage() {}
+func (*CancelMovementOrderResponse) ProtoMessage() {}
 
-func (x *CancelTroopMovementOrderResponse) ProtoReflect() protoreflect.Message {
+func (x *CancelMovementOrderResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -978,8 +938,8 @@ func (x *CancelTroopMovementOrderResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CancelTroopMovementOrderResponse.ProtoReflect.Descriptor instead.
-func (*CancelTroopMovementOrderResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CancelMovementOrderResponse.ProtoReflect.Descriptor instead.
+func (*CancelMovementOrderResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{15}
 }
 
@@ -1177,8 +1137,8 @@ func (*CancelBuildingUpgradeOrderResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{19}
 }
 
-// IssueTroopTrainingOrder
-type IssueTroopTrainingOrderRequest struct {
+// IssueTrainingOrder
+type IssueTrainingOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VillageCoords string                 `protobuf:"bytes,1,opt,name=village_coords,json=villageCoords,proto3" json:"village_coords,omitempty"`
 	TroopId       string                 `protobuf:"bytes,2,opt,name=troop_id,json=troopId,proto3" json:"troop_id,omitempty"`
@@ -1187,20 +1147,20 @@ type IssueTroopTrainingOrderRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *IssueTroopTrainingOrderRequest) Reset() {
-	*x = IssueTroopTrainingOrderRequest{}
+func (x *IssueTrainingOrderRequest) Reset() {
+	*x = IssueTrainingOrderRequest{}
 	mi := &file_server_v1_server_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IssueTroopTrainingOrderRequest) String() string {
+func (x *IssueTrainingOrderRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IssueTroopTrainingOrderRequest) ProtoMessage() {}
+func (*IssueTrainingOrderRequest) ProtoMessage() {}
 
-func (x *IssueTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
+func (x *IssueTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1212,52 +1172,52 @@ func (x *IssueTroopTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IssueTroopTrainingOrderRequest.ProtoReflect.Descriptor instead.
-func (*IssueTroopTrainingOrderRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use IssueTrainingOrderRequest.ProtoReflect.Descriptor instead.
+func (*IssueTrainingOrderRequest) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{20}
 }
 
-func (x *IssueTroopTrainingOrderRequest) GetVillageCoords() string {
+func (x *IssueTrainingOrderRequest) GetVillageCoords() string {
 	if x != nil {
 		return x.VillageCoords
 	}
 	return ""
 }
 
-func (x *IssueTroopTrainingOrderRequest) GetTroopId() string {
+func (x *IssueTrainingOrderRequest) GetTroopId() string {
 	if x != nil {
 		return x.TroopId
 	}
 	return ""
 }
 
-func (x *IssueTroopTrainingOrderRequest) GetQuantity() uint32 {
+func (x *IssueTrainingOrderRequest) GetQuantity() uint32 {
 	if x != nil {
 		return x.Quantity
 	}
 	return 0
 }
 
-type IssueTroopTrainingOrderResponse struct {
+type IssueTrainingOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *IssueTroopTrainingOrderResponse) Reset() {
-	*x = IssueTroopTrainingOrderResponse{}
+func (x *IssueTrainingOrderResponse) Reset() {
+	*x = IssueTrainingOrderResponse{}
 	mi := &file_server_v1_server_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IssueTroopTrainingOrderResponse) String() string {
+func (x *IssueTrainingOrderResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IssueTroopTrainingOrderResponse) ProtoMessage() {}
+func (*IssueTrainingOrderResponse) ProtoMessage() {}
 
-func (x *IssueTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
+func (x *IssueTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_server_v1_server_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1269,8 +1229,8 @@ func (x *IssueTroopTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IssueTroopTrainingOrderResponse.ProtoReflect.Descriptor instead.
-func (*IssueTroopTrainingOrderResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use IssueTrainingOrderResponse.ProtoReflect.Descriptor instead.
+func (*IssueTrainingOrderResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{21}
 }
 
@@ -1371,211 +1331,21 @@ func (*CancelTroopTrainingOrderResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{23}
 }
 
-// IssueResourceTransferOrder
-type IssueResourceTransferOrderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resources     *Resources             `protobuf:"bytes,1,opt,name=resources,proto3" json:"resources,omitempty"`
-	SourceCoords  string                 `protobuf:"bytes,2,opt,name=source_coords,json=sourceCoords,proto3" json:"source_coords,omitempty"`
-	TargetCoords  string                 `protobuf:"bytes,3,opt,name=target_coords,json=targetCoords,proto3" json:"target_coords,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *IssueResourceTransferOrderRequest) Reset() {
-	*x = IssueResourceTransferOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IssueResourceTransferOrderRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IssueResourceTransferOrderRequest) ProtoMessage() {}
-
-func (x *IssueResourceTransferOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IssueResourceTransferOrderRequest.ProtoReflect.Descriptor instead.
-func (*IssueResourceTransferOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{24}
-}
-
-func (x *IssueResourceTransferOrderRequest) GetResources() *Resources {
-	if x != nil {
-		return x.Resources
-	}
-	return nil
-}
-
-func (x *IssueResourceTransferOrderRequest) GetSourceCoords() string {
-	if x != nil {
-		return x.SourceCoords
-	}
-	return ""
-}
-
-func (x *IssueResourceTransferOrderRequest) GetTargetCoords() string {
-	if x != nil {
-		return x.TargetCoords
-	}
-	return ""
-}
-
-type IssueResourceTransferOrderResponse struct {
-	state         protoimpl.MessageState         `protogen:"open.v1"`
-	Order         *Village_ResourceTransferOrder `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *IssueResourceTransferOrderResponse) Reset() {
-	*x = IssueResourceTransferOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[25]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IssueResourceTransferOrderResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IssueResourceTransferOrderResponse) ProtoMessage() {}
-
-func (x *IssueResourceTransferOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[25]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IssueResourceTransferOrderResponse.ProtoReflect.Descriptor instead.
-func (*IssueResourceTransferOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{25}
-}
-
-func (x *IssueResourceTransferOrderResponse) GetOrder() *Village_ResourceTransferOrder {
-	if x != nil {
-		return x.Order
-	}
-	return nil
-}
-
-// CancelResourceTransferOrder
-type CancelResourceTransferOrderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SourceCoords  string                 `protobuf:"bytes,1,opt,name=source_coords,json=sourceCoords,proto3" json:"source_coords,omitempty"`
-	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CancelResourceTransferOrderRequest) Reset() {
-	*x = CancelResourceTransferOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[26]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CancelResourceTransferOrderRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CancelResourceTransferOrderRequest) ProtoMessage() {}
-
-func (x *CancelResourceTransferOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[26]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CancelResourceTransferOrderRequest.ProtoReflect.Descriptor instead.
-func (*CancelResourceTransferOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{26}
-}
-
-func (x *CancelResourceTransferOrderRequest) GetSourceCoords() string {
-	if x != nil {
-		return x.SourceCoords
-	}
-	return ""
-}
-
-func (x *CancelResourceTransferOrderRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-type CancelResourceTransferOrderResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CancelResourceTransferOrderResponse) Reset() {
-	*x = CancelResourceTransferOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[27]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CancelResourceTransferOrderResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CancelResourceTransferOrderResponse) ProtoMessage() {}
-
-func (x *CancelResourceTransferOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[27]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CancelResourceTransferOrderResponse.ProtoReflect.Descriptor instead.
-func (*CancelResourceTransferOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{27}
-}
-
 type World_Field struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Coords        string                 `protobuf:"bytes,1,opt,name=coords,proto3" json:"coords,omitempty"`
-	Kind          World_Field_Kind       `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.World_Field_Kind" json:"kind,omitempty"` // Affected by player pov
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Coords        string                  `protobuf:"bytes,1,opt,name=coords,proto3" json:"coords,omitempty"`
+	Kind          World_Field_Kind        `protobuf:"varint,2,opt,name=kind,proto3,enum=server.v1.World_Field_Kind" json:"kind,omitempty"`                                                     // Affected by player pov
+	Resources     *Resources              `protobuf:"bytes,3,opt,name=resources,proto3" json:"resources,omitempty"`                                                                            // Affected by player pov
+	Buildings     map[string]uint32       `protobuf:"bytes,4,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // key: building_id, Affected by player pov
+	Troops        map[string]uint32       `protobuf:"bytes,5,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`       // key: troop_id, Affected by player pov
+	PlayerId      *wrapperspb.StringValue `protobuf:"bytes,6,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`                                                              // Affected by player pov
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *World_Field) Reset() {
 	*x = World_Field{}
-	mi := &file_server_v1_server_proto_msgTypes[34]
+	mi := &file_server_v1_server_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1587,7 +1357,7 @@ func (x *World_Field) String() string {
 func (*World_Field) ProtoMessage() {}
 
 func (x *World_Field) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[34]
+	mi := &file_server_v1_server_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1617,6 +1387,34 @@ func (x *World_Field) GetKind() World_Field_Kind {
 	return World_Field_KIND_FOG
 }
 
+func (x *World_Field) GetResources() *Resources {
+	if x != nil {
+		return x.Resources
+	}
+	return nil
+}
+
+func (x *World_Field) GetBuildings() map[string]uint32 {
+	if x != nil {
+		return x.Buildings
+	}
+	return nil
+}
+
+func (x *World_Field) GetTroops() map[string]uint32 {
+	if x != nil {
+		return x.Troops
+	}
+	return nil
+}
+
+func (x *World_Field) GetPlayerId() *wrapperspb.StringValue {
+	if x != nil {
+		return x.PlayerId
+	}
+	return nil
+}
+
 type Village_BuildingUpgradeOrder struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Level         uint32                 `protobuf:"varint,1,opt,name=level,proto3" json:"level,omitempty"`
@@ -1628,7 +1426,7 @@ type Village_BuildingUpgradeOrder struct {
 
 func (x *Village_BuildingUpgradeOrder) Reset() {
 	*x = Village_BuildingUpgradeOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[38]
+	mi := &file_server_v1_server_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1640,7 +1438,7 @@ func (x *Village_BuildingUpgradeOrder) String() string {
 func (*Village_BuildingUpgradeOrder) ProtoMessage() {}
 
 func (x *Village_BuildingUpgradeOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[38]
+	mi := &file_server_v1_server_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1653,7 +1451,7 @@ func (x *Village_BuildingUpgradeOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Village_BuildingUpgradeOrder.ProtoReflect.Descriptor instead.
 func (*Village_BuildingUpgradeOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 2}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 0}
 }
 
 func (x *Village_BuildingUpgradeOrder) GetLevel() uint32 {
@@ -1688,7 +1486,7 @@ type Village_TroopTrainingOrder struct {
 
 func (x *Village_TroopTrainingOrder) Reset() {
 	*x = Village_TroopTrainingOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[39]
+	mi := &file_server_v1_server_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1700,7 +1498,7 @@ func (x *Village_TroopTrainingOrder) String() string {
 func (*Village_TroopTrainingOrder) ProtoMessage() {}
 
 func (x *Village_TroopTrainingOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[39]
+	mi := &file_server_v1_server_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1713,7 +1511,7 @@ func (x *Village_TroopTrainingOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Village_TroopTrainingOrder.ProtoReflect.Descriptor instead.
 func (*Village_TroopTrainingOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 3}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 1}
 }
 
 func (x *Village_TroopTrainingOrder) GetTroopId() string {
@@ -1737,87 +1535,19 @@ func (x *Village_TroopTrainingOrder) GetTimeLeft() uint32 {
 	return 0
 }
 
-type Village_ResourceTransferOrder struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Resources     *Resources             `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
-	TargetCoords  string                 `protobuf:"bytes,3,opt,name=target_coords,json=targetCoords,proto3" json:"target_coords,omitempty"`
-	TimeLeft      uint32                 `protobuf:"varint,4,opt,name=time_left,json=timeLeft,proto3" json:"time_left,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Village_ResourceTransferOrder) Reset() {
-	*x = Village_ResourceTransferOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[40]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Village_ResourceTransferOrder) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Village_ResourceTransferOrder) ProtoMessage() {}
-
-func (x *Village_ResourceTransferOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[40]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Village_ResourceTransferOrder.ProtoReflect.Descriptor instead.
-func (*Village_ResourceTransferOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 4}
-}
-
-func (x *Village_ResourceTransferOrder) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Village_ResourceTransferOrder) GetResources() *Resources {
-	if x != nil {
-		return x.Resources
-	}
-	return nil
-}
-
-func (x *Village_ResourceTransferOrder) GetTargetCoords() string {
-	if x != nil {
-		return x.TargetCoords
-	}
-	return ""
-}
-
-func (x *Village_ResourceTransferOrder) GetTimeLeft() uint32 {
-	if x != nil {
-		return x.TimeLeft
-	}
-	return 0
-}
-
 type SubscribeToWorldResponse_Patch struct {
-	state               protoimpl.MessageState  `protogen:"open.v1"`
-	Fields              map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: coords
-	Villages            map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: village_coords, Affected by player pov
-	Temples             map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: temple_coords, Affected by player pov
-	TroopMovementOrders []*TroopMovementOrder   `protobuf:"bytes,9,rep,name=troop_movement_orders,json=troopMovementOrders,proto3" json:"troop_movement_orders,omitempty"`                        // Affected by player pov
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state          protoimpl.MessageState  `protogen:"open.v1"`
+	Fields         map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: coords
+	Villages       map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: village_coords, Affected by player pov
+	Temples        map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: temple_coords, Affected by player pov
+	MovementOrders []*MovementOrder        `protobuf:"bytes,9,rep,name=movement_orders,json=movementOrders,proto3" json:"movement_orders,omitempty"`                                         // Affected by player pov
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *SubscribeToWorldResponse_Patch) Reset() {
 	*x = SubscribeToWorldResponse_Patch{}
-	mi := &file_server_v1_server_proto_msgTypes[41]
+	mi := &file_server_v1_server_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1829,7 +1559,7 @@ func (x *SubscribeToWorldResponse_Patch) String() string {
 func (*SubscribeToWorldResponse_Patch) ProtoMessage() {}
 
 func (x *SubscribeToWorldResponse_Patch) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[41]
+	mi := &file_server_v1_server_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1866,9 +1596,9 @@ func (x *SubscribeToWorldResponse_Patch) GetTemples() map[string]*Temple {
 	return nil
 }
 
-func (x *SubscribeToWorldResponse_Patch) GetTroopMovementOrders() []*TroopMovementOrder {
+func (x *SubscribeToWorldResponse_Patch) GetMovementOrders() []*MovementOrder {
 	if x != nil {
-		return x.TroopMovementOrders
+		return x.MovementOrders
 	}
 	return nil
 }
@@ -1877,7 +1607,7 @@ var File_server_v1_server_proto protoreflect.FileDescriptor
 
 const file_server_v1_server_proto_rawDesc = "" +
 	"\n" +
-	"\x16server/v1/server.proto\x12\tserver.v1\x1a\x1egoogle/protobuf/wrappers.proto\"\xde\b\n" +
+	"\x16server/v1/server.proto\x12\tserver.v1\x1a\x1egoogle/protobuf/wrappers.proto\"\xb7\v\n" +
 	"\x05World\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
 	"\x06height\x18\x02 \x01(\rR\x06height\x12=\n" +
@@ -1886,8 +1616,8 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\aplayers\x18\x05 \x03(\v2\x1d.server.v1.World.PlayersEntryR\aplayers\x124\n" +
 	"\x06fields\x18\x06 \x03(\v2\x1c.server.v1.World.FieldsEntryR\x06fields\x12:\n" +
 	"\bvillages\x18\a \x03(\v2\x1e.server.v1.World.VillagesEntryR\bvillages\x127\n" +
-	"\atemples\x18\b \x03(\v2\x1d.server.v1.World.TemplesEntryR\atemples\x12Q\n" +
-	"\x15troop_movement_orders\x18\t \x03(\v2\x1d.server.v1.TroopMovementOrderR\x13troopMovementOrders\x1aQ\n" +
+	"\atemples\x18\b \x03(\v2\x1d.server.v1.World.TemplesEntryR\atemples\x12A\n" +
+	"\x0fmovement_orders\x18\t \x03(\v2\x18.server.v1.MovementOrderR\x0emovementOrders\x1aQ\n" +
 	"\x0eBuildingsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
 	"\x05value\x18\x02 \x01(\v2\x13.server.v1.BuildingR\x05value:\x028\x01\x1aK\n" +
@@ -1905,10 +1635,20 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\x12.server.v1.VillageR\x05value:\x028\x01\x1aM\n" +
 	"\fTemplesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12'\n" +
-	"\x05value\x18\x02 \x01(\v2\x11.server.v1.TempleR\x05value:\x028\x01\x1a\x98\x01\n" +
+	"\x05value\x18\x02 \x01(\v2\x11.server.v1.TempleR\x05value:\x028\x01\x1a\x81\x04\n" +
 	"\x05Field\x12\x16\n" +
 	"\x06coords\x18\x01 \x01(\tR\x06coords\x12/\n" +
-	"\x04kind\x18\x02 \x01(\x0e2\x1b.server.v1.World.Field.KindR\x04kind\"F\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x1b.server.v1.World.Field.KindR\x04kind\x122\n" +
+	"\tresources\x18\x03 \x01(\v2\x14.server.v1.ResourcesR\tresources\x12C\n" +
+	"\tbuildings\x18\x04 \x03(\v2%.server.v1.World.Field.BuildingsEntryR\tbuildings\x12:\n" +
+	"\x06troops\x18\x05 \x03(\v2\".server.v1.World.Field.TroopsEntryR\x06troops\x129\n" +
+	"\tplayer_id\x18\x06 \x01(\v2\x1c.google.protobuf.StringValueR\bplayerId\x1a<\n" +
+	"\x0eBuildingsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\x1a9\n" +
+	"\vTroopsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\"F\n" +
 	"\x04Kind\x12\f\n" +
 	"\bKIND_FOG\x10\x00\x12\r\n" +
 	"\tKIND_WILD\x10\x01\x12\x10\n" +
@@ -1921,38 +1661,26 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x05Troop\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12(\n" +
-	"\x04cost\x18\x03 \x01(\v2\x14.server.v1.ResourcesR\x04cost\"\x89\x02\n" +
-	"\x12TroopMovementOrder\x12\x0e\n" +
+	"\x04cost\x18\x03 \x01(\v2\x14.server.v1.ResourcesR\x04cost\"\xec\x02\n" +
+	"\rMovementOrder\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
 	"\rsource_coords\x18\x02 \x01(\tR\fsourceCoords\x12#\n" +
-	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\x12A\n" +
-	"\x06troops\x18\x04 \x03(\v2).server.v1.TroopMovementOrder.TroopsEntryR\x06troops\x12\x1b\n" +
-	"\ttime_left\x18\x05 \x01(\rR\btimeLeft\x1a9\n" +
+	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\x12<\n" +
+	"\x06troops\x18\x04 \x03(\v2$.server.v1.MovementOrder.TroopsEntryR\x06troops\x122\n" +
+	"\tresources\x18\x05 \x01(\v2\x14.server.v1.ResourcesR\tresources\x12\x1b\n" +
+	"\ttime_left\x18\x06 \x01(\rR\btimeLeft\x12\x1b\n" +
+	"\tplayer_id\x18\a \x01(\tR\bplayerId\x12\x1a\n" +
+	"\bcomeback\x18\b \x01(\bR\bcomeback\x1a9\n" +
 	"\vTroopsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\"3\n" +
 	"\tResources\x12\x12\n" +
 	"\x04gold\x18\x01 \x01(\rR\x04gold\x12\x12\n" +
-	"\x04time\x18\x02 \x01(\rR\x04time\"\x8f\x01\n" +
-	"\x06Temple\x12\x16\n" +
-	"\x06coords\x18\x01 \x01(\tR\x06coords\x122\n" +
-	"\tresources\x18\x02 \x01(\v2\x14.server.v1.ResourcesR\tresources\x129\n" +
-	"\tplayer_id\x18\x03 \x01(\v2\x1c.google.protobuf.StringValueR\bplayerId\"\xfa\a\n" +
-	"\aVillage\x12\x16\n" +
-	"\x06coords\x18\x01 \x01(\tR\x06coords\x12\x1b\n" +
-	"\tplayer_id\x18\x02 \x01(\tR\bplayerId\x122\n" +
-	"\tresources\x18\x03 \x01(\v2\x14.server.v1.ResourcesR\tresources\x12?\n" +
-	"\tbuildings\x18\x04 \x03(\v2!.server.v1.Village.BuildingsEntryR\tbuildings\x126\n" +
-	"\x06troops\x18\x05 \x03(\v2\x1e.server.v1.Village.TroopsEntryR\x06troops\x12_\n" +
-	"\x17building_upgrade_orders\x18\x06 \x03(\v2'.server.v1.Village.BuildingUpgradeOrderR\x15buildingUpgradeOrders\x12Y\n" +
-	"\x15troop_training_orders\x18\a \x03(\v2%.server.v1.Village.TroopTrainingOrderR\x13troopTrainingOrders\x12b\n" +
-	"\x18resource_transfer_orders\x18\b \x03(\v2(.server.v1.Village.ResourceTransferOrderR\x16resourceTransferOrders\x1a<\n" +
-	"\x0eBuildingsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\x1a9\n" +
-	"\vTroopsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\x1aj\n" +
+	"\x04time\x18\x02 \x01(\rR\x04time\"\b\n" +
+	"\x06Temple\"\x9b\x03\n" +
+	"\aVillage\x12_\n" +
+	"\x17building_upgrade_orders\x18\x01 \x03(\v2'.server.v1.Village.BuildingUpgradeOrderR\x15buildingUpgradeOrders\x12Y\n" +
+	"\x15troop_training_orders\x18\x02 \x03(\v2%.server.v1.Village.TroopTrainingOrderR\x13troopTrainingOrders\x1aj\n" +
 	"\x14BuildingUpgradeOrder\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\rR\x05level\x12\x1f\n" +
 	"\vbuilding_id\x18\x02 \x01(\tR\n" +
@@ -1961,25 +1689,20 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x12TroopTrainingOrder\x12\x19\n" +
 	"\btroop_id\x18\x01 \x01(\tR\atroopId\x12\x1a\n" +
 	"\bquantity\x18\x02 \x01(\rR\bquantity\x12\x1b\n" +
-	"\ttime_left\x18\x03 \x01(\rR\btimeLeft\x1a\x9d\x01\n" +
-	"\x15ResourceTransferOrder\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x122\n" +
-	"\tresources\x18\x02 \x01(\v2\x14.server.v1.ResourcesR\tresources\x12#\n" +
-	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\x12\x1b\n" +
-	"\ttime_left\x18\x04 \x01(\rR\btimeLeft\"\x18\n" +
+	"\ttime_left\x18\x03 \x01(\rR\btimeLeft\"\x18\n" +
 	"\x06Player\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x11\n" +
 	"\x0fGetWorldRequest\":\n" +
 	"\x10GetWorldResponse\x12&\n" +
 	"\x05world\x18\x01 \x01(\v2\x10.server.v1.WorldR\x05world\"\x19\n" +
-	"\x17SubscribeToWorldRequest\"\xa1\x05\n" +
+	"\x17SubscribeToWorldRequest\"\x91\x05\n" +
 	"\x18SubscribeToWorldResponse\x12?\n" +
-	"\x05patch\x18\x01 \x01(\v2).server.v1.SubscribeToWorldResponse.PatchR\x05patch\x1a\xc3\x04\n" +
+	"\x05patch\x18\x01 \x01(\v2).server.v1.SubscribeToWorldResponse.PatchR\x05patch\x1a\xb3\x04\n" +
 	"\x05Patch\x12M\n" +
 	"\x06fields\x18\x06 \x03(\v25.server.v1.SubscribeToWorldResponse.Patch.FieldsEntryR\x06fields\x12S\n" +
 	"\bvillages\x18\a \x03(\v27.server.v1.SubscribeToWorldResponse.Patch.VillagesEntryR\bvillages\x12P\n" +
-	"\atemples\x18\b \x03(\v26.server.v1.SubscribeToWorldResponse.Patch.TemplesEntryR\atemples\x12Q\n" +
-	"\x15troop_movement_orders\x18\t \x03(\v2\x1d.server.v1.TroopMovementOrderR\x13troopMovementOrders\x1aQ\n" +
+	"\atemples\x18\b \x03(\v26.server.v1.SubscribeToWorldResponse.Patch.TemplesEntryR\atemples\x12A\n" +
+	"\x0fmovement_orders\x18\t \x03(\v2\x18.server.v1.MovementOrderR\x0emovementOrders\x1aQ\n" +
 	"\vFieldsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.server.v1.World.FieldR\x05value:\x028\x01\x1aO\n" +
@@ -1988,19 +1711,20 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\x12.server.v1.VillageR\x05value:\x028\x01\x1aM\n" +
 	"\fTemplesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12'\n" +
-	"\x05value\x18\x02 \x01(\v2\x11.server.v1.TempleR\x05value:\x028\x01\"\x84\x02\n" +
-	"\x1eIssueTroopMovementOrderRequest\x12\x0e\n" +
+	"\x05value\x18\x02 \x01(\v2\x11.server.v1.TempleR\x05value:\x028\x01\"\xae\x02\n" +
+	"\x19IssueMovementOrderRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
 	"\rsource_coords\x18\x02 \x01(\tR\fsourceCoords\x12#\n" +
-	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\x12M\n" +
-	"\x06troops\x18\x04 \x03(\v25.server.v1.IssueTroopMovementOrderRequest.TroopsEntryR\x06troops\x1a9\n" +
+	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\x12H\n" +
+	"\x06troops\x18\x04 \x03(\v20.server.v1.IssueMovementOrderRequest.TroopsEntryR\x06troops\x122\n" +
+	"\tresources\x18\x05 \x01(\v2\x14.server.v1.ResourcesR\tresources\x1a9\n" +
 	"\vTroopsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\"!\n" +
-	"\x1fIssueTroopMovementOrderResponse\"1\n" +
-	"\x1fCancelTroopMovementOrderRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\"\n" +
-	" CancelTroopMovementOrderResponse\"\x80\x01\n" +
+	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\"\x1c\n" +
+	"\x1aIssueMovementOrderResponse\",\n" +
+	"\x1aCancelMovementOrderRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x1d\n" +
+	"\x1bCancelMovementOrderResponse\"\x80\x01\n" +
 	" IssueBuildingUpgradeOrderRequest\x12%\n" +
 	"\x0evillage_coords\x18\x01 \x01(\tR\rvillageCoords\x12\x1f\n" +
 	"\vbuilding_id\x18\x02 \x01(\tR\n" +
@@ -2012,38 +1736,26 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\vbuilding_id\x18\x02 \x01(\tR\n" +
 	"buildingId\x12\x14\n" +
 	"\x05level\x18\x03 \x01(\rR\x05level\"$\n" +
-	"\"CancelBuildingUpgradeOrderResponse\"~\n" +
-	"\x1eIssueTroopTrainingOrderRequest\x12%\n" +
+	"\"CancelBuildingUpgradeOrderResponse\"y\n" +
+	"\x19IssueTrainingOrderRequest\x12%\n" +
 	"\x0evillage_coords\x18\x01 \x01(\tR\rvillageCoords\x12\x19\n" +
 	"\btroop_id\x18\x02 \x01(\tR\atroopId\x12\x1a\n" +
-	"\bquantity\x18\x03 \x01(\rR\bquantity\"!\n" +
-	"\x1fIssueTroopTrainingOrderResponse\"\x7f\n" +
+	"\bquantity\x18\x03 \x01(\rR\bquantity\"\x1c\n" +
+	"\x1aIssueTrainingOrderResponse\"\x7f\n" +
 	"\x1fCancelTroopTrainingOrderRequest\x12%\n" +
 	"\x0evillage_coords\x18\x01 \x01(\tR\rvillageCoords\x12\x19\n" +
 	"\btroop_id\x18\x02 \x01(\tR\atroopId\x12\x1a\n" +
 	"\bquantity\x18\x03 \x01(\rR\bquantity\"\"\n" +
-	" CancelTroopTrainingOrderResponse\"\xa1\x01\n" +
-	"!IssueResourceTransferOrderRequest\x122\n" +
-	"\tresources\x18\x01 \x01(\v2\x14.server.v1.ResourcesR\tresources\x12#\n" +
-	"\rsource_coords\x18\x02 \x01(\tR\fsourceCoords\x12#\n" +
-	"\rtarget_coords\x18\x03 \x01(\tR\ftargetCoords\"d\n" +
-	"\"IssueResourceTransferOrderResponse\x12>\n" +
-	"\x05order\x18\x01 \x01(\v2(.server.v1.Village.ResourceTransferOrderR\x05order\"Y\n" +
-	"\"CancelResourceTransferOrderRequest\x12#\n" +
-	"\rsource_coords\x18\x01 \x01(\tR\fsourceCoords\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\tR\x02id\"%\n" +
-	"#CancelResourceTransferOrderResponse2\xe7\b\n" +
+	" CancelTroopTrainingOrderResponse2\xc1\x06\n" +
 	"\aService\x12C\n" +
 	"\bGetWorld\x12\x1a.server.v1.GetWorldRequest\x1a\x1b.server.v1.GetWorldResponse\x12]\n" +
-	"\x10SubscribeToWorld\x12\".server.v1.SubscribeToWorldRequest\x1a#.server.v1.SubscribeToWorldResponse0\x01\x12p\n" +
-	"\x17IssueTroopMovementOrder\x12).server.v1.IssueTroopMovementOrderRequest\x1a*.server.v1.IssueTroopMovementOrderResponse\x12s\n" +
-	"\x18CancelTroopMovementOrder\x12*.server.v1.CancelTroopMovementOrderRequest\x1a+.server.v1.CancelTroopMovementOrderResponse\x12v\n" +
+	"\x10SubscribeToWorld\x12\".server.v1.SubscribeToWorldRequest\x1a#.server.v1.SubscribeToWorldResponse0\x01\x12a\n" +
+	"\x12IssueMovementOrder\x12$.server.v1.IssueMovementOrderRequest\x1a%.server.v1.IssueMovementOrderResponse\x12d\n" +
+	"\x13CancelMovementOrder\x12%.server.v1.CancelMovementOrderRequest\x1a&.server.v1.CancelMovementOrderResponse\x12v\n" +
 	"\x19IssueBuildingUpgradeOrder\x12+.server.v1.IssueBuildingUpgradeOrderRequest\x1a,.server.v1.IssueBuildingUpgradeOrderResponse\x12y\n" +
-	"\x1aCancelBuildingUpgradeOrder\x12,.server.v1.CancelBuildingUpgradeOrderRequest\x1a-.server.v1.CancelBuildingUpgradeOrderResponse\x12p\n" +
-	"\x17IssueTroopTrainingOrder\x12).server.v1.IssueTroopTrainingOrderRequest\x1a*.server.v1.IssueTroopTrainingOrderResponse\x12s\n" +
-	"\x18CancelTroopTrainingOrder\x12*.server.v1.CancelTroopTrainingOrderRequest\x1a+.server.v1.CancelTroopTrainingOrderResponse\x12y\n" +
-	"\x1aIssueResourceTransferOrder\x12,.server.v1.IssueResourceTransferOrderRequest\x1a-.server.v1.IssueResourceTransferOrderResponse\x12|\n" +
-	"\x1bCancelResourceTransferOrder\x12-.server.v1.CancelResourceTransferOrderRequest\x1a..server.v1.CancelResourceTransferOrderResponseB.Z,war-of-faith/pkg/protobuf/server/v1;serverv1b\x06proto3"
+	"\x1aCancelBuildingUpgradeOrder\x12,.server.v1.CancelBuildingUpgradeOrderRequest\x1a-.server.v1.CancelBuildingUpgradeOrderResponse\x12a\n" +
+	"\x12IssueTrainingOrder\x12$.server.v1.IssueTrainingOrderRequest\x1a%.server.v1.IssueTrainingOrderResponse\x12s\n" +
+	"\x18CancelTroopTrainingOrder\x12*.server.v1.CancelTroopTrainingOrderRequest\x1a+.server.v1.CancelTroopTrainingOrderResponseB.Z,war-of-faith/pkg/protobuf/server/v1;serverv1b\x06proto3"
 
 var (
 	file_server_v1_server_proto_rawDescOnce sync.Once
@@ -2058,121 +1770,109 @@ func file_server_v1_server_proto_rawDescGZIP() []byte {
 }
 
 var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
+var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_server_v1_server_proto_goTypes = []any{
-	(World_Field_Kind)(0),                       // 0: server.v1.World.Field.Kind
-	(*World)(nil),                               // 1: server.v1.World
-	(*Building)(nil),                            // 2: server.v1.Building
-	(*Troop)(nil),                               // 3: server.v1.Troop
-	(*TroopMovementOrder)(nil),                  // 4: server.v1.TroopMovementOrder
-	(*Resources)(nil),                           // 5: server.v1.Resources
-	(*Temple)(nil),                              // 6: server.v1.Temple
-	(*Village)(nil),                             // 7: server.v1.Village
-	(*Player)(nil),                              // 8: server.v1.Player
-	(*GetWorldRequest)(nil),                     // 9: server.v1.GetWorldRequest
-	(*GetWorldResponse)(nil),                    // 10: server.v1.GetWorldResponse
-	(*SubscribeToWorldRequest)(nil),             // 11: server.v1.SubscribeToWorldRequest
-	(*SubscribeToWorldResponse)(nil),            // 12: server.v1.SubscribeToWorldResponse
-	(*IssueTroopMovementOrderRequest)(nil),      // 13: server.v1.IssueTroopMovementOrderRequest
-	(*IssueTroopMovementOrderResponse)(nil),     // 14: server.v1.IssueTroopMovementOrderResponse
-	(*CancelTroopMovementOrderRequest)(nil),     // 15: server.v1.CancelTroopMovementOrderRequest
-	(*CancelTroopMovementOrderResponse)(nil),    // 16: server.v1.CancelTroopMovementOrderResponse
-	(*IssueBuildingUpgradeOrderRequest)(nil),    // 17: server.v1.IssueBuildingUpgradeOrderRequest
-	(*IssueBuildingUpgradeOrderResponse)(nil),   // 18: server.v1.IssueBuildingUpgradeOrderResponse
-	(*CancelBuildingUpgradeOrderRequest)(nil),   // 19: server.v1.CancelBuildingUpgradeOrderRequest
-	(*CancelBuildingUpgradeOrderResponse)(nil),  // 20: server.v1.CancelBuildingUpgradeOrderResponse
-	(*IssueTroopTrainingOrderRequest)(nil),      // 21: server.v1.IssueTroopTrainingOrderRequest
-	(*IssueTroopTrainingOrderResponse)(nil),     // 22: server.v1.IssueTroopTrainingOrderResponse
-	(*CancelTroopTrainingOrderRequest)(nil),     // 23: server.v1.CancelTroopTrainingOrderRequest
-	(*CancelTroopTrainingOrderResponse)(nil),    // 24: server.v1.CancelTroopTrainingOrderResponse
-	(*IssueResourceTransferOrderRequest)(nil),   // 25: server.v1.IssueResourceTransferOrderRequest
-	(*IssueResourceTransferOrderResponse)(nil),  // 26: server.v1.IssueResourceTransferOrderResponse
-	(*CancelResourceTransferOrderRequest)(nil),  // 27: server.v1.CancelResourceTransferOrderRequest
-	(*CancelResourceTransferOrderResponse)(nil), // 28: server.v1.CancelResourceTransferOrderResponse
-	nil,                                    // 29: server.v1.World.BuildingsEntry
-	nil,                                    // 30: server.v1.World.TroopsEntry
-	nil,                                    // 31: server.v1.World.PlayersEntry
-	nil,                                    // 32: server.v1.World.FieldsEntry
-	nil,                                    // 33: server.v1.World.VillagesEntry
-	nil,                                    // 34: server.v1.World.TemplesEntry
-	(*World_Field)(nil),                    // 35: server.v1.World.Field
-	nil,                                    // 36: server.v1.TroopMovementOrder.TroopsEntry
-	nil,                                    // 37: server.v1.Village.BuildingsEntry
-	nil,                                    // 38: server.v1.Village.TroopsEntry
-	(*Village_BuildingUpgradeOrder)(nil),   // 39: server.v1.Village.BuildingUpgradeOrder
-	(*Village_TroopTrainingOrder)(nil),     // 40: server.v1.Village.TroopTrainingOrder
-	(*Village_ResourceTransferOrder)(nil),  // 41: server.v1.Village.ResourceTransferOrder
-	(*SubscribeToWorldResponse_Patch)(nil), // 42: server.v1.SubscribeToWorldResponse.Patch
-	nil,                                    // 43: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
-	nil,                                    // 44: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
-	nil,                                    // 45: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
-	nil,                                    // 46: server.v1.IssueTroopMovementOrderRequest.TroopsEntry
-	(*wrapperspb.StringValue)(nil),         // 47: google.protobuf.StringValue
+	(World_Field_Kind)(0),                      // 0: server.v1.World.Field.Kind
+	(*World)(nil),                              // 1: server.v1.World
+	(*Building)(nil),                           // 2: server.v1.Building
+	(*Troop)(nil),                              // 3: server.v1.Troop
+	(*MovementOrder)(nil),                      // 4: server.v1.MovementOrder
+	(*Resources)(nil),                          // 5: server.v1.Resources
+	(*Temple)(nil),                             // 6: server.v1.Temple
+	(*Village)(nil),                            // 7: server.v1.Village
+	(*Player)(nil),                             // 8: server.v1.Player
+	(*GetWorldRequest)(nil),                    // 9: server.v1.GetWorldRequest
+	(*GetWorldResponse)(nil),                   // 10: server.v1.GetWorldResponse
+	(*SubscribeToWorldRequest)(nil),            // 11: server.v1.SubscribeToWorldRequest
+	(*SubscribeToWorldResponse)(nil),           // 12: server.v1.SubscribeToWorldResponse
+	(*IssueMovementOrderRequest)(nil),          // 13: server.v1.IssueMovementOrderRequest
+	(*IssueMovementOrderResponse)(nil),         // 14: server.v1.IssueMovementOrderResponse
+	(*CancelMovementOrderRequest)(nil),         // 15: server.v1.CancelMovementOrderRequest
+	(*CancelMovementOrderResponse)(nil),        // 16: server.v1.CancelMovementOrderResponse
+	(*IssueBuildingUpgradeOrderRequest)(nil),   // 17: server.v1.IssueBuildingUpgradeOrderRequest
+	(*IssueBuildingUpgradeOrderResponse)(nil),  // 18: server.v1.IssueBuildingUpgradeOrderResponse
+	(*CancelBuildingUpgradeOrderRequest)(nil),  // 19: server.v1.CancelBuildingUpgradeOrderRequest
+	(*CancelBuildingUpgradeOrderResponse)(nil), // 20: server.v1.CancelBuildingUpgradeOrderResponse
+	(*IssueTrainingOrderRequest)(nil),          // 21: server.v1.IssueTrainingOrderRequest
+	(*IssueTrainingOrderResponse)(nil),         // 22: server.v1.IssueTrainingOrderResponse
+	(*CancelTroopTrainingOrderRequest)(nil),    // 23: server.v1.CancelTroopTrainingOrderRequest
+	(*CancelTroopTrainingOrderResponse)(nil),   // 24: server.v1.CancelTroopTrainingOrderResponse
+	nil,                                        // 25: server.v1.World.BuildingsEntry
+	nil,                                        // 26: server.v1.World.TroopsEntry
+	nil,                                        // 27: server.v1.World.PlayersEntry
+	nil,                                        // 28: server.v1.World.FieldsEntry
+	nil,                                        // 29: server.v1.World.VillagesEntry
+	nil,                                        // 30: server.v1.World.TemplesEntry
+	(*World_Field)(nil),                        // 31: server.v1.World.Field
+	nil,                                        // 32: server.v1.World.Field.BuildingsEntry
+	nil,                                        // 33: server.v1.World.Field.TroopsEntry
+	nil,                                        // 34: server.v1.MovementOrder.TroopsEntry
+	(*Village_BuildingUpgradeOrder)(nil),       // 35: server.v1.Village.BuildingUpgradeOrder
+	(*Village_TroopTrainingOrder)(nil),         // 36: server.v1.Village.TroopTrainingOrder
+	(*SubscribeToWorldResponse_Patch)(nil),     // 37: server.v1.SubscribeToWorldResponse.Patch
+	nil,                                        // 38: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	nil,                                        // 39: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	nil,                                        // 40: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	nil,                                        // 41: server.v1.IssueMovementOrderRequest.TroopsEntry
+	(*wrapperspb.StringValue)(nil),             // 42: google.protobuf.StringValue
 }
 var file_server_v1_server_proto_depIdxs = []int32{
-	29, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
-	30, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
-	31, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
-	32, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
-	33, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
-	34, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
-	4,  // 6: server.v1.World.troop_movement_orders:type_name -> server.v1.TroopMovementOrder
+	25, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
+	26, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
+	27, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
+	28, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
+	29, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
+	30, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
+	4,  // 6: server.v1.World.movement_orders:type_name -> server.v1.MovementOrder
 	5,  // 7: server.v1.Building.cost:type_name -> server.v1.Resources
 	5,  // 8: server.v1.Troop.cost:type_name -> server.v1.Resources
-	36, // 9: server.v1.TroopMovementOrder.troops:type_name -> server.v1.TroopMovementOrder.TroopsEntry
-	5,  // 10: server.v1.Temple.resources:type_name -> server.v1.Resources
-	47, // 11: server.v1.Temple.player_id:type_name -> google.protobuf.StringValue
-	5,  // 12: server.v1.Village.resources:type_name -> server.v1.Resources
-	37, // 13: server.v1.Village.buildings:type_name -> server.v1.Village.BuildingsEntry
-	38, // 14: server.v1.Village.troops:type_name -> server.v1.Village.TroopsEntry
-	39, // 15: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
-	40, // 16: server.v1.Village.troop_training_orders:type_name -> server.v1.Village.TroopTrainingOrder
-	41, // 17: server.v1.Village.resource_transfer_orders:type_name -> server.v1.Village.ResourceTransferOrder
-	1,  // 18: server.v1.GetWorldResponse.world:type_name -> server.v1.World
-	42, // 19: server.v1.SubscribeToWorldResponse.patch:type_name -> server.v1.SubscribeToWorldResponse.Patch
-	46, // 20: server.v1.IssueTroopMovementOrderRequest.troops:type_name -> server.v1.IssueTroopMovementOrderRequest.TroopsEntry
-	5,  // 21: server.v1.IssueResourceTransferOrderRequest.resources:type_name -> server.v1.Resources
-	41, // 22: server.v1.IssueResourceTransferOrderResponse.order:type_name -> server.v1.Village.ResourceTransferOrder
-	2,  // 23: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
-	3,  // 24: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
-	8,  // 25: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
-	35, // 26: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
-	7,  // 27: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
-	6,  // 28: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
-	0,  // 29: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
-	5,  // 30: server.v1.Village.ResourceTransferOrder.resources:type_name -> server.v1.Resources
-	43, // 31: server.v1.SubscribeToWorldResponse.Patch.fields:type_name -> server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
-	44, // 32: server.v1.SubscribeToWorldResponse.Patch.villages:type_name -> server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
-	45, // 33: server.v1.SubscribeToWorldResponse.Patch.temples:type_name -> server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
-	4,  // 34: server.v1.SubscribeToWorldResponse.Patch.troop_movement_orders:type_name -> server.v1.TroopMovementOrder
-	35, // 35: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry.value:type_name -> server.v1.World.Field
-	7,  // 36: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry.value:type_name -> server.v1.Village
-	6,  // 37: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry.value:type_name -> server.v1.Temple
-	9,  // 38: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
-	11, // 39: server.v1.Service.SubscribeToWorld:input_type -> server.v1.SubscribeToWorldRequest
-	13, // 40: server.v1.Service.IssueTroopMovementOrder:input_type -> server.v1.IssueTroopMovementOrderRequest
-	15, // 41: server.v1.Service.CancelTroopMovementOrder:input_type -> server.v1.CancelTroopMovementOrderRequest
-	17, // 42: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
-	19, // 43: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
-	21, // 44: server.v1.Service.IssueTroopTrainingOrder:input_type -> server.v1.IssueTroopTrainingOrderRequest
-	23, // 45: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
-	25, // 46: server.v1.Service.IssueResourceTransferOrder:input_type -> server.v1.IssueResourceTransferOrderRequest
-	27, // 47: server.v1.Service.CancelResourceTransferOrder:input_type -> server.v1.CancelResourceTransferOrderRequest
-	10, // 48: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
-	12, // 49: server.v1.Service.SubscribeToWorld:output_type -> server.v1.SubscribeToWorldResponse
-	14, // 50: server.v1.Service.IssueTroopMovementOrder:output_type -> server.v1.IssueTroopMovementOrderResponse
-	16, // 51: server.v1.Service.CancelTroopMovementOrder:output_type -> server.v1.CancelTroopMovementOrderResponse
-	18, // 52: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
-	20, // 53: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
-	22, // 54: server.v1.Service.IssueTroopTrainingOrder:output_type -> server.v1.IssueTroopTrainingOrderResponse
-	24, // 55: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
-	26, // 56: server.v1.Service.IssueResourceTransferOrder:output_type -> server.v1.IssueResourceTransferOrderResponse
-	28, // 57: server.v1.Service.CancelResourceTransferOrder:output_type -> server.v1.CancelResourceTransferOrderResponse
-	48, // [48:58] is the sub-list for method output_type
-	38, // [38:48] is the sub-list for method input_type
-	38, // [38:38] is the sub-list for extension type_name
-	38, // [38:38] is the sub-list for extension extendee
-	0,  // [0:38] is the sub-list for field type_name
+	34, // 9: server.v1.MovementOrder.troops:type_name -> server.v1.MovementOrder.TroopsEntry
+	5,  // 10: server.v1.MovementOrder.resources:type_name -> server.v1.Resources
+	35, // 11: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
+	36, // 12: server.v1.Village.troop_training_orders:type_name -> server.v1.Village.TroopTrainingOrder
+	1,  // 13: server.v1.GetWorldResponse.world:type_name -> server.v1.World
+	37, // 14: server.v1.SubscribeToWorldResponse.patch:type_name -> server.v1.SubscribeToWorldResponse.Patch
+	41, // 15: server.v1.IssueMovementOrderRequest.troops:type_name -> server.v1.IssueMovementOrderRequest.TroopsEntry
+	5,  // 16: server.v1.IssueMovementOrderRequest.resources:type_name -> server.v1.Resources
+	2,  // 17: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
+	3,  // 18: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
+	8,  // 19: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
+	31, // 20: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
+	7,  // 21: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
+	6,  // 22: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
+	0,  // 23: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
+	5,  // 24: server.v1.World.Field.resources:type_name -> server.v1.Resources
+	32, // 25: server.v1.World.Field.buildings:type_name -> server.v1.World.Field.BuildingsEntry
+	33, // 26: server.v1.World.Field.troops:type_name -> server.v1.World.Field.TroopsEntry
+	42, // 27: server.v1.World.Field.player_id:type_name -> google.protobuf.StringValue
+	38, // 28: server.v1.SubscribeToWorldResponse.Patch.fields:type_name -> server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	39, // 29: server.v1.SubscribeToWorldResponse.Patch.villages:type_name -> server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	40, // 30: server.v1.SubscribeToWorldResponse.Patch.temples:type_name -> server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	4,  // 31: server.v1.SubscribeToWorldResponse.Patch.movement_orders:type_name -> server.v1.MovementOrder
+	31, // 32: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry.value:type_name -> server.v1.World.Field
+	7,  // 33: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry.value:type_name -> server.v1.Village
+	6,  // 34: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry.value:type_name -> server.v1.Temple
+	9,  // 35: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
+	11, // 36: server.v1.Service.SubscribeToWorld:input_type -> server.v1.SubscribeToWorldRequest
+	13, // 37: server.v1.Service.IssueMovementOrder:input_type -> server.v1.IssueMovementOrderRequest
+	15, // 38: server.v1.Service.CancelMovementOrder:input_type -> server.v1.CancelMovementOrderRequest
+	17, // 39: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
+	19, // 40: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
+	21, // 41: server.v1.Service.IssueTrainingOrder:input_type -> server.v1.IssueTrainingOrderRequest
+	23, // 42: server.v1.Service.CancelTroopTrainingOrder:input_type -> server.v1.CancelTroopTrainingOrderRequest
+	10, // 43: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
+	12, // 44: server.v1.Service.SubscribeToWorld:output_type -> server.v1.SubscribeToWorldResponse
+	14, // 45: server.v1.Service.IssueMovementOrder:output_type -> server.v1.IssueMovementOrderResponse
+	16, // 46: server.v1.Service.CancelMovementOrder:output_type -> server.v1.CancelMovementOrderResponse
+	18, // 47: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
+	20, // 48: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
+	22, // 49: server.v1.Service.IssueTrainingOrder:output_type -> server.v1.IssueTrainingOrderResponse
+	24, // 50: server.v1.Service.CancelTroopTrainingOrder:output_type -> server.v1.CancelTroopTrainingOrderResponse
+	43, // [43:51] is the sub-list for method output_type
+	35, // [35:43] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_server_v1_server_proto_init() }
@@ -2186,7 +1886,7 @@ func file_server_v1_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_v1_server_proto_rawDesc), len(file_server_v1_server_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   46,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
