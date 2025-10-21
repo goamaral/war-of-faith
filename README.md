@@ -22,3 +22,15 @@ Players compete to conquer the 4 mighty temples.
 ## Ideas
 - Skill tree
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
+
+## TODO
+- Conquer wild field
+- Sort source fields by total troops
+- Combat
+- Add another simple troop
+- Pillage
+- End game
+- Server simulation
+- Reveal fog fields on movement
+- Player 2
+- Main hall effect

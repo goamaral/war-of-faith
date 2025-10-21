@@ -1,10 +1,10 @@
 import type { JSX, FlowComponent } from "solid-js"
 
-import { createStore, SetStoreFunction } from "solid-js/store"
-import { batch, createUniqueId, onCleanup, onMount, Show } from "solid-js"
+import { createStore } from "solid-js/store"
+import { batch, onCleanup, onMount, Show } from "solid-js"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
-import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE } from './entities'
+import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, goldPerUnit } from './entities'
 
 export const playerId = "1"
 
@@ -93,9 +93,9 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 //     }))
 
 // Movement orders
-export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
+export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
   const id = crypto.randomUUID()
-  state_issueMovementOrder(id, sourceCoords, targetCoords, troops)
+  state_issueMovementOrder(id, sourceCoords, targetCoords, troops, gold)
   // serverCli.issueMovementOrder({ id, sourceCoords, targetCoords, troops })
   //   .catch(err => {
   //     alert(`Failed to issue movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${err}`)
@@ -192,7 +192,7 @@ function state_tick() {
       if (timeLeft == 0) {
         const targetField = store.world.fields[order.targetCoords] || newWildField(order.targetCoords)
         if (targetField.playerId != order.playerId) {
-          // TODO: Combat
+          alert("TODO: Combat")
 
           const troopsLeft = Object.values(order.troops).reduce((a, b) => a + b, 0)
           if (troopsLeft > 0) {
@@ -220,7 +220,7 @@ function state_tick() {
 
             } else {
               // Pillage
-              const pillage = Math.min(targetField.resources!.gold, troopsLeft)
+              const pillage = Math.min(targetField.resources!.gold, troopsLeft * goldPerUnit)
               setStore("world", "fields", order.targetCoords, "resources", r => sub(r!, { gold: pillage } as serverV1.Resources))
               newMovementOrders.push({
                 ...order,
@@ -228,6 +228,9 @@ function state_tick() {
                 comeback: true,
               } as serverV1.MovementOrder)
             }
+
+          } else {
+            setStore("world", "fields", order.targetCoords, "resources", r => add(r!, order.resources!))
           }
 
         } else {
@@ -279,12 +282,13 @@ function state_tick() {
   persistStore()
 }
 
-// Troop movement orders
-function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>) {
+// Movement orders
+function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
   const dst = calculateDistance(sourceCoords, targetCoords)
-  const order = { id, sourceCoords, targetCoords, troops, resources: newResources(), timeLeft: dst, playerId } as serverV1.MovementOrder
+  const order = { id, sourceCoords, targetCoords, troops, resources: newResources({ gold }), timeLeft: dst, playerId } as serverV1.MovementOrder
   batch(() => {
     setStore("world", "fields", sourceCoords, "troops", r => sub(r!, troops))
+    setStore("world", "fields", sourceCoords, "resources", "gold", g => g - gold)
     setStore("world", "movementOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
   })
   persistStore()

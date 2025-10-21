@@ -15,7 +15,7 @@ import {
   encodeCoords,
   playerVillageFields,
 } from './store'
-import { newFieldTroops, newWildField } from "./entities"
+import { goldPerUnit, newFieldTroops, newWildField, World_Field_KindToString } from "./entities"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -74,7 +74,11 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
         return { 'background-color': field.playerId! == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
 
       case serverV1.World_Field_Kind.TEMPLE:
-        return { 'background-color': 'yellow' }
+        let color = "yellow"
+        if (field.playerId) {
+          color = field.playerId == playerId ? "yellowgreen" : "lightsalmon	"
+        }
+        return { 'background-color': color }
 
       default:
         return {}
@@ -111,115 +115,91 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     const targetCoords = () => decodeCoords(targetField()!.coords)
     
     return <div>
-      <h2>{World_Field_EntityKindToString(targetField()!.kind)}</h2>
+      <h2>{World_Field_KindToString(targetField()!.kind)}</h2>
       <p><span>Coords</span> {targetCoords().x},{targetCoords().y}</p>
       {children}
     </div>
   }
 
-  function Village() {
+  const sourceFields = () => playerFields(f => f.coords != targetField()!.coords)
+  
+  function Targatable() {
+    const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
+    createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
+    const selectedField = () => store.world.fields[selectedSourceCoords()]
+    
     const troops = () => Object.values(store.world.troops)
-    const sourceFields = () => playerVillageFields(f => f.coords != targetField()!.coords)
+    const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
+    const totalSelectedTroopQuantity = () => Object.values(selectedTroopQuantity()).reduce((a, b) => a + b, 0)
 
-    function Attackable() {
-      const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
-      createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
-      const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
-      
-      return <div>
-        <label>Village</label>
-        <select value={selectedSourceCoords()} onChange={ev => setSelectedSourceCoords(ev.currentTarget.value)}>
-          <For each={sourceFields()}>
-            {f => <option value={f.coords}>{f.coords}</option>}
-          </For>
-        </select>
+    const maxGold = () => Math.min(selectedField().resources!.gold, totalSelectedTroopQuantity() * goldPerUnit)
+    const [selectedGold, setSelectedGold] = createSignal(0)
 
-        <label>Troops</label>
-        <div>
-          <For each={troops()}>
-            {t => {
-              const maxQuantity = () => store.world.fields[selectedSourceCoords()].troops[t.id]
+    return <div>
+      <label>From</label>
+      <select value={selectedSourceCoords()} onChange={ev => setSelectedSourceCoords(ev.currentTarget.value)}>
+        <For each={sourceFields()}>
+          {f => <option value={f.coords}>{World_Field_KindToString(f.kind)} {f.coords}</option>}
+        </For>
+      </select>
 
-              return <div>
-                <span>{t.name} ({maxQuantity()})</span>
-                <input type="number" min={0} max={maxQuantity()}
-                  value={selectedTroopQuantity()[t.id]}
-                  onChange={ev => setSelectedTroopQuantity({ [t.id]: +ev.currentTarget.value })}
-                />
-              </div>
-            }}
-          </For>
-        </div>
-
-        <button onClick={() => {
-          issueMovementOrder(selectedSourceCoords(), targetField()!.coords, selectedTroopQuantity())
-          setSelectedTroopQuantity(newFieldTroops())
-        }}>Attack</button>
-      </div>
-    }
-
-    return <Wrapper>
-      <Show when={sourceFields().length > 0}>
-        <Attackable />
-      </Show>
-    </Wrapper>
-  }
-
-  function Temple() {
-    const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(playerVillageFields()[0].coords)
-    createEffect(() => setSelectedSourceCoords(playerVillageFields()[0].coords))
-    const [goldToDonate, setGoldToDonate] = createSignal(0)
-
-    const selectedSourceField = () => playerFields().find(v => v.coords == selectedSourceCoords())!
-
-    async function donate() {
-      alert("TODO: FieldInfo.Temple.donate")
-    }
-
-    return <Wrapper>
+      <p>Troops</p>
       <div>
-        <p>{targetField()!.resources!.gold} gold left</p>
+        <For each={troops()}>
+          {t => {
+            const maxQuantity = () => selectedField().troops[t.id]
 
-        <label>Village</label>
-        <select value={selectedSourceCoords()} onChange={ev => setSelectedSourceCoords(ev.currentTarget.value)}>
-          {Object.values(playerVillageFields()).map(f => (<option value={f.coords}>{f.coords}</option>))}
-        </select>
-        <input type="number" min={0} max={selectedSourceField().resources!.gold}
-          value={goldToDonate()}
-          onChange={ev => setGoldToDonate(+ev.currentTarget.value)}
-        />
-
-        <button onClick={donate}>Donate</button>
+            return <div>
+              <span>{t.name} ({maxQuantity()})</span>
+              <input type="number" min={0} max={maxQuantity()}
+                value={selectedTroopQuantity()[t.id]}
+                onChange={ev => setSelectedTroopQuantity({ [t.id]: +ev.currentTarget.value })}
+              />
+            </div>
+          }}
+        </For>
       </div>
-    </Wrapper>
+
+      <p>Resources</p>
+      <div>
+        <div>
+          <span>Gold ({maxGold()})</span>
+          <input type="number" min={0} max={maxGold()}
+            value={selectedGold()}
+            onChange={ev => setSelectedGold(+ev.currentTarget.value)}
+          />
+        </div>
+      </div>
+
+      <button
+        onClick={() => {
+          issueMovementOrder(selectedSourceCoords(), targetField()!.coords, selectedTroopQuantity(), selectedGold())
+          setSelectedTroopQuantity(newFieldTroops())
+          setSelectedGold(0)
+        }}
+        disabled={totalSelectedTroopQuantity() == 0}
+      >
+        {(targetField()!.playerId != playerId) ? "Attack" : "Send"}
+      </button>
+    </div>
   }
 
   return <>
-    <Switch fallback={<Wrapper/>}>
+    <Switch fallback={
+      <Wrapper>
+        <Show when={sourceFields().length > 0}>
+          <Targatable />
+        </Show>
+      </Wrapper>
+    }>
       <Match when={targetField() == undefined}>
         <div><h2>No field selected</h2></div>
       </Match>
-      <Match when={targetField()?.kind == serverV1.World_Field_Kind.VILLAGE}>
-        <Village />
-      </Match>
-      <Match when={targetField()?.kind == serverV1.World_Field_Kind.TEMPLE}>
-        <Temple/>
+      <Match when={targetField()?.kind == serverV1.World_Field_Kind.FOG || targetField()?.kind == serverV1.World_Field_Kind.WILD}>
+        <Wrapper />
       </Match>
     </Switch>
   </>
-}
-
-function World_Field_EntityKindToString(entityKind: serverV1.World_Field_Kind): string {
-  switch (entityKind) {
-    case serverV1.World_Field_Kind.VILLAGE:
-      return 'Village'
-
-    case serverV1.World_Field_Kind.TEMPLE:
-      return 'Temple'
-
-    default:
-      return 'Wild Field'
-  }
 }
 
 function Movements() {
@@ -252,9 +232,9 @@ function Movements() {
               const [targetX, targetY] = order.targetCoords.split('_').map(Number)
 
               return (<div>
-                <A href={`/world/fields/${order.sourceCoords}`}>{World_Field_EntityKindToString(sourceField().kind)} ({sourceX},{sourceY})</A>
+                <A href={`/world/fields/${order.sourceCoords}`}>{World_Field_KindToString(sourceField().kind)} ({sourceX},{sourceY})</A>
                 <span> -&gt; </span>
-                <A href={`/world/fields/${order.targetCoords}`}>{World_Field_EntityKindToString(targetField().kind)} ({targetX},{targetY})</A>
+                <A href={`/world/fields/${order.targetCoords}`}>{World_Field_KindToString(targetField().kind)} ({targetX},{targetY})</A>
                 <span> - {order.timeLeft}s </span>
                 <button onClick={() => cancelMovementOrder(order)}>Cancel</button>
               </div>)
