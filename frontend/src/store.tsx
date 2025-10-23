@@ -261,12 +261,16 @@ function state_tick() {
 
       // Upgrade buildings
       const newBuildingUpgradeOrders: serverV1.Village_BuildingUpgradeOrder[] = []
-      village.buildingUpgradeOrders.forEach(order => {
-        const timeLeft = order.timeLeft - 1
-        if (timeLeft == 0) {
-          setStore("world", "fields", coords, "buildings", order.buildingId, b => b + 1)
+      village.buildingUpgradeOrders.forEach((order, index) => {
+        if (index == 0) {
+          const timeLeft = order.timeLeft - 1
+          if (timeLeft == 0) {
+            setStore("world", "fields", coords, "buildings", order.buildingId, b => b + 1)
+          } else {
+            newBuildingUpgradeOrders.push({ ...order, timeLeft })
+          }
         } else {
-          newBuildingUpgradeOrders.push({ ...order, timeLeft })
+          newBuildingUpgradeOrders.push(order)
         }
       })
       setStore("world", "villages", coords, "buildingUpgradeOrders", newBuildingUpgradeOrders)
@@ -274,11 +278,15 @@ function state_tick() {
       // Train troops
       const newTroopTrainingOrders: serverV1.Village_TroopTrainingOrder[] = []
       village.troopTrainingOrders.forEach((order, index) => {
-        const timeLeft = order.timeLeft - 1
-        if (timeLeft == 0) {
-          setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
+        if (index == 0) {
+          const timeLeft = order.timeLeft - 1
+          if (timeLeft == 0) {
+            setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
+          } else {
+            newTroopTrainingOrders.push({ ...order, timeLeft })
+          }
         } else {
-          newTroopTrainingOrders.push({ ...order, timeLeft })
+          newTroopTrainingOrders.push(order)
         }
       })
       setStore("world", "villages", coords, "troopTrainingOrders", newTroopTrainingOrders)

@@ -24,7 +24,7 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Queued training troop orders and building orders should work like a queue and only start training/building when the previous order is finished
+- Troop training orders should train one troop at a time and not all at once
 - Sort source fields by total troops
 - Combat
 - Add another simple troop

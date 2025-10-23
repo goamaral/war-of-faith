@@ -107,8 +107,9 @@ function VillageBuildings() {
       <ul>
         <For each={village().buildingUpgradeOrders}>
           {order => {
+            const building = store.world.buildings[order.buildingId]
             return (<li>
-              <span>{order.buildingId} (lvl {order.level}) - {order.timeLeft}s </span>
+              <span>{building.name} (lvl {order.level}) - {order.timeLeft}s </span>
               <Show when={buildingUpgradeOrderCancelable(order)}>
                 <button onClick={() => cancelBuildingUpgradeOrder(villageCoords, order)}>cancel</button>
               </Show>
@@ -129,8 +130,6 @@ function VillageTroops() {
           {(troopId) => {
             const troop = store.world.troops[troopId]
 
-            const [quantityToTrain, setQuantityToTrain] = createSignal(0)
-
             const quantity = () => field().troops[troopId]
             const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
               return acc + (troopId == order.troopId ? order.quantity : 0)
@@ -139,8 +138,11 @@ function VillageTroops() {
               if (troopId == LEADER) return trainableLeaders()
               return 0
             }
-            const cost = () => mul(troop.cost!, quantityToTrain())
             const description = () => `train (${cost().time}s, ${cost().gold} gold)`
+
+            const [quantityToTrain, setQuantityToTrain] = createSignal(trainableTroops())
+
+            const cost = () => mul(troop.cost!, quantityToTrain())
 
             function Counter() {
               return <input type="number" min={0} max={trainableTroops()}
@@ -152,7 +154,7 @@ function VillageTroops() {
             return <li>
               <span>{troop.name} - {quantity()} units ({quantityInTraining()} training)</span>
               <Switch>
-                <Match when={trainableTroops() <= 0}>
+                <Match when={trainableTroops() == 0}>
                   <></>
                 </Match>
                 <Match when={!canAfford(cost())}>
