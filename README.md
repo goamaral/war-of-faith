@@ -24,7 +24,7 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Conquer wild field
+- Queued training troop orders and building orders should work like a queue and only start training/building when the previous order is finished
 - Sort source fields by total troops
 - Combat
 - Add another simple troop
@@ -34,3 +34,4 @@ Players compete to conquer the 4 mighty temples.
 - Reveal fog fields on movement
 - Player 2
 - Main hall effect
+- Temple effect

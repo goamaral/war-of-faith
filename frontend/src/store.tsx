@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
-import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, goldPerUnit } from './entities'
+import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, goldPerUnit, countTroops } from './entities'
 
 export const playerId = "1"
 
@@ -48,6 +48,9 @@ export function playerFields(filter?: (f: serverV1.World_Field) => boolean) {
 }
 export function playerVillageFields(filter?: (f: serverV1.World_Field) => boolean) {
   return playerFields(filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
+}
+export function getField(coords: string) {
+  return store.world.fields[coords] || newWildField(coords)
 }
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
@@ -190,23 +193,25 @@ function state_tick() {
     store.world.movementOrders.forEach(order => {
       const timeLeft = order.timeLeft - 1
       if (timeLeft == 0) {
-        const targetField = store.world.fields[order.targetCoords] || newWildField(order.targetCoords)
+        const targetField = getField(order.targetCoords)
         if (targetField.playerId != order.playerId) {
           alert("TODO: Combat")
 
-          const troopsLeft = Object.values(order.troops).reduce((a, b) => a + b, 0)
+          const troopsLeft = countTroops(order.troops)
           if (troopsLeft > 0) {
             // Conquer
             if (order.troops[LEADER] > 0) {
               if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
-                setStore("world", "fields", order.targetCoords, f => ({
-                  ...f,
-                  kind: serverV1.World_Field_Kind.VILLAGE,
-                  buildings: { ...f.buildings, [HALL]: 1 },
-                  troops: add(f.troops, order.troops),
-                  resources: add(f.resources!, order.resources!),
-                  playerId: order.playerId,
-                }) as serverV1.World_Field)
+                setStore("world", "fields", order.targetCoords, f => {
+                  if (f == undefined) f = newWildField(order.targetCoords)
+                  return {
+                    ...f,
+                    kind: serverV1.World_Field_Kind.VILLAGE,
+                    troops: add(f.troops, order.troops),
+                    resources: add(f.resources!, order.resources!),
+                    playerId: order.playerId,
+                  } as serverV1.World_Field
+                })
                 setStore("world", "villages", order.targetCoords, newVillage())
       
               } else {

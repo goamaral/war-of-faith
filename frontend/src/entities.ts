@@ -34,11 +34,11 @@ export function newWildField(coords: string, v: Partial<serverV1.World_Field> = 
   return {
     coords,
     kind: serverV1.World_Field_Kind.WILD,
-    buildings: {},
+    buildings: { [HALL]: 1, [GOLD_MINE]: 0 },
     troops: newFieldTroops(),
     resources: newResources(),
     ...v,
-  }
+  } as serverV1.World_Field
 }
 
 export function newResources(v: Partial<serverV1.Resources> = {}) {
@@ -55,4 +55,8 @@ export function newFieldTroops() {
     troops[troopId] = 0
   }
   return troops
+}
+
+export function countTroops(troops: Record<string, number>) {
+  return Object.values(troops).reduce((a, b) => a + b, 0)
 }

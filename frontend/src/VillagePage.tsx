@@ -20,6 +20,17 @@ function village() {
   return store.world.villages[villageCoords]
 }
 
+function trainableLeaders() {
+  const maxLeaders = playerVillageFields().length
+  const leaders = playerVillageFields().reduce((acc, f) => acc + f.troops[LEADER], 0)
+  const leadersInTraining = playerVillageFields()
+    .map(f => store.world.villages[f.coords].troopTrainingOrders)
+    .flat()
+    .filter(o => o.troopId == LEADER)
+    .reduce((acc, o) => acc + (o.quantity > 0 ? 1 : 0), 0)
+  return maxLeaders - leaders - leadersInTraining
+}
+
 // TODO: Take into consideration dependencies
 function buildingUpgradeOrderCancelable(order: serverV1.Village_BuildingUpgradeOrder) {
   const orders = village().buildingUpgradeOrders
@@ -118,21 +129,17 @@ function VillageTroops() {
           {(troopId) => {
             const troop = store.world.troops[troopId]
 
-            const [quantityToTrain, setQuantityToTrain] = createSignal(1)
+            const [quantityToTrain, setQuantityToTrain] = createSignal(0)
 
             const quantity = () => field().troops[troopId]
             const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
               return acc + (troopId == order.troopId ? order.quantity : 0)
             }, 0)
             const trainableTroops = () => {
-              if (troopId == LEADER) {
-                const maxLeaders = playerVillageFields().length
-                return maxLeaders - quantity() - quantityInTraining()
-              }
-              return undefined
+              if (troopId == LEADER) return trainableLeaders()
+              return 0
             }
             const cost = () => mul(troop.cost!, quantityToTrain())
-
             const description = () => `train (${cost().time}s, ${cost().gold} gold)`
 
             function Counter() {
@@ -145,7 +152,7 @@ function VillageTroops() {
             return <li>
               <span>{troop.name} - {quantity()} units ({quantityInTraining()} training)</span>
               <Switch>
-                <Match when={trainableTroops() == 0}>
+                <Match when={trainableTroops() <= 0}>
                   <></>
                 </Match>
                 <Match when={!canAfford(cost())}>

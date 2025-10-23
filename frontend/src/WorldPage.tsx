@@ -14,8 +14,9 @@ import {
   playerFields,
   encodeCoords,
   playerVillageFields,
+  getField,
 } from './store'
-import { goldPerUnit, newFieldTroops, newWildField, World_Field_KindToString } from "./entities"
+import { countTroops, goldPerUnit, newFieldTroops, newWildField, World_Field_KindToString } from "./entities"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -121,7 +122,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     </div>
   }
 
-  const sourceFields = () => playerFields(f => f.coords != targetField()!.coords)
+  const sourceFields = () => playerFields(f => f.coords != targetField()!.coords).sort((a, b) => countTroops(b.troops) - countTroops(a.troops)) // TODO: Sort by distance or power
   
   function Targatable() {
     const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
@@ -130,9 +131,8 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     
     const troops = () => Object.values(store.world.troops)
     const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
-    const totalSelectedTroopQuantity = () => Object.values(selectedTroopQuantity()).reduce((a, b) => a + b, 0)
 
-    const maxGold = () => Math.min(selectedField().resources!.gold, totalSelectedTroopQuantity() * goldPerUnit)
+    const maxGold = () => Math.min(selectedField().resources!.gold, countTroops(selectedTroopQuantity()) * goldPerUnit)
     const [selectedGold, setSelectedGold] = createSignal(0)
 
     return <div>
@@ -150,7 +150,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
             const maxQuantity = () => selectedField().troops[t.id]
 
             return <div>
-              <span>{t.name} ({maxQuantity()})</span>
+              <span>{t.name} ({maxQuantity()})</span> {/* TODO: On max quantity click, pick max quantity */}
               <input type="number" min={0} max={maxQuantity()}
                 value={selectedTroopQuantity()[t.id]}
                 onChange={ev => setSelectedTroopQuantity({ [t.id]: +ev.currentTarget.value })}
@@ -163,7 +163,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
       <p>Resources</p>
       <div>
         <div>
-          <span>Gold ({maxGold()})</span>
+          <span>Gold ({maxGold()})</span> {/* TODO: On max gold click, pick max gold */}
           <input type="number" min={0} max={maxGold()}
             value={selectedGold()}
             onChange={ev => setSelectedGold(+ev.currentTarget.value)}
@@ -177,7 +177,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
           setSelectedTroopQuantity(newFieldTroops())
           setSelectedGold(0)
         }}
-        disabled={totalSelectedTroopQuantity() == 0}
+        disabled={countTroops(selectedTroopQuantity()) == 0}
       >
         {(targetField()!.playerId != playerId) ? "Attack" : "Send"}
       </button>
@@ -195,7 +195,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
       <Match when={targetField() == undefined}>
         <div><h2>No field selected</h2></div>
       </Match>
-      <Match when={targetField()?.kind == serverV1.World_Field_Kind.FOG || targetField()?.kind == serverV1.World_Field_Kind.WILD}>
+      <Match when={targetField()?.kind == serverV1.World_Field_Kind.FOG}>
         <Wrapper />
       </Match>
     </Switch>
@@ -205,17 +205,17 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
 function Movements() {
   const outgoing = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
+    const targetPlayerId = getField(o.targetCoords).playerId
     return sourcePlayerId == playerId && targetPlayerId != playerId
   })
   const incoming = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
+    const targetPlayerId = getField(o.targetCoords).playerId
     return sourcePlayerId != playerId && targetPlayerId == playerId
   })
   const support = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
+    const targetPlayerId = getField(o.targetCoords).playerId
     return sourcePlayerId == playerId && targetPlayerId == playerId
   })
 
@@ -228,7 +228,7 @@ function Movements() {
             {order => {
               const sourceField = () => store.world.fields[order.sourceCoords]
               const [sourceX, sourceY] = order.sourceCoords.split('_').map(Number)
-              const targetField = () => store.world.fields[order.targetCoords]
+              const targetField = () => getField(order.targetCoords)
               const [targetX, targetY] = order.targetCoords.split('_').map(Number)
 
               return (<div>
