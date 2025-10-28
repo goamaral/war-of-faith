@@ -279,11 +279,16 @@ function state_tick() {
       const newTroopTrainingOrders: serverV1.Village_TroopTrainingOrder[] = []
       village.troopTrainingOrders.forEach((order, index) => {
         if (index == 0) {
+          const troop = store.world.troops[order.troopId]
           const timeLeft = order.timeLeft - 1
-          if (timeLeft == 0) {
+          let quantity = order.quantity
+
+          if (timeLeft % troop.cost!.time == 0) {
+            quantity -= 1
             setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
-          } else {
-            newTroopTrainingOrders.push({ ...order, timeLeft })
+          }
+          if (timeLeft > 0) {
+            newTroopTrainingOrders.push({ ...order, timeLeft, quantity })
           }
         } else {
           newTroopTrainingOrders.push(order)
