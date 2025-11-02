@@ -24,8 +24,6 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Sort source fields by total troops
-- Combat
 - Add another simple troop
 - Pillage
 - End game

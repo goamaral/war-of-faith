@@ -195,19 +195,21 @@ function state_tick() {
       if (timeLeft == 0) {
         const targetField = getField(order.targetCoords)
         if (targetField.playerId != order.playerId) {
-          alert("TODO: Combat")
+          // Combat
+          const orderTroops = { [LEADER]: Math.max(0, order.troops[LEADER] - targetField.troops[LEADER]) } as Record<string, number>
+          const targetFieldTroops = { [LEADER]: Math.max(0, targetField.troops[LEADER] - order.troops[LEADER]) } as Record<string, number>
 
-          const troopsLeft = countTroops(order.troops)
+          const troopsLeft = countTroops(orderTroops)
           if (troopsLeft > 0) {
             // Conquer
-            if (order.troops[LEADER] > 0) {
+            if (orderTroops[LEADER] > 0) {
               if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
                 setStore("world", "fields", order.targetCoords, f => {
                   if (f == undefined) f = newWildField(order.targetCoords)
                   return {
                     ...f,
                     kind: serverV1.World_Field_Kind.VILLAGE,
-                    troops: add(f.troops, order.troops),
+                    troops: add(f.troops, orderTroops),
                     resources: add(f.resources!, order.resources!),
                     playerId: order.playerId,
                   } as serverV1.World_Field
@@ -217,7 +219,7 @@ function state_tick() {
               } else {
                 setStore("world", "fields", order.targetCoords, f => ({
                   ...f,
-                  troops: add(f.troops, order.troops),
+                  troops: add(f.troops, orderTroops),
                   resources: add(f.resources!, order.resources!),
                   playerId: order.playerId,
                 }) as serverV1.World_Field)
@@ -235,6 +237,7 @@ function state_tick() {
             }
 
           } else {
+            setStore("world", "fields", order.targetCoords, "troops", targetFieldTroops)
             setStore("world", "fields", order.targetCoords, "resources", r => add(r!, order.resources!))
           }
 
