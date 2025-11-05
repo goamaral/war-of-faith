@@ -12,11 +12,8 @@ import {
   StoreLoader, store, playerId, decodeCoords,
   issueMovementOrder, cancelMovementOrder,
   playerFields,
-  encodeCoords,
-  playerVillageFields,
-  getField,
 } from './store'
-import { countTroops, goldPerUnit, newFieldTroops, newWildField, World_Field_KindToString } from "./entities"
+import { countTroops, carriableGoldPerUnit, newFieldTroops, World_Field_KindToString } from "./entities"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -46,9 +43,7 @@ function World() {
 
   const cells = () => {
     const fields = Array(store.world.width).fill(undefined)
-    fields.forEach((_, y) => {
-      fields[y] = Array(store.world.height).fill(undefined).map((_, x) => newWildField(encodeCoords(x, y)))
-    })
+    fields.forEach((_, y) => fields[y] = Array(store.world.height).fill(undefined))
     for (const coords in store.world.fields) {
       const { x, y } = decodeCoords(coords)
       fields[y][x] = store.world.fields[coords]
@@ -132,7 +127,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     const troops = () => Object.values(store.world.troops)
     const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
 
-    const maxGold = () => Math.min(selectedField().resources!.gold, countTroops(selectedTroopQuantity()) * goldPerUnit)
+    const maxGold = () => Math.min(selectedField().resources!.gold, countTroops(selectedTroopQuantity()) * carriableGoldPerUnit)
     const [selectedGold, setSelectedGold] = createSignal(0)
 
     return <div>
@@ -150,10 +145,10 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
             const maxQuantity = () => selectedField().troops[t.id]
 
             return <div>
-              <span>{t.name} ({maxQuantity()})</span> {/* TODO: On max quantity click, pick max quantity */}
+              <span>{t.name} ({maxQuantity() /* TODO: On max quantity click, pick max quantity */})</span>
               <input type="number" min={0} max={maxQuantity()}
-                value={selectedTroopQuantity()[t.id]}
-                onChange={ev => setSelectedTroopQuantity({ [t.id]: +ev.currentTarget.value })}
+                value={selectedTroopQuantity()[t.id] }
+                onChange={ev => setSelectedTroopQuantity(stq => ({ ...stq, [t.id]: +ev.currentTarget.value }))}
               />
             </div>
           }}
@@ -205,17 +200,17 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
 function Movements() {
   const outgoing = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = getField(o.targetCoords).playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId == playerId && targetPlayerId != playerId
   })
   const incoming = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = getField(o.targetCoords).playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId != playerId && targetPlayerId == playerId
   })
   const support = () => store.world.movementOrders.filter(o => {
     const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = getField(o.targetCoords).playerId
+    const targetPlayerId = store.world.fields[o.targetCoords].playerId
     return sourcePlayerId == playerId && targetPlayerId == playerId
   })
 
@@ -228,7 +223,7 @@ function Movements() {
             {order => {
               const sourceField = () => store.world.fields[order.sourceCoords]
               const [sourceX, sourceY] = order.sourceCoords.split('_').map(Number)
-              const targetField = () => getField(order.targetCoords)
+              const targetField = () => store.world.fields[order.targetCoords]
               const [targetX, targetY] = order.targetCoords.split('_').map(Number)
 
               return (<div>

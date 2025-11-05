@@ -12,6 +12,7 @@ var (
 	Building_GOLD_MINE = "gold-mine"
 
 	Troop_LEADER = "leader"
+	Troop_RAIDER = "raider"
 )
 
 type World struct {
@@ -31,6 +32,7 @@ func (w *World) CreateVillage(coords string, playerId string) {
 		},
 		Troops: map[string]uint32{
 			Troop_LEADER: 0,
+			Troop_RAIDER: 0,
 		},
 		PlayerId: wrapperspb.String(playerId),
 	}
@@ -45,6 +47,7 @@ func (w *World) CreateTemple(coords string) {
 		Buildings: map[string]uint32{},
 		Troops: map[string]uint32{
 			Troop_LEADER: 0,
+			Troop_RAIDER: 0,
 		},
 	}
 	w.Temples[coords] = &serverv1.Temple{}

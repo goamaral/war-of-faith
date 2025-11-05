@@ -3,12 +3,15 @@ import { useParams } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import {
-  StoreLoader, store, mul,
+  StoreLoader, store, mulN,
   issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
   issueTroopTrainingOrder, cancelTroopTrainingOrder,
-  playerVillageFields
+  playerVillageFields,
+  div,
+  sub,
+  add
 } from './store'
-import { LEADER } from "./entities"
+import { LEADER, newFieldTroops, newResources } from "./entities"
 
 let villageCoords = ""
 
@@ -122,6 +125,16 @@ function VillageBuildings() {
 }
 
 function VillageTroops() {
+  const [troopQuantity, setTroopQuantity] = createSignal(newFieldTroops())
+  const resourcesLeft = () => {
+    let res = field().resources!
+    for (const troopId in store.world.troops) {
+      res = sub(res, mulN(store.world.troops[troopId].cost!, troopQuantity()[troopId]))
+    }
+    res.time = 0
+    return res
+  }
+
   return (
     <div>
       <h2>Troops</h2>
@@ -135,19 +148,20 @@ function VillageTroops() {
               return acc + (troopId == order.troopId ? order.quantity : 0)
             }, 0)
             const trainableTroops = () => {
-              if (troopId == LEADER) return trainableLeaders()
-              return 0
+              const troopQuantityCost = mulN(troop.cost!, troopQuantity()[troopId])
+              troopQuantityCost.time = 0
+              let trainable = Math.floor(div(add(resourcesLeft(), troopQuantityCost), troop.cost!))
+              if (troopId == LEADER) return Math.min(trainable, trainableLeaders())
+              return trainable
             }
+            
+            const cost = () => mulN(troop.cost!, troopQuantity()[troopId])
             const description = () => `train (${cost().time}s, ${cost().gold} gold)`
-
-            const [quantityToTrain, setQuantityToTrain] = createSignal(trainableTroops())
-
-            const cost = () => mul(troop.cost!, quantityToTrain())
 
             function Counter() {
               return <input type="number" min={0} max={trainableTroops()}
-                value={quantityToTrain()}
-                onChange={e => setQuantityToTrain(+e.currentTarget.value)}
+                value={troopQuantity()[troopId]}
+                onChange={e => setTroopQuantity(prev => ({ ...prev, [troopId]: +e.currentTarget.value }))}
               />
             }
 
@@ -163,7 +177,11 @@ function VillageTroops() {
                 </Match>
                 <Match when={true}>
                   <Counter />
-                  <button onClick={() => issueTroopTrainingOrder(villageCoords, troopId, quantityToTrain())}>{description()}</button>
+                  <button onClick={() => {
+                    issueTroopTrainingOrder(villageCoords, troopId, troopQuantity()[troopId])
+                    setTroopQuantity(prev => ({ ...prev, [troopId]: 0 }))
+                  }}>{description()}</button>
+                  <button onClick={() => setTroopQuantity(prev => ({ ...prev, [troopId]: trainableTroops() }))}>(max: {trainableTroops()})</button>
                 </Match>
               </Switch>
             </li>

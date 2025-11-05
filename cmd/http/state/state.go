@@ -32,8 +32,16 @@ func NewWorld(patchChan chan *serverv1.SubscribeToWorldResponse_Patch) *World {
 					Id:   Troop_LEADER,
 					Name: "Leader",
 					Cost: &serverv1.Resources{
-						Gold: 10,
-						Time: 10,
+						Gold: 50,
+						Time: 20,
+					},
+				},
+				Troop_RAIDER: {
+					Id:   Troop_RAIDER,
+					Name: "Raider",
+					Cost: &serverv1.Resources{
+						Gold: 5,
+						Time: 2,
 					},
 				},
 			},

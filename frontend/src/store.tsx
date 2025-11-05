@@ -4,7 +4,8 @@ import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
-import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, goldPerUnit, countTroops } from './entities'
+import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, carriableGoldPerUnit, countTroops, newFieldTroops, RAIDER } from './entities'
+import { combatLogger } from "./logger"
 
 export const playerId = "1"
 
@@ -36,6 +37,14 @@ async function loadStore() {
 
   } else {
     const { world } = await serverCli.getWorld({})
+    for (let x = 0; x < world!.width; x++) {
+      for (let y = 0; y < world!.height; y++) {
+        const coords = encodeCoords(x, y)
+        if (world!.fields[coords] == undefined) {
+          world!.fields[coords] = newWildField(coords)
+        }
+      }
+    }
     const store = { loaded: true, world }
     setStore(store)
     localStorage.setItem("store", JSON.stringify(store))
@@ -48,9 +57,6 @@ export function playerFields(filter?: (f: serverV1.World_Field) => boolean) {
 }
 export function playerVillageFields(filter?: (f: serverV1.World_Field) => boolean) {
   return playerFields(filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
-}
-export function getField(coords: string) {
-  return store.world.fields[coords] || newWildField(coords)
 }
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
@@ -165,10 +171,24 @@ export function sub<T extends Record<string, any>>(a: T, b: T): T {
   }
   return res as T
 }
-export function mul<T extends Record<string, any>>(a: T, n: any): T {
+export function mulN<T extends Record<string, any>>(a: T, n: number): T {
   const res = {} as Record<string, any>
   for (const [k, v] of Object.entries(a)) {
     res[k] = v * n
+  }
+  return res as T
+}
+export function div<T extends Record<string, any>>(a: T, b: T): number {
+  let res = Infinity
+  for (const [k, v] of Object.entries(a)) {
+    res = Math.min(res, v / b[k] || Infinity)
+  }
+  return res
+}
+export function divN<T extends Record<string, any>>(a: T, n: number): T {
+  const res = {} as Record<string, any>
+  for (const [k, v] of Object.entries(a)) {
+    res[k] = v / n
   }
   return res as T
 }
@@ -193,52 +213,80 @@ function state_tick() {
     store.world.movementOrders.forEach(order => {
       const timeLeft = order.timeLeft - 1
       if (timeLeft == 0) {
-        const targetField = getField(order.targetCoords)
+        const targetField = store.world.fields[order.targetCoords]
         if (targetField.playerId != order.playerId) {
           // Combat
-          const orderTroops = { [LEADER]: Math.max(0, order.troops[LEADER] - targetField.troops[LEADER]) } as Record<string, number>
-          const targetFieldTroops = { [LEADER]: Math.max(0, targetField.troops[LEADER] - order.troops[LEADER]) } as Record<string, number>
+          const attackerTroops = newFieldTroops(order.troops)
+          const defenderTroops = newFieldTroops(targetField.troops)
+          const getTroopLayer = (troops: Record<string, number>) => {
+            if (troops[RAIDER] > 0) return { troopId: RAIDER, quantity: troops[RAIDER] }
+            if (troops[LEADER] > 0) return { troopId: LEADER, quantity: troops[LEADER] }
+            return { troopId: undefined, quantity: 0 }
+          }
+          while (true) {
+            const { troopId: attackerTroopId, quantity: attackerQuantity } = getTroopLayer(attackerTroops)
+            if (attackerTroopId == undefined) {
+              combatLogger("Attacker lost")
+              break
+            }
+            const { troopId: defenderTroopId, quantity: defenderQuantity } = getTroopLayer(defenderTroops)
+            if (defenderTroopId == undefined) {
+              combatLogger("Defender lost")
+              break
+            }
 
-          const troopsLeft = countTroops(orderTroops)
+            combatLogger(`${attackerQuantity} ${attackerTroopId} VS ${defenderQuantity} ${defenderTroopId}`)
+
+            attackerTroops[attackerTroopId] = Math.max(0, attackerTroops[attackerTroopId] - defenderQuantity)
+            defenderTroops[defenderTroopId] = Math.max(0, defenderTroops[defenderTroopId] - attackerQuantity)
+          }
+
+          const troopsLeft = countTroops(attackerTroops)
           if (troopsLeft > 0) {
             // Conquer
-            if (orderTroops[LEADER] > 0) {
+            if (attackerTroops[LEADER] > 0) {
               if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
                 setStore("world", "fields", order.targetCoords, f => {
-                  if (f == undefined) f = newWildField(order.targetCoords)
                   return {
                     ...f,
                     kind: serverV1.World_Field_Kind.VILLAGE,
-                    troops: add(f.troops, orderTroops),
+                    troops: attackerTroops,
                     resources: add(f.resources!, order.resources!),
                     playerId: order.playerId,
                   } as serverV1.World_Field
                 })
                 setStore("world", "villages", order.targetCoords, newVillage())
-      
+
               } else {
                 setStore("world", "fields", order.targetCoords, f => ({
                   ...f,
-                  troops: add(f.troops, orderTroops),
+                  troops: attackerTroops,
                   resources: add(f.resources!, order.resources!),
                   playerId: order.playerId,
                 }) as serverV1.World_Field)
               }
+              combatLogger("Field conquered")
 
             } else {
               // Pillage
-              const pillage = Math.min(targetField.resources!.gold, troopsLeft * goldPerUnit)
-              setStore("world", "fields", order.targetCoords, "resources", r => sub(r!, { gold: pillage } as serverV1.Resources))
+              const pillage = { gold: Math.min(targetField.resources!.gold, troopsLeft * carriableGoldPerUnit) } as serverV1.Resources
+              setStore("world", "fields", order.targetCoords, "resources", r => sub(r!, pillage))
               newMovementOrders.push({
                 ...order,
-                timeLeft: calculateDistance(order.sourceCoords, order.targetCoords),
+                sourceCoords: order.targetCoords,
+                targetCoords: order.sourceCoords,
+                troops: attackerTroops,
+                resources: pillage,
+                timeLeft: calculateDistance(order.targetCoords, order.sourceCoords),
                 comeback: true,
               } as serverV1.MovementOrder)
+              combatLogger(`Pillaged (gold: ${pillage.gold})`)
             }
 
           } else {
-            setStore("world", "fields", order.targetCoords, "troops", targetFieldTroops)
+            setStore("world", "fields", order.targetCoords, "troops", defenderTroops)
             setStore("world", "fields", order.targetCoords, "resources", r => add(r!, order.resources!))
+            combatLogger(`Delivered (gold: ${order.resources!.gold})`)
           }
 
         } else {
@@ -248,6 +296,7 @@ function state_tick() {
             troops: add(f.troops, order.troops),
             resources: add(f.resources!, order.resources!),
           }) as serverV1.World_Field)
+          combatLogger(`Delivered (gold: ${order.resources!.gold})`)
         }
 
       } else {
@@ -318,6 +367,7 @@ function state_cancelMovementOrder(id: string) {
   batch(() => {
     setStore("world", "movementOrders", orders => {
       const order = orders.find(o => o.id == id)!
+      if (order.comeback) throw new Error("Can't cancel a comeback order") // TODO
       const dst = calculateDistance(order.sourceCoords, order.targetCoords)
       order.timeLeft = dst - order.timeLeft
       order.comeback = true
@@ -352,7 +402,7 @@ function state_cancelBuildingUpgradeOrder(coords: string, order: serverV1.Villag
 // Troop training orders
 function state_issueTroopTrainingOrder(coords: string, troopId: string, quantity: number) {
   const troop = store.world.troops[troopId]
-  const cost = mul(troop.cost!, quantity) as serverV1.Resources
+  const cost = mulN(troop.cost!, quantity) as serverV1.Resources
   const order = { quantity, troopId, timeLeft: cost.time } as serverV1.Village_TroopTrainingOrder
   batch(() => {
     setStore("world", "villages", coords, "troopTrainingOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
@@ -363,7 +413,7 @@ function state_issueTroopTrainingOrder(coords: string, troopId: string, quantity
 }
 function state_cancelTroopTrainingOrder(coords: string, order: serverV1.Village_TroopTrainingOrder) {
   const troop = store.world.troops[order.troopId]
-  const cost = mul(troop.cost!, order.quantity) as serverV1.Resources
+  const cost = mulN(troop.cost!, order.quantity) as serverV1.Resources
   batch(() => {
     setStore("world", "villages", coords, "troopTrainingOrders", orders => orders.filter(o => !(o.troopId == order.troopId && o.quantity == order.quantity)))
     setStore("world", "fields", coords, "resources", r => add(r!, cost))
