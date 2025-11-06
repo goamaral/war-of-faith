@@ -68,7 +68,7 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   function kindStyle(): JSX.CSSProperties {
     switch (field.kind) {
       case serverV1.World_Field_Kind.VILLAGE:
-        return { 'background-color': field.playerId! == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
+        return { 'background-color': field.playerId == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
 
       case serverV1.World_Field_Kind.TEMPLE:
         let color = "yellow"
@@ -83,6 +83,8 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   }
 
   function open() {
+    if (field.playerId != playerId) return
+
     switch (field.kind) {
       case serverV1.World_Field_Kind.VILLAGE:
         navigate(`/villages/${field.coords}`)

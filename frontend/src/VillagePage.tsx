@@ -9,7 +9,8 @@ import {
   playerVillageFields,
   div,
   sub,
-  add
+  add,
+  playerId
 } from './store'
 import { LEADER, newFieldTroops, newResources } from "./entities"
 
@@ -62,12 +63,14 @@ export default function VillagePage() {
     {() =>
       <div>
         <h1>Village {villageCoords}</h1>
-        <h2>Resources</h2>
-        <ul>
-          <li>{field().resources!.gold} Gold</li>
-        </ul>
-        <VillageBuildings />
-        <VillageTroops />
+        <Show when={field().playerId == playerId}>
+          <h2>Resources</h2>
+          <ul>
+            <li>{field().resources!.gold} Gold</li>
+          </ul>
+          <VillageBuildings />
+          <VillageTroops />
+        </Show>
       </div>
     }
   </StoreLoader>

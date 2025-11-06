@@ -24,10 +24,11 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Block opening enemy village
 - Block cancelling order that is coming back
+- Temple page
 - End game (5 min with all the mighty temples)
 - Add stats to troops (defense, attack, capacity)
+- Validate conditions before executing actions
 - Server simulation
 - Reveal fog fields on movement
 - Player 2
