@@ -24,7 +24,6 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- World - On max troop quantity click, pick max quantity
 - Block opening enemy village
 - Block cancelling order that is coming back
 - End game (5 min with all the mighty temples)

@@ -36,6 +36,7 @@ function World() {
     'grid-template-columns': `repeat(${store.world.width}, 20px)`,
     'grid-template-rows': `repeat(${store.world.height}, 20px)`,
     'width': 'fit-content',
+    'height': 'fit-content',
     'border-bottom': '1px solid black',
     'border-right': '1px solid black',
   } as JSX.CSSProperties
@@ -145,7 +146,8 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
             const maxQuantity = () => selectedField().troops[t.id]
 
             return <div>
-              <span>{t.name} ({maxQuantity() /* TODO: On max quantity click, pick max quantity */})</span>
+              <span>{t.name} </span>
+              <button onClick={() => setSelectedTroopQuantity(stq => ({ ...stq, [t.id]: maxQuantity() }))}>({maxQuantity()})</button>
               <input type="number" min={0} max={maxQuantity()}
                 value={selectedTroopQuantity()[t.id] }
                 onChange={ev => setSelectedTroopQuantity(stq => ({ ...stq, [t.id]: +ev.currentTarget.value }))}
