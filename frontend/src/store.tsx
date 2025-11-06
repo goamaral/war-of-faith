@@ -211,9 +211,10 @@ function state_tick() {
     // Move orders
     const newMovementOrders: serverV1.MovementOrder[] = []
     store.world.movementOrders.forEach(order => {
+      const targetCoords = order.comeback ? order.sourceCoords : order.targetCoords
       const timeLeft = order.timeLeft - 1
       if (timeLeft == 0) {
-        const targetField = store.world.fields[order.targetCoords]
+        const targetField = store.world.fields[targetCoords]
         if (targetField.playerId != order.playerId) {
           // Combat
           const attackerTroops = newFieldTroops(order.troops)
@@ -246,7 +247,7 @@ function state_tick() {
             // Conquer
             if (attackerTroops[LEADER] > 0) {
               if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
-                setStore("world", "fields", order.targetCoords, f => {
+                setStore("world", "fields", targetCoords, f => {
                   return {
                     ...f,
                     kind: serverV1.World_Field_Kind.VILLAGE,
@@ -255,10 +256,10 @@ function state_tick() {
                     playerId: order.playerId,
                   } as serverV1.World_Field
                 })
-                setStore("world", "villages", order.targetCoords, newVillage())
+                setStore("world", "villages", targetCoords, newVillage())
 
               } else {
-                setStore("world", "fields", order.targetCoords, f => ({
+                setStore("world", "fields", targetCoords, f => ({
                   ...f,
                   troops: attackerTroops,
                   resources: add(f.resources!, order.resources!),
@@ -270,11 +271,9 @@ function state_tick() {
             } else {
               // Pillage
               const pillage = { gold: Math.min(targetField.resources!.gold, troopsLeft * carriableGoldPerUnit) } as serverV1.Resources
-              setStore("world", "fields", order.targetCoords, "resources", r => sub(r!, pillage))
+              setStore("world", "fields", targetCoords, "resources", r => sub(r!, pillage))
               newMovementOrders.push({
                 ...order,
-                sourceCoords: order.targetCoords,
-                targetCoords: order.sourceCoords,
                 troops: attackerTroops,
                 resources: pillage,
                 timeLeft: calculateDistance(order.targetCoords, order.sourceCoords),
@@ -284,14 +283,14 @@ function state_tick() {
             }
 
           } else {
-            setStore("world", "fields", order.targetCoords, "troops", defenderTroops)
-            setStore("world", "fields", order.targetCoords, "resources", r => add(r!, order.resources!))
+            setStore("world", "fields", targetCoords, "troops", defenderTroops)
+            setStore("world", "fields", targetCoords, "resources", r => add(r!, order.resources!))
             combatLogger(`Delivered (gold: ${order.resources!.gold})`)
           }
 
         } else {
           // Deliver
-          setStore("world", "fields", order.targetCoords, f => ({
+          setStore("world", "fields", targetCoords, f => ({
             ...f,
             troops: add(f.troops, order.troops),
             resources: add(f.resources!, order.resources!),
@@ -366,12 +365,15 @@ function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords
 function state_cancelMovementOrder(id: string) {
   batch(() => {
     setStore("world", "movementOrders", orders => {
-      const order = orders.find(o => o.id == id)!
-      if (order.comeback) throw new Error("Can't cancel a comeback order") // TODO
-      const dst = calculateDistance(order.sourceCoords, order.targetCoords)
-      order.timeLeft = dst - order.timeLeft
-      order.comeback = true
-      return orders.sort((a, b) => a.timeLeft - b.timeLeft)
+      const index = orders.findIndex(o => o.id == id)!
+      const order = orders[index]
+      if (order.comeback) throw new Error("Can't cancel a comeback order")
+      orders[index] = {
+        ...order,
+        timeLeft: calculateDistance(order.sourceCoords, order.targetCoords) - order.timeLeft,
+        comeback: true,
+      }
+      return orders.slice().sort((a, b) => a.timeLeft - b.timeLeft)
     })
   })
   persistStore()

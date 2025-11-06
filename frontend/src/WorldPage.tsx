@@ -201,26 +201,41 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
   </>
 }
 
-function Movements() {
-  const outgoing = () => store.world.movementOrders.filter(o => {
-    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
-    return sourcePlayerId == playerId && targetPlayerId != playerId
-  })
-  const incoming = () => store.world.movementOrders.filter(o => {
-    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
-    return sourcePlayerId != playerId && targetPlayerId == playerId
-  })
-  const support = () => store.world.movementOrders.filter(o => {
-    const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
-    const targetPlayerId = store.world.fields[o.targetCoords].playerId
-    return sourcePlayerId == playerId && targetPlayerId == playerId
-  })
+enum TroopMovementType {
+  Outgoing,
+  Incoming,
+  Support,
+}
 
-  function Movements({ title, orders }: {title: string, orders: Accessor<serverV1.MovementOrder[]>}) {
+function Movements() {
+  function Movements({ type }: {type: TroopMovementType}) {
+    const orders = () => store.world.movementOrders.filter(o => {
+      const sourcePlayerId = store.world.fields[o.sourceCoords].playerId
+      const targetPlayerId = store.world.fields[o.targetCoords].playerId
+
+      switch (type) {
+        case TroopMovementType.Outgoing:
+          return sourcePlayerId == playerId && targetPlayerId != playerId
+        case TroopMovementType.Incoming:
+          return sourcePlayerId == playerId && targetPlayerId == playerId
+        case TroopMovementType.Support:
+          return sourcePlayerId == playerId && targetPlayerId == playerId
+      }
+    })
+
+    const title = () => {
+      switch (type) {
+        case TroopMovementType.Outgoing:
+          return "Outgoing"
+        case TroopMovementType.Incoming:
+          return "Incoming"
+        case TroopMovementType.Support:
+          return "Support"
+      }
+    }
+
     return <>
-      <h3>{title}</h3>
+      <h3>{title()}</h3>
       <Show when={orders().length > 0} fallback={<p>No movements</p>}>
         <div>
           <For each={orders()}>
@@ -229,13 +244,16 @@ function Movements() {
               const [sourceX, sourceY] = order.sourceCoords.split('_').map(Number)
               const targetField = () => store.world.fields[order.targetCoords]
               const [targetX, targetY] = order.targetCoords.split('_').map(Number)
+              const arrow = () => order.comeback ? "<-" : "->"
 
               return (<div>
                 <A href={`/world/fields/${order.sourceCoords}`}>{World_Field_KindToString(sourceField().kind)} ({sourceX},{sourceY})</A>
-                <span> -&gt; </span>
+                <span> {arrow()} </span>
                 <A href={`/world/fields/${order.targetCoords}`}>{World_Field_KindToString(targetField().kind)} ({targetX},{targetY})</A>
                 <span> - {order.timeLeft}s </span>
-                <button onClick={() => cancelMovementOrder(order)}>Cancel</button>
+                <Show when={type != TroopMovementType.Incoming && !order.comeback}>
+                  <button onClick={() => cancelMovementOrder(order)}>Cancel</button>
+                </Show>
               </div>)
             }}
           </For>
@@ -246,8 +264,8 @@ function Movements() {
 
   return <div>
     <h2>Troop Movements</h2>
-    <Movements title="Outgoing" orders={outgoing} />
-    <Movements title="Incoming" orders={incoming} />
-    <Movements title="Support" orders={support} />
+    <Movements type={TroopMovementType.Outgoing} />
+    <Movements type={TroopMovementType.Incoming} />
+    <Movements type={TroopMovementType.Support} />
   </div>
 }
