@@ -266,7 +266,7 @@ function state_tick() {
                   playerId: order.playerId,
                 }) as serverV1.World_Field)
               }
-              combatLogger("Field conquered")
+              combatLogger(`Field ${targetCoords} conquered`)
 
             } else {
               // Pillage
@@ -407,7 +407,7 @@ function state_issueTroopTrainingOrder(coords: string, troopId: string, quantity
   const cost = mulN(troop.cost!, quantity) as serverV1.Resources
   const order = { quantity, troopId, timeLeft: cost.time } as serverV1.Village_TroopTrainingOrder
   batch(() => {
-    setStore("world", "villages", coords, "troopTrainingOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    setStore("world", "villages", coords, "troopTrainingOrders", orders => [...orders, order])
     setStore("world", "fields", coords, "resources", r => sub(r!, cost))
   })
   persistStore()

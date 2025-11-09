@@ -5,7 +5,7 @@ import { ErrorBoundary } from "solid-js"
 // import LoginPage from './LoginPage'
 import WorldPage from './WorldPage'
 import VillagesPage from './VillagesPage'
-import VillagePage from './VillagePage'
+import WorldFieldPage from "./WorldFieldPage"
 
 render(
   () => (
@@ -23,8 +23,8 @@ render(
       <Router>
         {/* <Route path="/login" component={LoginPage} /> */}
         <Route path="/world" component={WorldPage} />
+        <Route path="/world/:coords" component={WorldFieldPage} />
         <Route path="/villages" component={VillagesPage} />
-        <Route path="/villages/:coords" component={VillagePage} />
       </Router>
     </ErrorBoundary>
   ), 

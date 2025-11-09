@@ -68,7 +68,7 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   function kindStyle(): JSX.CSSProperties {
     switch (field.kind) {
       case serverV1.World_Field_Kind.VILLAGE:
-        return { 'background-color': field.playerId == playerId ? 'green' : 'red' , 'cursor': 'pointer' }
+        return { 'background-color': field.playerId == playerId ? 'green' : 'red' }
 
       case serverV1.World_Field_Kind.TEMPLE:
         let color = "yellow"
@@ -82,30 +82,17 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
     }
   }
 
-  function open() {
-    if (field.playerId != playerId) return
-
-    switch (field.kind) {
-      case serverV1.World_Field_Kind.VILLAGE:
-        navigate(`/villages/${field.coords}`)
-        break
-
-      case serverV1.World_Field_Kind.TEMPLE:
-        alert('TODO: Open temple page')
-        break
-    }
-  }
-
   // TODO: Convert to tailwind
   const fieldStyle = () => ({
     'position': 'relative',
     'border-top': '1px solid black',
     'border-left': '1px solid black',
+    'cursor': 'pointer',
     ...kindStyle(),
   } as JSX.CSSProperties)
 
   return (
-    <div style={fieldStyle()} onClick={() => setField(field)} onDblClick={open}></div>
+    <div style={fieldStyle()} onClick={() => setField(field)} onDblClick={() => navigate(`/world/${field.coords}`)}></div>
   )
 }
 
@@ -162,7 +149,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
       <p>Resources</p>
       <div>
         <div>
-          <span>Gold ({maxGold()})</span> {/* TODO: On max gold click, pick max gold */}
+          <button onClick={() => setSelectedGold(maxGold())}>Gold ({maxGold()})</button>
           <input type="number" min={0} max={maxGold()}
             value={selectedGold()}
             onChange={ev => setSelectedGold(+ev.currentTarget.value)}
@@ -217,7 +204,7 @@ function Movements() {
         case TroopMovementType.Outgoing:
           return sourcePlayerId == playerId && targetPlayerId != playerId
         case TroopMovementType.Incoming:
-          return sourcePlayerId == playerId && targetPlayerId == playerId
+          return sourcePlayerId != playerId && targetPlayerId == playerId
         case TroopMovementType.Support:
           return sourcePlayerId == playerId && targetPlayerId == playerId
       }

@@ -1,27 +1,19 @@
-import { createSignal, Show, For, Switch, Match } from "solid-js"
+import { createSignal, Show, For, Switch, Match, Accessor } from "solid-js"
 import { useParams } from "@solidjs/router"
 
-import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
+import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import {
-  StoreLoader, store, mulN,
+  store, mulN, div, sub, add,
   issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
   issueTroopTrainingOrder, cancelTroopTrainingOrder,
-  playerVillageFields,
-  div,
-  sub,
-  add,
-  playerId
-} from './store'
-import { LEADER, newFieldTroops, newResources } from "./entities"
+  playerVillageFields, playerId
+} from '../store'
+import { LEADER, newFieldTroops, newWildField } from "../entities"
 
-let villageCoords = ""
-
-function field() {
-  return store.world.fields[villageCoords]
-}
+let villageField = () => ({} as serverV1.World_Field)
 
 function village() {
-  return store.world.villages[villageCoords]
+  return store.world.villages[villageField()!.coords]
 }
 
 function trainableLeaders() {
@@ -43,37 +35,31 @@ function buildingUpgradeOrderCancelable(order: serverV1.Village_BuildingUpgradeO
 }
 
 function getBuildingNextLevel(buildingId: string): number {
-  const f = field()
+  const f = villageField()
   const v = village()
   const orders = v.buildingUpgradeOrders.filter(o => o.buildingId == buildingId)
   return f.buildings[buildingId] + orders.length + 1
 }
 
 function canAfford(cost: serverV1.Resources) {
-  if (cost.gold > field().resources!.gold) return false
+  if (cost.gold > villageField().resources!.gold) return false
   return true
 }
 
-// TODO: Hide village details if you're not the player
-export default function VillagePage() {
-  const { coords } = useParams() as { coords: string }
-  villageCoords = coords
+export default function Village({ field }: { field: Accessor<serverV1.World_Field>}) {
+  villageField = field
 
-  return <StoreLoader>
-    {() =>
-      <div>
-        <h1>Village {villageCoords}</h1>
-        <Show when={field().playerId == playerId}>
-          <h2>Resources</h2>
-          <ul>
-            <li>{field().resources!.gold} Gold</li>
-          </ul>
-          <VillageBuildings />
-          <VillageTroops />
-        </Show>
-      </div>
-    }
-  </StoreLoader>
+  return <div>
+    <h1>Village {field().coords}</h1>
+    <Show when={field().playerId == playerId}>
+      <h2>Resources</h2>
+      <ul>
+        <li>{field().resources!.gold} Gold</li>
+      </ul>
+      <VillageBuildings />
+      <VillageTroops />
+    </Show>
+  </div>
 }
 
 function VillageBuildings() {
@@ -81,14 +67,14 @@ function VillageBuildings() {
     <div>
       <h2>Buildings</h2>
       <ul>
-        <For each={Object.keys(field().buildings)}>
+        <For each={Object.keys(villageField().buildings)}>
           {buildingId => {
             const building = store.world.buildings[buildingId]
             const maxLevel = building.cost.length
 
             const nextLevel = () => getBuildingNextLevel(buildingId)
             const cost = () => building.cost[nextLevel()-1]
-            const level = () => field().buildings[buildingId]
+            const level = () => villageField().buildings[buildingId]
 
             const description = () => `upgrade (lvl ${nextLevel()}, ${cost().time}s, ${cost().gold} gold)`
 
@@ -102,7 +88,7 @@ function VillageBuildings() {
                   <button disabled={true}>{description()}</button>
                 </Match>
                 <Match when={true}>
-                  <button onClick={() => issueBuildingUpgradeOrder(villageCoords, buildingId, nextLevel())}>{description()}</button>
+                  <button onClick={() => issueBuildingUpgradeOrder(villageField().coords, buildingId, nextLevel())}>{description()}</button>
                 </Match>
               </Switch>
             </li>
@@ -117,7 +103,7 @@ function VillageBuildings() {
             return (<li>
               <span>{building.name} (lvl {order.level}) - {order.timeLeft}s </span>
               <Show when={buildingUpgradeOrderCancelable(order)}>
-                <button onClick={() => cancelBuildingUpgradeOrder(villageCoords, order)}>cancel</button>
+                <button onClick={() => cancelBuildingUpgradeOrder(villageField().coords, order)}>cancel</button>
               </Show>
             </li>)
           }}
@@ -130,7 +116,7 @@ function VillageBuildings() {
 function VillageTroops() {
   const [troopQuantity, setTroopQuantity] = createSignal(newFieldTroops())
   const resourcesLeft = () => {
-    let res = field().resources!
+    let res = villageField().resources!
     for (const troopId in store.world.troops) {
       res = sub(res, mulN(store.world.troops[troopId].cost!, troopQuantity()[troopId]))
     }
@@ -146,7 +132,7 @@ function VillageTroops() {
           {(troopId) => {
             const troop = store.world.troops[troopId]
 
-            const quantity = () => field().troops[troopId]
+            const quantity = () => villageField().troops[troopId]
             const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
               return acc + (troopId == order.troopId ? order.quantity : 0)
             }, 0)
@@ -181,7 +167,7 @@ function VillageTroops() {
                 <Match when={true}>
                   <Counter />
                   <button onClick={() => {
-                    issueTroopTrainingOrder(villageCoords, troopId, troopQuantity()[troopId])
+                    issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
                     setTroopQuantity(prev => ({ ...prev, [troopId]: 0 }))
                   }}>{description()}</button>
                   <button onClick={() => setTroopQuantity(prev => ({ ...prev, [troopId]: trainableTroops() }))}>(max: {trainableTroops()})</button>
@@ -197,7 +183,7 @@ function VillageTroops() {
           {order => {
             const troop = store.world.troops[order.troopId]
             return <li>
-              {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(villageCoords, order)}>cancel</button>
+              {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(villageField().coords, order)}>cancel</button>
             </li>
           }}
         </For>
