@@ -41,7 +41,7 @@ async function loadStore() {
       for (let y = 0; y < world!.height; y++) {
         const coords = encodeCoords(x, y)
         if (world!.fields[coords] == undefined) {
-          world!.fields[coords] = newWildField(coords)
+          world!.fields[coords] = newWildField(coords, {}, Object.keys(world!.buildings))
         }
       }
     }
@@ -160,35 +160,37 @@ export async function cancelTroopTrainingOrder(coords: string, order: serverV1.V
 export function add<T extends Record<string, any>>(a: T, b: T): T {
   const res = { ...a } as Record<string, any>
   for (const [k, v] of Object.entries(b)) {
-    res[k] += v
+    res[k] = typeof v == "number" ? res[k] + v : v
   }
   return res as T
 }
 export function sub<T extends Record<string, any>>(a: T, b: T): T {
   const res = { ...a } as Record<string, any>
   for (const [k, v] of Object.entries(b)) {
-    res[k] -= v
+    res[k] = typeof v == "number" ? res[k] - v : v
   }
   return res as T
 }
 export function mulN<T extends Record<string, any>>(a: T, n: number): T {
   const res = {} as Record<string, any>
   for (const [k, v] of Object.entries(a)) {
-    res[k] = v * n
+    res[k] = typeof v == "number" ? v * n : v
   }
   return res as T
 }
-export function div<T extends Record<string, any>>(a: T, b: T): number {
+export function div<T extends Record<string, any>>(a: T, b: T, filter?: (k: string) => boolean): number {
   let res = Infinity
   for (const [k, v] of Object.entries(a)) {
-    res = Math.min(res, v / b[k] || Infinity)
+    if (typeof v != "number") continue
+    if (filter && !filter(k)) continue
+    res = Math.min(res, v / b[k])
   }
   return res
 }
 export function divN<T extends Record<string, any>>(a: T, n: number): T {
   const res = {} as Record<string, any>
   for (const [k, v] of Object.entries(a)) {
-    res[k] = v / n
+    res[k] = typeof v == "number" ? v / n : v
   }
   return res as T
 }
@@ -247,15 +249,13 @@ function state_tick() {
             // Conquer
             if (attackerTroops[LEADER] > 0) {
               if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
-                setStore("world", "fields", targetCoords, f => {
-                  return {
-                    ...f,
-                    kind: serverV1.World_Field_Kind.VILLAGE,
-                    troops: attackerTroops,
-                    resources: add(f.resources!, order.resources!),
-                    playerId: order.playerId,
-                  } as serverV1.World_Field
-                })
+                setStore("world", "fields", targetCoords, f => ({
+                  ...f,
+                  kind: serverV1.World_Field_Kind.VILLAGE,
+                  troops: attackerTroops,
+                  resources: add(f.resources!, order.resources!),
+                  playerId: order.playerId,
+                } as serverV1.World_Field))
                 setStore("world", "villages", targetCoords, newVillage())
 
               } else {

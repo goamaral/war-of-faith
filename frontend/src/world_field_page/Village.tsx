@@ -50,34 +50,6 @@ function canAfford(cost: serverV1.Resources) {
   return true
 }
 
-type CounterProps = {
-  troopId: string
-  troopQuantity: Accessor<Record<string, number>>
-  setTroopQuantity: Setter<Record<string, number>>
-  trainableTroops: () => number
-};
-
-function Counter({ troopId, troopQuantity, setTroopQuantity, trainableTroops }: CounterProps) {  
-  return (
-    <div class="flex items-center">
-      <input
-        type="number"
-        min={0}
-        max={trainableTroops()}
-        class="input input-bordered input-sm flex-shrink w-full rounded-r-none border-r-0"
-        value={troopQuantity()[troopId]}
-        onInput={e => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: +e.currentTarget.value }))}
-      />
-      <button
-        class="btn btn-outline btn-sm rounded-l-none flex-none w-1/3"
-        onClick={() => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: trainableTroops() }))}
-      >
-        {valueCompressor(trainableTroops())}
-      </button>
-    </div>
-  );
-}
-
 export default function Village({ field }: { field: Accessor<serverV1.World_Field>}) {
   villageField = field
 
@@ -171,8 +143,7 @@ function VillageTroops() {
           const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => acc + (troopId == order.troopId ? order.quantity : 0), 0)
           const trainableTroops = () => {
             const troopQuantityCost = mulN(troop.cost!, troopQuantity()[troopId])
-            troopQuantityCost.time = 0
-            let trainable = Math.floor(div(add(resourcesLeft(), troopQuantityCost), troop.cost!))
+            let trainable = Math.floor(div(add(resourcesLeft(), troopQuantityCost), troop.cost!, k => k != "time"))
             if (troopId == LEADER) return Math.min(trainable, trainableLeaders())
             return trainable
           }
@@ -185,35 +156,35 @@ function VillageTroops() {
             <div>{quantity()} ({quantityInTraining()})</div>
 
             <div>
-              <Switch>
-                <Match when={trainableTroops() == 0}>
-                  <></>
-                </Match>
-                <Match when={!canAfford(cost()) || true}>
-                  <Counter troopId={troopId} troopQuantity={troopQuantity} setTroopQuantity={setTroopQuantity} trainableTroops={trainableTroops} />
-                </Match>
-              </Switch>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  min={0}
+                  max={trainableTroops()}
+                  class="input input-bordered input-sm flex-shrink w-full rounded-r-none border-r-0"
+                  value={troopQuantity()[troopId]}
+                  onInput={e => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: +e.currentTarget.value }))}
+                />
+                <button
+                  class="btn btn-outline btn-sm rounded-l-none flex-none w-1/3"
+                  disabled={trainableTroops() == 0}
+                  onClick={() => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: trainableTroops() }))}
+                >
+                  {valueCompressor(trainableTroops())}
+                </button>
+              </div>
             </div>
 
             <div>
-              <Switch>
-                <Match when={trainableTroops() == 0}>
-                  <></>
-                </Match>
-                <Match when={!canAfford(cost())}>
-                  <button class="btn btn-disabled btn-sm">{description()}</button>
-                </Match>
-                <Match when={true}>
-                  <button
-                    class="btn btn-outline btn-sm"
-                    onClick={() => {
-                      issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
-                      setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
-                    }}>
-                    {description()}
-                  </button>
-                </Match>
-              </Switch>
+              <button
+                class="btn btn-outline btn-sm"
+                disabled={trainableTroops() == 0}
+                onClick={() => {
+                  issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
+                  setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
+                }}>
+                {description()}
+              </button>
             </div>
           </>
         }}</For>

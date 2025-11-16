@@ -14,9 +14,10 @@ export default function WorldFieldPage() {
       const field = () => store.world.fields[coords]
 
       return <div>
-          <h1>{World_Field_KindToString(field().kind)}</h1>
-          <div>Coords: {field().coords}</div>
-          <div>Player: {field().playerId || "None"}</div>        <Switch>
+        <h1>{World_Field_KindToString(field().kind)}</h1>
+        <div>Coords: {field().coords}</div>
+        <div>Player: {field().playerId || "None"}</div>
+        <Switch>
           <Match when={field().kind == serverV1.World_Field_Kind.VILLAGE}>
             <Village field={field} />
           </Match>
