@@ -13,40 +13,41 @@ export default function WorldFieldPage() {
     {() => {
       const field = () => store.world.fields[coords]
 
-      return <Switch fallback={<div>{World_Field_KindToString(field().kind)} {coords}</div>}>
-        <Match when={field().kind == serverV1.World_Field_Kind.VILLAGE}>
-          <Village field={field} />
-        </Match>
-        <Match when={field().kind == serverV1.World_Field_Kind.TEMPLE}>
-          <Temple field={field} />
-        </Match>
-      </Switch>
+      return <div>
+          <h1>{World_Field_KindToString(field().kind)}</h1>
+          <div>Coords: {field().coords}</div>
+          <div>Player: {field().playerId || "None"}</div>        <Switch>
+          <Match when={field().kind == serverV1.World_Field_Kind.VILLAGE}>
+            <Village field={field} />
+          </Match>
+          <Match when={field().kind == serverV1.World_Field_Kind.TEMPLE}>
+            <Temple field={field} />
+          </Match>
+        </Switch>
+      </div>
     }}
   </StoreLoader>
 }
 
 function Temple({ field }: { field: Accessor<serverV1.World_Field> }) {
-  return <div>
-    <div>Temple</div>
-    <Show when={field().playerId == playerId}>
-      <div>
-        <h2>Resources</h2>
-        <ul>
-          <li>{field().resources!.gold} Gold</li>
-        </ul>
-      </div>
-      <div>
-        <h2>Troops</h2>
-        <ul>
-          <For each={Object.keys(store.world.troops)}>
-            {(troopId) => {
-                const troop = store.world.troops[troopId]
-                const quantity = () => field().troops[troopId]
-                return <li>{troop.name} - {quantity()} units</li>
-              }}
-          </For>
-        </ul>
-      </div>
-    </Show>
-  </div>
+  return <Show when={field().playerId == playerId}>
+    <div>
+      <h2>Resources</h2>
+      <ul>
+        <li>{field().resources!.gold} Gold</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Troops</h2>
+      <ul>
+        <For each={Object.keys(store.world.troops)}>
+          {(troopId) => {
+              const troop = store.world.troops[troopId]
+              const quantity = () => field().troops[troopId]
+              return <li>{troop.name} - {quantity()} units</li>
+            }}
+        </For>
+      </ul>
+    </div>
+  </Show>
 }

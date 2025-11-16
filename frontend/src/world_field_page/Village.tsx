@@ -1,5 +1,4 @@
-import { createSignal, Show, For, Switch, Match, Accessor } from "solid-js"
-import { useParams } from "@solidjs/router"
+import { createSignal, Show, For, Switch, Match, Accessor, Setter } from "solid-js"
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import {
@@ -8,12 +7,17 @@ import {
   issueTroopTrainingOrder, cancelTroopTrainingOrder,
   playerVillageFields, playerId
 } from '../store'
-import { LEADER, newFieldTroops, newWildField } from "../entities"
+import { LEADER, newFieldTroops } from "../entities"
 
 let villageField = () => ({} as serverV1.World_Field)
 
 function village() {
   return store.world.villages[villageField()!.coords]
+}
+
+function valueCompressor(value: number) {
+  if (value < 1000) return value
+  return `${Math.floor(value / 100) / 10}K`
 }
 
 function trainableLeaders() {
@@ -23,7 +27,7 @@ function trainableLeaders() {
     .map(f => store.world.villages[f.coords].troopTrainingOrders)
     .flat()
     .filter(o => o.troopId == LEADER)
-    .reduce((acc, o) => acc + (o.quantity > 0 ? 1 : 0), 0)
+    .reduce((acc, o) => acc + o.quantity, 0)
   return maxLeaders - leaders - leadersInTraining
 }
 
@@ -46,20 +50,45 @@ function canAfford(cost: serverV1.Resources) {
   return true
 }
 
+type CounterProps = {
+  troopId: string
+  troopQuantity: Accessor<Record<string, number>>
+  setTroopQuantity: Setter<Record<string, number>>
+  trainableTroops: () => number
+};
+
+function Counter({ troopId, troopQuantity, setTroopQuantity, trainableTroops }: CounterProps) {  
+  return (
+    <div class="flex items-center">
+      <input
+        type="number"
+        min={0}
+        max={trainableTroops()}
+        class="input input-bordered input-sm flex-shrink w-full rounded-r-none border-r-0"
+        value={troopQuantity()[troopId]}
+        onInput={e => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: +e.currentTarget.value }))}
+      />
+      <button
+        class="btn btn-outline btn-sm rounded-l-none flex-none w-1/3"
+        onClick={() => setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: trainableTroops() }))}
+      >
+        {valueCompressor(trainableTroops())}
+      </button>
+    </div>
+  );
+}
+
 export default function Village({ field }: { field: Accessor<serverV1.World_Field>}) {
   villageField = field
 
-  return <div>
-    <h1>Village {field().coords}</h1>
-    <Show when={field().playerId == playerId}>
-      <h2>Resources</h2>
-      <ul>
-        <li>{field().resources!.gold} Gold</li>
-      </ul>
-      <VillageBuildings />
-      <VillageTroops />
-    </Show>
-  </div>
+  return <Show when={field().playerId == playerId}>
+    <h2>Resources</h2>
+    <ul>
+      <li>{field().resources!.gold} Gold</li>
+    </ul>
+    <VillageBuildings />
+    <VillageTroops />
+  </Show>
 }
 
 function VillageBuildings() {
@@ -95,6 +124,7 @@ function VillageBuildings() {
           }}
         </For>
       </ul>
+
       <h4>Orders</h4>
       <ul>
         <For each={village().buildingUpgradeOrders}>
@@ -127,66 +157,76 @@ function VillageTroops() {
   return (
     <div>
       <h2>Troops</h2>
-      <ul>
-        <For each={Object.keys(store.world.troops)}>
-          {(troopId) => {
-            const troop = store.world.troops[troopId]
+      <div class="grid [grid-template-columns:max-content_max-content_max-content_max-content_max-content] gap-x-4 gap-y-2 items-center">
+        {/* Header */}
+        <div class="font-bold">Unit</div>
+        <div class="font-bold">Requirements</div>
+        <div class="font-bold">Total</div>
+        <div class="font-bold">Recruit (max)</div>
+        <div class="font-bold"></div>
+        {/* Body */}
+        <For each={Object.keys(store.world.troops)}>{(troopId) => {
+          const troop = store.world.troops[troopId]
+          const quantity = () => villageField().troops[troopId]
+          const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => acc + (troopId == order.troopId ? order.quantity : 0), 0)
+          const trainableTroops = () => {
+            const troopQuantityCost = mulN(troop.cost!, troopQuantity()[troopId])
+            troopQuantityCost.time = 0
+            let trainable = Math.floor(div(add(resourcesLeft(), troopQuantityCost), troop.cost!))
+            if (troopId == LEADER) return Math.min(trainable, trainableLeaders())
+            return trainable
+          }
+          const cost = () => mulN(troop.cost!, troopQuantity()[troopId])
+          const description = () => `train (${cost().time}s, ${cost().gold} gold)`
 
-            const quantity = () => villageField().troops[troopId]
-            const quantityInTraining = () => village().troopTrainingOrders.reduce((acc, order) => {
-              return acc + (troopId == order.troopId ? order.quantity : 0)
-            }, 0)
-            const trainableTroops = () => {
-              const troopQuantityCost = mulN(troop.cost!, troopQuantity()[troopId])
-              troopQuantityCost.time = 0
-              let trainable = Math.floor(div(add(resourcesLeft(), troopQuantityCost), troop.cost!))
-              if (troopId == LEADER) return Math.min(trainable, trainableLeaders())
-              return trainable
-            }
-            
-            const cost = () => mulN(troop.cost!, troopQuantity()[troopId])
-            const description = () => `train (${cost().time}s, ${cost().gold} gold)`
+          return <>
+            <div style="word-break:break-word">{troop.name}</div>
+            <div>{troop.cost!.gold} gold, {troop.cost!.time}s</div>
+            <div>{quantity()} ({quantityInTraining()})</div>
 
-            function Counter() {
-              return <input type="number" min={0} max={trainableTroops()}
-                value={troopQuantity()[troopId]}
-                onChange={e => setTroopQuantity(prev => ({ ...prev, [troopId]: +e.currentTarget.value }))}
-              />
-            }
+            <div>
+              <Switch>
+                <Match when={trainableTroops() == 0}>
+                  <></>
+                </Match>
+                <Match when={!canAfford(cost()) || true}>
+                  <Counter troopId={troopId} troopQuantity={troopQuantity} setTroopQuantity={setTroopQuantity} trainableTroops={trainableTroops} />
+                </Match>
+              </Switch>
+            </div>
 
-            return <li>
-              <span>{troop.name} - {quantity()} units ({quantityInTraining()} training)</span>
+            <div>
               <Switch>
                 <Match when={trainableTroops() == 0}>
                   <></>
                 </Match>
                 <Match when={!canAfford(cost())}>
-                  <Counter />
-                  <button disabled={true}>{description()}</button>
+                  <button class="btn btn-disabled btn-sm">{description()}</button>
                 </Match>
                 <Match when={true}>
-                  <Counter />
-                  <button onClick={() => {
-                    issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
-                    setTroopQuantity(prev => ({ ...prev, [troopId]: 0 }))
-                  }}>{description()}</button>
-                  <button onClick={() => setTroopQuantity(prev => ({ ...prev, [troopId]: trainableTroops() }))}>(max: {trainableTroops()})</button>
+                  <button
+                    class="btn btn-outline btn-sm"
+                    onClick={() => {
+                      issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
+                      setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
+                    }}>
+                    {description()}
+                  </button>
                 </Match>
               </Switch>
-            </li>
-          }}
-        </For>
-      </ul>
+            </div>
+          </>
+        }}</For>
+      </div>
+
       <h4>Orders</h4>
       <ul>
-        <For each={village().troopTrainingOrders}>
-          {order => {
-            const troop = store.world.troops[order.troopId]
-            return <li>
-              {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(villageField().coords, order)}>cancel</button>
-            </li>
-          }}
-        </For>
+        <For each={village().troopTrainingOrders}>{order => {
+          const troop = store.world.troops[order.troopId]
+          return <li>
+            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(villageField().coords, order)}>cancel</button>
+          </li>
+        }}</For>
       </ul>
     </div>
   )
