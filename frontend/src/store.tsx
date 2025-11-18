@@ -11,7 +11,7 @@ export const playerId = "1"
 
 export const [store, setStore] = createStore({
   loaded: false,
-  world: {} as serverV1.World
+  world: {} as serverV1.World,
 })
 
 declare global {
@@ -207,10 +207,75 @@ export function calcDist(sourceCoords: string, targetCoords: string) {
   return Math.abs(srcX - trgX) + Math.abs(srcY - trgY)
 }
 
+const winConditionOwnershipAge = 5*60 // 5 min
+function checkWinCondition() {
+  let winner = undefined
+  for (const [coords, temple] of Object.entries(store.world.temples)) {
+    const playerId = store.world.fields[coords].playerId
+    if (temple.ownershipAge < winConditionOwnershipAge) return
+    if (winner && winner != playerId) return
+    winner = playerId
+  }
+  window.alert("Player " + winner + " won")
+}
+
 /* State machine */
 function state_tick() {
   batch(() => {
-    // Move orders
+    /* Temples */
+    Object.entries(store.world.temples).forEach(([coords, temple]) => {
+      setStore("world", "temples", coords, { ...temple, ownershipAge: temple.ownershipAge + 1 })
+    })
+
+    /* Win condition */
+    checkWinCondition()
+
+    /* Villages */
+    Object.entries(store.world.villages).forEach(([coords, village]) => {
+      const field = store.world.fields[coords]
+
+      // Increase resources
+      setStore("world", "fields", coords, "resources", r => ({ gold: r!.gold + field.buildings[GOLD_MINE] }))
+
+      // Upgrade buildings
+      const newBuildingUpgradeOrders: serverV1.Village_BuildingUpgradeOrder[] = []
+      village.buildingUpgradeOrders.forEach((order, index) => {
+        if (index == 0) {
+          const timeLeft = order.timeLeft - 1
+          if (timeLeft == 0) {
+            setStore("world", "fields", coords, "buildings", order.buildingId, b => b + 1)
+          } else {
+            newBuildingUpgradeOrders.push({ ...order, timeLeft })
+          }
+        } else {
+          newBuildingUpgradeOrders.push(order)
+        }
+      })
+      setStore("world", "villages", coords, "buildingUpgradeOrders", newBuildingUpgradeOrders)
+
+      // Train troops
+      const newTroopTrainingOrders: serverV1.Village_TroopTrainingOrder[] = []
+      village.troopTrainingOrders.forEach((order, index) => {
+        if (index == 0) {
+          const troop = store.world.troops[order.troopId]
+          const timeLeft = order.timeLeft - 1
+          let quantity = order.quantity
+
+          if (timeLeft % troop.cost!.time == 0) {
+            quantity -= 1
+            setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
+          }
+          if (timeLeft > 0) {
+            newTroopTrainingOrders.push({ ...order, timeLeft, quantity })
+          }
+        } else {
+          newTroopTrainingOrders.push(order)
+        }
+      })
+      setStore("world", "villages", coords, "troopTrainingOrders", newTroopTrainingOrders)
+    })
+
+    /* Movement orders */
     const newMovementOrders: serverV1.MovementOrder[] = []
     store.world.movementOrders.forEach(order => {
       const targetCoords = order.comeback ? order.sourceCoords : order.targetCoords
@@ -265,6 +330,7 @@ function state_tick() {
                   resources: add(f.resources!, order.resources!),
                   playerId: order.playerId,
                 }) as serverV1.World_Field)
+                setStore("world", "temples", targetCoords, t => ({ ...t, ownershipAge: 0 }))
               }
               combatLogger(`Field ${targetCoords} conquered`)
 
@@ -303,50 +369,6 @@ function state_tick() {
       }
     })
     setStore("world", "movementOrders", newMovementOrders)
-
-    Object.entries(store.world.villages).forEach(([coords, village]) => {
-      const field = store.world.fields[coords]
-
-      // Increase resources
-      setStore("world", "fields", coords, "resources", r => ({ gold: r!.gold + field.buildings[GOLD_MINE] }))
-
-      // Upgrade buildings
-      const newBuildingUpgradeOrders: serverV1.Village_BuildingUpgradeOrder[] = []
-      village.buildingUpgradeOrders.forEach((order, index) => {
-        if (index == 0) {
-          const timeLeft = order.timeLeft - 1
-          if (timeLeft == 0) {
-            setStore("world", "fields", coords, "buildings", order.buildingId, b => b + 1)
-          } else {
-            newBuildingUpgradeOrders.push({ ...order, timeLeft })
-          }
-        } else {
-          newBuildingUpgradeOrders.push(order)
-        }
-      })
-      setStore("world", "villages", coords, "buildingUpgradeOrders", newBuildingUpgradeOrders)
-
-      // Train troops
-      const newTroopTrainingOrders: serverV1.Village_TroopTrainingOrder[] = []
-      village.troopTrainingOrders.forEach((order, index) => {
-        if (index == 0) {
-          const troop = store.world.troops[order.troopId]
-          const timeLeft = order.timeLeft - 1
-          let quantity = order.quantity
-
-          if (timeLeft % troop.cost!.time == 0) {
-            quantity -= 1
-            setStore("world", "fields", coords, "troops", order.troopId, t => t + 1)
-          }
-          if (timeLeft > 0) {
-            newTroopTrainingOrders.push({ ...order, timeLeft, quantity })
-          }
-        } else {
-          newTroopTrainingOrders.push(order)
-        }
-      })
-      setStore("world", "villages", coords, "troopTrainingOrders", newTroopTrainingOrders)
-    })
   })
   persistStore()
 }

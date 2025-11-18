@@ -63,7 +63,9 @@ message Resources {
   uint32 time = 2;
 }
 
-message Temple {}
+message Temple {
+  uint32 ownership_age = 1;
+}
 
 message Village {
   repeated BuildingUpgradeOrder building_upgrade_orders = 1;

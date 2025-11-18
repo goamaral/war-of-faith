@@ -457,6 +457,7 @@ func (x *Resources) GetTime() uint32 {
 
 type Temple struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	OwnershipAge  uint32                 `protobuf:"varint,1,opt,name=ownership_age,json=ownershipAge,proto3" json:"ownership_age,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -489,6 +490,13 @@ func (x *Temple) ProtoReflect() protoreflect.Message {
 // Deprecated: Use Temple.ProtoReflect.Descriptor instead.
 func (*Temple) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Temple) GetOwnershipAge() uint32 {
+	if x != nil {
+		return x.OwnershipAge
+	}
+	return 0
 }
 
 type Village struct {
@@ -1676,8 +1684,9 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\rR\x05value:\x028\x01\"3\n" +
 	"\tResources\x12\x12\n" +
 	"\x04gold\x18\x01 \x01(\rR\x04gold\x12\x12\n" +
-	"\x04time\x18\x02 \x01(\rR\x04time\"\b\n" +
-	"\x06Temple\"\x9b\x03\n" +
+	"\x04time\x18\x02 \x01(\rR\x04time\"-\n" +
+	"\x06Temple\x12#\n" +
+	"\rownership_age\x18\x01 \x01(\rR\fownershipAge\"\x9b\x03\n" +
 	"\aVillage\x12_\n" +
 	"\x17building_upgrade_orders\x18\x01 \x03(\v2'.server.v1.Village.BuildingUpgradeOrderR\x15buildingUpgradeOrders\x12Y\n" +
 	"\x15troop_training_orders\x18\x02 \x03(\v2%.server.v1.Village.TroopTrainingOrderR\x13troopTrainingOrders\x1aj\n" +

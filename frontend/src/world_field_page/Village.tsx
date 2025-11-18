@@ -178,7 +178,7 @@ function VillageTroops() {
             <div>
               <button
                 class="btn btn-outline btn-sm"
-                disabled={trainableTroops() == 0}
+                disabled={troopQuantity()[troopId] == 0 || trainableTroops() == 0}
                 onClick={() => {
                   issueTroopTrainingOrder(villageField().coords, troopId, troopQuantity()[troopId])
                   setTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
