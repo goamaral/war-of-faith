@@ -201,7 +201,7 @@ export function decodeCoords(coords: string) {
 export function encodeCoords(x: number, y: number) {
   return `${x}_${y}`
 }
-function calculateDistance(sourceCoords: string, targetCoords: string) {
+export function calcDist(sourceCoords: string, targetCoords: string) {
   const { x: srcX, y: srcY } = decodeCoords(sourceCoords)
   const { x: trgX, y: trgY } = decodeCoords(targetCoords)
   return Math.abs(srcX - trgX) + Math.abs(srcY - trgY)
@@ -276,7 +276,7 @@ function state_tick() {
                 ...order,
                 troops: attackerTroops,
                 resources: pillage,
-                timeLeft: calculateDistance(order.targetCoords, order.sourceCoords),
+                timeLeft: calcDist(order.targetCoords, order.sourceCoords),
                 comeback: true,
               } as serverV1.MovementOrder)
               combatLogger(`Pillaged (gold: ${pillage.gold})`)
@@ -353,7 +353,7 @@ function state_tick() {
 
 // Movement orders
 function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
-  const dst = calculateDistance(sourceCoords, targetCoords)
+  const dst = calcDist(sourceCoords, targetCoords)
   const order = { id, sourceCoords, targetCoords, troops, resources: newResources({ gold }), timeLeft: dst, playerId } as serverV1.MovementOrder
   batch(() => {
     setStore("world", "fields", sourceCoords, "troops", r => sub(r!, troops))
@@ -370,7 +370,7 @@ function state_cancelMovementOrder(id: string) {
       if (order.comeback) throw new Error("Can't cancel a comeback order")
       orders[index] = {
         ...order,
-        timeLeft: calculateDistance(order.sourceCoords, order.targetCoords) - order.timeLeft,
+        timeLeft: calcDist(order.sourceCoords, order.targetCoords) - order.timeLeft,
         comeback: true,
       }
       return orders.slice().sort((a, b) => a.timeLeft - b.timeLeft)

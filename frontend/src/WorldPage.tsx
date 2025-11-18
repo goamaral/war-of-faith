@@ -12,6 +12,7 @@ import {
   StoreLoader, store, playerId, decodeCoords,
   issueMovementOrder, cancelMovementOrder,
   playerFields,
+  calcDist,
 } from './store'
 import { countTroops, carriableGoldPerUnit, newFieldTroops, World_Field_KindToString } from "./entities"
 
@@ -107,11 +108,14 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     </div>
   }
 
-  const sourceFields = () => playerFields(f => f.coords != targetField()!.coords).sort((a, b) => countTroops(b.troops) - countTroops(a.troops)) // TODO: Sort by distance or power
-  
+  const sourceFields = () => {
+    const fields = playerFields(f => f.coords != targetField()!.coords)
+    if (targetField() == undefined) return fields
+    return fields.sort((a, b) => calcDist(targetField()!.coords, a.coords) - calcDist(targetField()!.coords, b.coords))
+  }
+
   function Targatable() {
     const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
-    createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
     const selectedField = () => store.world.fields[selectedSourceCoords()]
     
     const troops = () => Object.values(store.world.troops)
@@ -171,18 +175,19 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
   }
 
   return <>
-    <Switch fallback={
-      <Wrapper>
-        <Show when={sourceFields().length > 0}>
-          <Targatable />
-        </Show>
-      </Wrapper>
-    }>
+    <Switch>
       <Match when={targetField() == undefined}>
         <div><h2>No field selected</h2></div>
       </Match>
       <Match when={targetField()?.kind == serverV1.World_Field_Kind.FOG}>
         <Wrapper />
+      </Match>
+      <Match when={true}>
+        <Wrapper>
+          <Show when={sourceFields().length > 0}>
+            <Targatable />
+          </Show>
+        </Wrapper>
       </Match>
     </Switch>
   </>
