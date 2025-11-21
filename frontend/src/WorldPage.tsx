@@ -3,18 +3,20 @@ import type { JSX, ParentProps } from "solid-js"
 import {
   createSignal, Accessor, Setter,
   Show, For, Switch, Match,
-  createEffect
+  createEffect, onMount, onCleanup,
+  createMemo,
+  batch
 } from "solid-js"
 import { useNavigate, A } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import {
-  StoreLoader, store, playerId, decodeCoords,
+  StoreLoader, store, decodeCoords,
   issueMovementOrder, cancelMovementOrder,
   playerFields,
   calcDist,
 } from './store'
-import { countTroops, carriableGoldPerUnit, newFieldTroops, World_Field_KindToString } from "./entities"
+import { countTroops, carriableGoldPerUnit, newFieldTroops, World_Field_KindToString, LEADER, RAIDER } from "./entities"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -43,7 +45,7 @@ function World() {
   } as JSX.CSSProperties
 
 
-  const cells = () => {
+  const cells = createMemo(() => {
     const fields = Array(store.world.width).fill(undefined)
     fields.forEach((_, y) => fields[y] = Array(store.world.height).fill(undefined))
     for (const coords in store.world.fields) {
@@ -51,7 +53,7 @@ function World() {
       fields[y][x] = store.world.fields[coords]
     }
     return fields.flat()
-  }
+  })
 
   return (<div class="flex">
     <div style={gridStyle}>
@@ -69,12 +71,12 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   function kindStyle(): JSX.CSSProperties {
     switch (field.kind) {
       case serverV1.World_Field_Kind.VILLAGE:
-        return { 'background-color': field.playerId == playerId ? 'green' : 'red' }
+        return { 'background-color': field.playerId == store.playerId ? 'green' : 'red' }
 
       case serverV1.World_Field_Kind.TEMPLE:
         let color = "yellow"
         if (field.playerId) {
-          color = field.playerId == playerId ? "yellowgreen" : "lightsalmon	"
+          color = field.playerId == store.playerId ? "yellowgreen" : "lightsalmon	"
         }
         return { 'background-color': color }
 
@@ -108,21 +110,42 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
     </div>
   }
 
-  const sourceFields = () => {
-    const fields = playerFields(f => f.coords != targetField()!.coords)
-    if (targetField() == undefined) return fields
-    return fields.sort((a, b) => calcDist(targetField()!.coords, a.coords) - calcDist(targetField()!.coords, b.coords))
-  }
+  const sourceFields = createMemo(() => {
+    if (targetField() == undefined) return []
+    const fields = playerFields(f => f.coords != targetField()?.coords)
+    const troopScore = (f: serverV1.World_Field) => 100 * f.troops[LEADER] + f.troops[RAIDER]
+    return fields.sort((a, b) => troopScore(b) - troopScore(a))
+  })
 
   function Targatable() {
     const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
+    createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
     const selectedField = () => store.world.fields[selectedSourceCoords()]
     
-    const troops = () => Object.values(store.world.troops)
+    const troops = Object.values(store.world.troops)
     const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
 
     const maxGold = () => Math.min(selectedField().resources!.gold, countTroops(selectedTroopQuantity()) * carriableGoldPerUnit)
     const [selectedGold, setSelectedGold] = createSignal(0)
+
+    // Prevent invalid inputs
+    createEffect(() => {
+      const _selectedGold = selectedGold()
+      batch(() => {
+        if (_selectedGold < 0) return setSelectedGold(0)
+        if (_selectedGold > maxGold()) return setSelectedGold(maxGold())
+      })
+    
+      const _selectedTroopQuantity = selectedTroopQuantity()
+      const _selectedField = selectedField()
+      batch(() => {
+        Object.entries(_selectedTroopQuantity).forEach(([troopId, quantity]) => {
+          const maxQuantity = _selectedField.troops[troopId]
+          if (quantity < 0) return setSelectedTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
+          if (quantity > maxQuantity) return setSelectedTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: maxQuantity }))
+        })
+      })
+    })
 
     return <div>
       <label>From</label>
@@ -134,7 +157,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
 
       <p>Troops</p>
       <div>
-        <For each={troops()}>
+        <For each={troops}>
           {t => {
             const maxQuantity = () => selectedField().troops[t.id]
 
@@ -169,7 +192,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
         }}
         disabled={countTroops(selectedTroopQuantity()) == 0}
       >
-        {(targetField()!.playerId != playerId) ? "Attack" : "Send"}
+        {(targetField()!.playerId != store.playerId ) ? "Attack" : "Send"}
       </button>
     </div>
   }
@@ -211,14 +234,14 @@ function Movements() {
             const targetField = () => store.world.fields[order.targetCoords]
             const [targetX, targetY] = order.targetCoords.split('_').map(Number)
             const arrow = () => order.comeback ? "<-" : "->"
-            const danger = () => order.playerId != playerId
+            const danger = () => order.playerId != store.playerId 
 
             return <div style={danger() ? "color:red" : undefined}>
               <A href={`/world/fields/${order.sourceCoords}`}>{World_Field_KindToString(sourceField().kind)} ({sourceX},{sourceY})</A>
               <span> {arrow()} </span>
               <A href={`/world/fields/${order.targetCoords}`}>{World_Field_KindToString(targetField().kind)} ({targetX},{targetY})</A>
               <span> - {order.timeLeft}s </span>
-              <Show when={order.playerId == playerId && !order.comeback}>
+              <Show when={order.playerId == store.playerId  && !order.comeback}>
                 <button onClick={() => cancelMovementOrder(order)}>Cancel</button>
               </Show>
             </div>

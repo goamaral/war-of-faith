@@ -86,6 +86,7 @@ message Village {
 
 message Player {
   string id = 1;
+  repeated string village_key_bindings = 2; // order: key_binding (1..0), value: village_coords
 }
 
 /* WORLD */

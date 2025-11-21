@@ -24,11 +24,11 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Create shortcuts (w - world, 1..0 - village, v - villages)
-- World - Source fields should be sorted by conquer order
+- Validate conditions before executing actions
+- World - Highlight selected field
+- Village - Transfer resources from other villages
 - Villages - Change village order
 - Add stats to troops (defense, attack, capacity)
-- Validate conditions before executing actions
 - AI
 - Reveal fog fields on movement
 - Building effects

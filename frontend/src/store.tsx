@@ -1,17 +1,18 @@
-import type { JSX, FlowComponent } from "solid-js"
-
+import type { JSX } from "solid-js"
 import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
+import { useNavigate } from "@solidjs/router"
+
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
-import { newVillage, newWildField, newResources, HALL, LEADER, GOLD_MINE, carriableGoldPerUnit, countTroops, newFieldTroops, RAIDER } from './entities'
-import { combatLogger } from "./logger"
-
-export const playerId = "1"
+import {
+  newVillage, newWildField, newResources, LEADER, GOLD_MINE, carriableGoldPerUnit, countTroops, newFieldTroops, RAIDER } from './entities'
+import { combatLogger, endingLogger, movementLogger } from "./logger"
 
 export const [store, setStore] = createStore({
   loaded: false,
   world: {} as serverV1.World,
+  playerId: "",
 })
 
 declare global {
@@ -21,7 +22,6 @@ declare global {
 }
 window.resetStore = function() {
   localStorage.removeItem("store")
-  setStore("loaded", false)
   location.reload()
 }
 
@@ -34,7 +34,7 @@ async function loadStore() {
   if (persistedStore) {
     const store = JSON.parse(persistedStore)
     setStore(store)
-
+    
   } else {
     const { world } = await serverCli.getWorld({})
     for (let x = 0; x < world!.width; x++) {
@@ -45,7 +45,8 @@ async function loadStore() {
         }
       }
     }
-    const store = { loaded: true, world }
+
+    const store = { loaded: true, world, playerId: "1" }
     setStore(store)
     localStorage.setItem("store", JSON.stringify(store))
   }
@@ -53,16 +54,28 @@ async function loadStore() {
 
 // Helpers
 export function playerFields(filter?: (f: serverV1.World_Field) => boolean) {
-  return Object.values(store.world.fields).filter(f => f?.playerId == playerId && (!filter || filter(f)))
+  return Object.values(store.world.fields).filter(f => f.playerId == store.playerId && (!filter || filter(f)))
 }
 export function playerVillageFields(filter?: (f: serverV1.World_Field) => boolean) {
   return playerFields(filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
 }
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
+  const navigate = useNavigate()
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (document.activeElement?.tagName === 'INPUT') return
+    if (e.key === 'w') return navigate('/world')
+    if (e.key === 'v') return navigate('/villages')
+    const villageNumber = Number.parseInt(e.key)
+    if (Number.isInteger(villageNumber)) {
+      const villageIndex = (villageNumber == 0 ? 10 : villageNumber)-1
+      const villageCoords = store.world.players[store.playerId].villageKeyBindings[villageIndex]
+      if (villageCoords) return navigate(`/world/${villageCoords}`)
+    }
+  }
+
   onMount(() => {
     let intervalId = undefined as undefined | number
-    
     async function setup() {
       if (!store.loaded) await loadStore()
 
@@ -79,10 +92,12 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
       // subscribeToWorld()
 
       intervalId = setInterval(state_tick, 1000)
+      document.addEventListener('keydown', handleKeyDown)
     }
-  
     setup()
+
     onCleanup(() => clearInterval(intervalId))
+    onCleanup(() => document.removeEventListener('keydown', handleKeyDown))
   })
 
   return <Show when={store.loaded} fallback={<p>Loading...</p>} keyed>
@@ -207,16 +222,35 @@ export function calcDist(sourceCoords: string, targetCoords: string) {
   return Math.abs(srcX - trgX) + Math.abs(srcY - trgY)
 }
 
-const winConditionOwnershipAge = 5*60 // 5 min
+const winConditionOwnershipAge = 1*60 // 5 min
 function checkWinCondition() {
   let winner = undefined
-  for (const [coords, temple] of Object.entries(store.world.temples)) {
+  for (const coords of Object.keys(store.world.temples)) {
     const playerId = store.world.fields[coords].playerId
-    if (temple.ownershipAge < winConditionOwnershipAge) return
-    if (winner && winner != playerId) return
+    if (winner && winner != playerId) return false
     winner = playerId
   }
-  window.alert("Player " + winner + " won")
+  if (!winner) return false
+
+  endingLogger(`Player ${winner} controls all temples`)
+
+  let timeLeft = 0
+  for (const temple of Object.values(store.world.temples)) {
+    if (temple.ownershipAge < winConditionOwnershipAge) timeLeft = Math.max(timeLeft, winConditionOwnershipAge - temple.ownershipAge)
+  }
+  if (timeLeft > 0) {
+    endingLogger(`Win in ${timeLeft} seconds`)
+    return false
+  }
+
+  if (!winner) return false
+  const ok = window.confirm("Player " + winner + " won. Reset the game?")
+  if (ok) {
+    window.resetStore()
+    return true
+  }
+
+  return false
 }
 
 /* State machine */
@@ -228,7 +262,7 @@ function state_tick() {
     })
 
     /* Win condition */
-    checkWinCondition()
+    if (checkWinCondition()) return
 
     /* Villages */
     Object.entries(store.world.villages).forEach(([coords, village]) => {
@@ -313,25 +347,40 @@ function state_tick() {
           if (troopsLeft > 0) {
             // Conquer
             if (attackerTroops[LEADER] > 0) {
-              if (targetField.kind != serverV1.World_Field_Kind.TEMPLE) {
-                setStore("world", "fields", targetCoords, f => ({
-                  ...f,
-                  kind: serverV1.World_Field_Kind.VILLAGE,
-                  troops: attackerTroops,
-                  resources: add(f.resources!, order.resources!),
-                  playerId: order.playerId,
-                } as serverV1.World_Field))
-                setStore("world", "villages", targetCoords, newVillage())
-
-              } else {
-                setStore("world", "fields", targetCoords, f => ({
-                  ...f,
-                  troops: attackerTroops,
-                  resources: add(f.resources!, order.resources!),
-                  playerId: order.playerId,
-                }) as serverV1.World_Field)
-                setStore("world", "temples", targetCoords, t => ({ ...t, ownershipAge: 0 }))
+              // Set source player village key binding
+              {
+                const index = store.world.players[order.playerId].villageKeyBindings.findIndex(c => !c)
+                if (index != -1) {
+                  setStore("world", "players", order.playerId, "villageKeyBindings", index, targetCoords)
+                } else if (store.world.players[order.playerId].villageKeyBindings.length < 10) {
+                  setStore("world", "players", order.playerId, "villageKeyBindings", villageKeyBindings => villageKeyBindings.concat(targetCoords))
+                }
               }
+
+              // Unset target player village key binding
+              if (targetField.playerId) {
+                const index = store.world.players[targetField.playerId].villageKeyBindings.findIndex(c => c == targetCoords)
+                if (index != -1) {
+                  setStore("world", "players", targetField.playerId, "villageKeyBindings", index, "")
+                }
+              }
+
+              // World field
+              setStore("world", "fields", targetCoords, f => ({
+                ...f,
+                kind: targetField.kind == serverV1.World_Field_Kind.TEMPLE ? serverV1.World_Field_Kind.TEMPLE : serverV1.World_Field_Kind.VILLAGE,
+                troops: attackerTroops,
+                resources: add(f.resources!, order.resources!),
+                playerId: order.playerId,
+              }) as serverV1.World_Field)
+
+              // Temple | village
+              if (targetField.kind == serverV1.World_Field_Kind.TEMPLE) {
+                setStore("world", "temples", targetCoords, t => ({ ...t, ownershipAge: 0 }))
+              } else {
+                setStore("world", "villages", targetCoords, newVillage())
+              }
+
               combatLogger(`Field ${targetCoords} conquered`)
 
             } else {
@@ -369,20 +418,22 @@ function state_tick() {
       }
     })
     setStore("world", "movementOrders", newMovementOrders)
+
+    persistStore()
   })
-  persistStore()
 }
 
 // Movement orders
 function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
   const dst = calcDist(sourceCoords, targetCoords)
-  const order = { id, sourceCoords, targetCoords, troops, resources: newResources({ gold }), timeLeft: dst, playerId } as serverV1.MovementOrder
+  const order = { id, sourceCoords, targetCoords, troops, resources: newResources({ gold }), timeLeft: dst, playerId: store.playerId } as serverV1.MovementOrder
   batch(() => {
     setStore("world", "fields", sourceCoords, "troops", r => sub(r!, troops))
     setStore("world", "fields", sourceCoords, "resources", "gold", g => g - gold)
     setStore("world", "movementOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
   })
   persistStore()
+  movementLogger(`Issued movement order (source: ${sourceCoords}, target: ${targetCoords})`)
 }
 function state_cancelMovementOrder(id: string) {
   batch(() => {

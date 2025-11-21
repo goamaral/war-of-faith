@@ -1,5 +1,5 @@
-import { Accessor, For, Match, Switch, Show } from "solid-js"
-import { store, StoreLoader, playerId } from "./store"
+import { Accessor, For, Match, Switch, Show, onMount, onCleanup, createMemo } from "solid-js"
+import { store, StoreLoader } from "./store"
 import { useParams } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
@@ -7,11 +7,11 @@ import Village from "./world_field_page/Village"
 import { World_Field_KindToString } from "./entities"
 
 export default function WorldFieldPage() {
-  const { coords } = useParams() as { coords: string }
+  const params = useParams() as { coords: string }
 
   return <StoreLoader>
     {() => {
-      const field = () => store.world.fields[coords]
+      const field = () => store.world.fields[params.coords]!
 
       return <div>
         <h1>{World_Field_KindToString(field().kind)}</h1>
@@ -31,7 +31,7 @@ export default function WorldFieldPage() {
 }
 
 function Temple({ field }: { field: Accessor<serverV1.World_Field> }) {
-  return <Show when={field().playerId == playerId}>
+  return <Show when={field().playerId == store.playerId}>
     <div>
       <h2>Resources</h2>
       <ul>
@@ -43,9 +43,9 @@ function Temple({ field }: { field: Accessor<serverV1.World_Field> }) {
       <ul>
         <For each={Object.keys(store.world.troops)}>
           {(troopId) => {
-              const troop = store.world.troops[troopId]
+              const troop = () => store.world.troops[troopId]
               const quantity = () => field().troops[troopId]
-              return <li>{troop.name} - {quantity()} units</li>
+              return <li>{troop().name} - {quantity()} units</li>
             }}
         </For>
       </ul>

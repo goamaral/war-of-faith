@@ -552,10 +552,11 @@ func (x *Village) GetTroopTrainingOrders() []*Village_TroopTrainingOrder {
 }
 
 type Player struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	VillageKeyBindings []string               `protobuf:"bytes,2,rep,name=village_key_bindings,json=villageKeyBindings,proto3" json:"village_key_bindings,omitempty"` // order: key_binding (1..0), value: village_coords
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Player) Reset() {
@@ -593,6 +594,13 @@ func (x *Player) GetId() string {
 		return x.Id
 	}
 	return ""
+}
+
+func (x *Player) GetVillageKeyBindings() []string {
+	if x != nil {
+		return x.VillageKeyBindings
+	}
+	return nil
 }
 
 // GetWorld
@@ -1698,9 +1706,10 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\x12TroopTrainingOrder\x12\x19\n" +
 	"\btroop_id\x18\x01 \x01(\tR\atroopId\x12\x1a\n" +
 	"\bquantity\x18\x02 \x01(\rR\bquantity\x12\x1b\n" +
-	"\ttime_left\x18\x03 \x01(\rR\btimeLeft\"\x18\n" +
+	"\ttime_left\x18\x03 \x01(\rR\btimeLeft\"J\n" +
 	"\x06Player\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x11\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x120\n" +
+	"\x14village_key_bindings\x18\x02 \x03(\tR\x12villageKeyBindings\"\x11\n" +
 	"\x0fGetWorldRequest\":\n" +
 	"\x10GetWorldResponse\x12&\n" +
 	"\x05world\x18\x01 \x01(\v2\x10.server.v1.WorldR\x05world\"\x19\n" +

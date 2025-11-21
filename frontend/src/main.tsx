@@ -1,6 +1,6 @@
 import { render } from "solid-js/web"
-import { Router, Route } from "@solidjs/router"
-import { ErrorBoundary } from "solid-js"
+import { Router, Route, useNavigate } from "@solidjs/router"
+import { ErrorBoundary, onMount, onCleanup } from "solid-js"
 
 // import LoginPage from './LoginPage'
 import WorldPage from './WorldPage'
@@ -21,12 +21,11 @@ render(
       }}
     >
       <Router>
-        {/* <Route path="/login" component={LoginPage} /> */}
         <Route path="/world" component={WorldPage} />
         <Route path="/world/:coords" component={WorldFieldPage} />
         <Route path="/villages" component={VillagesPage} />
       </Router>
     </ErrorBoundary>
-  ), 
+  ),
   document.getElementById("app") as HTMLElement,
 )

@@ -10,7 +10,7 @@ export default function VillagesPage() {
         <h1>Villages</h1>
         <ul>
           <For each={playerVillageFields()}>
-            {f => <li><A href={`/villages/${f.coords}`}>village {f.coords}</A></li>}
+            {f => <li><A href={`/world/${f.coords}`}>village {f.coords}</A></li>}
           </For>
         </ul>
       </div>

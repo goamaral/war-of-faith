@@ -37,6 +37,9 @@ func (w *World) CreateVillage(coords string, playerId string) {
 		PlayerId: wrapperspb.String(playerId),
 	}
 	w.Villages[coords] = &serverv1.Village{}
+	if (len(w.Players[playerId].VillageKeyBindings) < 10) {
+		w.Players[playerId].VillageKeyBindings = append(w.Players[playerId].VillageKeyBindings, coords)
+	}
 }
 
 func (w *World) CreateTemple(coords string) {
