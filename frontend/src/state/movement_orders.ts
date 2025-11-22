@@ -1,9 +1,10 @@
 import { ok, err } from "neverthrow"
 
-import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
-import { calcDist, countTroops, sub } from './helpers'
-import { newResources } from "./entities"
-import { movementLogger } from "./logger"
+import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
+import { calcDist, countTroops, sub } from '../helpers'
+import { newResources } from "../entities"
+import { movementLogger } from "../logger"
+import { Mutator } from "./mutator"
 
 export const CARRIABLE_GOLD_PER_UNIT = 10
 
@@ -42,13 +43,7 @@ export namespace IssueMovementOrder {
     playerId: string
   }
 
-  interface Setter {
-    setFieldTroops: (coords: string, set: (troops: Record<string, number>) => Record<string, number>) => void
-    setFieldGold: (coords: string, set: (gold: number) => number) => void
-    setMovementOrders: (set: (orders: serverV1.MovementOrder[]) => serverV1.MovementOrder[]) => void
-  }
-
-  export function call(world: serverV1.World, req: Request, setter: Setter) {
+  export function call(world: serverV1.World, mut: Mutator, req: Request) {
     // Troops validation
     for (const troopId in req.troops) {
       const quantity = req.troops[troopId]
@@ -74,12 +69,48 @@ export namespace IssueMovementOrder {
       playerId: req.playerId,
     } as serverV1.MovementOrder
 
-    setter.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
-    setter.setFieldGold(req.sourceCoords, gold => gold - req.gold)
-    setter.setMovementOrders(orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    mut.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
+    mut.setFieldGold(req.sourceCoords, gold => gold - req.gold)
+    mut.setMovementOrders(orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
 
-    movementLogger(`Issued movement order (source: ${req.sourceCoords}, target: ${req.targetCoords})`)
+    movementLogger(`Issued movement order (id: ${req.id}, source: ${req.sourceCoords}, target: ${req.targetCoords})`)
+    return ok()
+  }
+}
 
+export namespace CancelMovementOrder {
+  export enum ErrorType {
+    MOVEMENT_ORDER_NOT_FOUND,
+    MOVEMENT_ORDER_COMING_BACK,
+  }
+  export class Err extends Error {
+    static typeToMsg: Record<ErrorType, string> = {
+      [ErrorType.MOVEMENT_ORDER_NOT_FOUND]: "Movement order not found",
+      [ErrorType.MOVEMENT_ORDER_COMING_BACK]: "Movement order coming back",
+    }
+
+    constructor(public type: ErrorType) {
+      super(Err.typeToMsg[type] || `Error(type: ${type})`)
+    }
+  }
+
+  export function call(world: serverV1.World, mut: Mutator, id: string) {
+    const index = world.movementOrders.findIndex(o => o.id == id)
+    if (index == -1) return err(new Err(ErrorType.MOVEMENT_ORDER_NOT_FOUND))
+
+    const order = world.movementOrders[index]
+    if (order.comeback) return err(new Err(ErrorType.MOVEMENT_ORDER_NOT_FOUND))
+
+    mut.setMovementOrders(orders => {
+      orders[index] = {
+        ...order,
+        timeLeft: calcDist(order.sourceCoords, order.targetCoords) - order.timeLeft,
+        comeback: true,
+      }
+      return orders.slice().sort((a, b) => a.timeLeft - b.timeLeft)
+    })
+
+    movementLogger(`Canceled movement order (id: ${order.id}, source: ${order.sourceCoords}, target: ${order.targetCoords})`)
     return ok()
   }
 }

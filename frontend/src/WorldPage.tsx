@@ -9,9 +9,9 @@ import { useNavigate, A } from "@solidjs/router"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { StoreLoader, store, playerFields } from './store'
 import { newFieldTroops, World_Field_KindToString, LEADER, RAIDER } from "./entities"
-import { cancelMovementOrder, issueMovementOrder } from "./actions"
+import { cancelMovementOrder, issueMovementOrder } from "./actions/movement_orders"
 import { countTroops, decodeCoords } from "./helpers"
-import { IssueMovementOrder } from "./state_movement_orders"
+import { IssueMovementOrder } from "./state/movement_orders"
 
 export default function WorldPage() {
   return <StoreLoader>

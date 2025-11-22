@@ -3,6 +3,7 @@ import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
 import { useNavigate } from "@solidjs/router"
 
+import type { Mutator } from "./state/mutator"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
 import {
@@ -11,7 +12,7 @@ import {
 } from './entities'
 import { combatLogger, endingLogger } from "./logger"
 import { add, calcDist, countTroops, encodeCoords, mulN, sub } from "./helpers"
-import { CARRIABLE_GOLD_PER_UNIT } from "./state_movement_orders"
+import { CARRIABLE_GOLD_PER_UNIT } from "./state/movement_orders"
 
 export const [store, setStore] = createStore({
   loaded: false,
@@ -357,24 +358,10 @@ function state_tick() {
   })
 }
 
-// Movement orders
-
-
-export function state_cancelMovementOrder(id: string) {
-  batch(() => {
-    setStore("world", "movementOrders", orders => {
-      const index = orders.findIndex(o => o.id == id)!
-      const order = orders[index]
-      if (order.comeback) throw new Error("Can't cancel a comeback order")
-      orders[index] = {
-        ...order,
-        timeLeft: calcDist(order.sourceCoords, order.targetCoords) - order.timeLeft,
-        comeback: true,
-      }
-      return orders.slice().sort((a, b) => a.timeLeft - b.timeLeft)
-    })
-  })
-  persistStore()
+export const mutator: Mutator = {
+  setFieldTroops: (coords: string, set) => setStore("world", "fields", coords, "troops", set),
+  setFieldGold: (coords: string, set) => setStore("world", "fields", coords, "resources", "gold", set),
+  setMovementOrders: (set) => setStore("world", "movementOrders", set),
 }
 
 // Building upgrade orders
