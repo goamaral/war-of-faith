@@ -121,24 +121,6 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 //       attacks: patch.attacks,
 //     }))
 
-// Building upgrade orders
-export function issueBuildingUpgradeOrder(coords: string, buildingId: string, level: number) {
-  const order = state_issueBuildingUpgradeOrder(coords, buildingId, level)
-  // serverCli.issueBuildingUpgradeOrder({ coords, buildingId: buildingId, level: level })
-  //   .catch(err => {
-  //     alert(`Failed to issue building upgrade order (buildingId: ${buildingId}, level: ${level}): ${err}`)
-  //     state_cancelBuildingUpgradeOrder(coords, order)
-  //   })
-}
-export async function cancelBuildingUpgradeOrder(coords: string, order: serverV1.Village_BuildingUpgradeOrder) {
-  state_cancelBuildingUpgradeOrder(coords, order)
-  // serverCli.cancelBuildingUpgradeOrder({ coords, buildingId: order.buildingId, level: order.level })
-  //   .catch(err => {
-  //     alert(`Failed to cancel building upgrade order (buildingId: ${order.buildingId}, level: ${order.level}): ${err}`)
-  //     state_issueBuildingUpgradeOrder(coords, order.buildingId, order.level)
-  //   })
-}
-
 // Troop training orders
 export function issueTroopTrainingOrder(coords: string, troopId: string, quantity: number) {
   const order = state_issueTroopTrainingOrder(coords, troopId, quantity)
@@ -359,31 +341,11 @@ function state_tick() {
 }
 
 export const mutator: Mutator = {
-  setFieldTroops: (coords: string, set) => setStore("world", "fields", coords, "troops", set),
-  setFieldGold: (coords: string, set) => setStore("world", "fields", coords, "resources", "gold", set),
   setMovementOrders: (set) => setStore("world", "movementOrders", set),
-}
+  setFieldTroops: (coords, set) => setStore("world", "fields", coords, "troops", set),
+  setFieldResources: (coords, set) => setStore("world", "fields", coords, "resources", r => set(r!)),
 
-// Building upgrade orders
-function state_issueBuildingUpgradeOrder(coords: string, buildingId: string, level: number) {
-  const building = store.world.buildings[buildingId]
-  const cost = building.cost[level-1]
-  const order = { level, buildingId, timeLeft: cost.time } as serverV1.Village_BuildingUpgradeOrder
-  batch(() => {
-    setStore("world", "villages", coords, "buildingUpgradeOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
-    setStore("world", "fields", coords, "resources", r => sub(r!, cost))
-  })
-  persistStore()
-  return order
-}
-function state_cancelBuildingUpgradeOrder(coords: string, order: serverV1.Village_BuildingUpgradeOrder) {
-  const building = store.world.buildings[order.buildingId]
-  const cost = building.cost[order.level-1]
-  batch(() => {
-    setStore("world", "villages", coords, "buildingUpgradeOrders", orders => orders.filter(o => !(o.buildingId == order.buildingId && o.level == order.level)))
-    setStore("world", "fields", coords, "resources", r => add(r!, cost))
-  })
-  persistStore()
+  setVillageBuildingUpgradeOrders: (coords, set) => setStore("world", "villages", coords, "buildingUpgradeOrders", set)
 }
 
 // Troop training orders

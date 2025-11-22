@@ -44,18 +44,15 @@ export namespace IssueMovementOrder {
   }
 
   export function call(world: serverV1.World, mut: Mutator, req: Request) {
-    // Troops validation
     for (const troopId in req.troops) {
       const quantity = req.troops[troopId]
       if (quantity < 0) return err(new Err(ErrorType.INVALID_TROOP_QUANTITY))
       if (quantity > maxTroopQuantity(world, req.sourceCoords, troopId)) return err(new Err(ErrorType.INVALID_TROOP_QUANTITY))
     }
 
-    // Resources validation
     if (req.gold < 0) return err(new Err(ErrorType.INVALID_GOLD))
     if (req.gold > maxGold(world, req.sourceCoords)) return err(new Err(ErrorType.INVALID_GOLD))
 
-    // Player validation
     if (req.playerId != world.fields[req.sourceCoords].playerId) return err(new Err(ErrorType.INVALID_PLAYER))
 
     // Apply
@@ -70,7 +67,7 @@ export namespace IssueMovementOrder {
     } as serverV1.MovementOrder
 
     mut.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
-    mut.setFieldGold(req.sourceCoords, gold => gold - req.gold)
+    mut.setFieldResources(req.sourceCoords, r => sub(r, order.resources!))
     mut.setMovementOrders(orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
 
     movementLogger(`Issued movement order (id: ${req.id}, source: ${req.sourceCoords}, target: ${req.targetCoords})`)
@@ -80,13 +77,13 @@ export namespace IssueMovementOrder {
 
 export namespace CancelMovementOrder {
   export enum ErrorType {
-    MOVEMENT_ORDER_NOT_FOUND,
-    MOVEMENT_ORDER_COMING_BACK,
+    ORDER_NOT_FOUND,
+    ORDER_COMING_BACK,
   }
   export class Err extends Error {
     static typeToMsg: Record<ErrorType, string> = {
-      [ErrorType.MOVEMENT_ORDER_NOT_FOUND]: "Movement order not found",
-      [ErrorType.MOVEMENT_ORDER_COMING_BACK]: "Movement order coming back",
+      [ErrorType.ORDER_NOT_FOUND]: "Order not found",
+      [ErrorType.ORDER_COMING_BACK]: "Order coming back",
     }
 
     constructor(public type: ErrorType) {
@@ -96,11 +93,12 @@ export namespace CancelMovementOrder {
 
   export function call(world: serverV1.World, mut: Mutator, id: string) {
     const index = world.movementOrders.findIndex(o => o.id == id)
-    if (index == -1) return err(new Err(ErrorType.MOVEMENT_ORDER_NOT_FOUND))
+    if (index == -1) return err(new Err(ErrorType.ORDER_NOT_FOUND))
 
     const order = world.movementOrders[index]
-    if (order.comeback) return err(new Err(ErrorType.MOVEMENT_ORDER_NOT_FOUND))
+    if (order.comeback) return err(new Err(ErrorType.ORDER_COMING_BACK))
 
+    // Apply
     mut.setMovementOrders(orders => {
       orders[index] = {
         ...order,

@@ -1,10 +1,10 @@
-import { ok, ResultAsync } from "neverthrow"
+import { ResultAsync } from "neverthrow"
 import { batch } from "solid-js"
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { IssueMovementOrder, CancelMovementOrder } from "../state/movement_orders"
-import { store, persistStore, mutator } from "../store"
 import { serverCli } from "../api"
+import { store, persistStore, mutator } from "../store"
 
 // Movement orders
 export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
@@ -26,11 +26,11 @@ export async function issueMovementOrder(sourceCoords: string, targetCoords: str
   // if (resServerIssueMovementOrder.isErr()) {
   //   alert(`Failed to issue movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${resServerIssueMovementOrder.error}`)
   //   batch(() => CancelMovementOrder.call(store.world, mutator, id))
+  //   persistStore()
   //   return
   // }
 
   persistStore()
-  return ok()
 }
 
 export async function cancelMovementOrder(order: serverV1.MovementOrder) {
@@ -51,9 +51,9 @@ export async function cancelMovementOrder(order: serverV1.MovementOrder) {
   //     gold: order.resources!.gold,
   //     playerId: order.playerId,
   //   }))
+  //   persistStore()
   //   return
   // }
 
   persistStore()
-  return ok()
 }

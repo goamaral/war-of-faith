@@ -3,11 +3,12 @@ import { createSignal, Show, For, Switch, Match, Accessor, Setter, createMemo, c
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import {
   store, playerVillageFields,
-  issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
   issueTroopTrainingOrder, cancelTroopTrainingOrder,
 } from '../store'
 import { LEADER, newFieldTroops } from "../entities"
 import { add, div, mulN, sub } from "../helpers"
+import { cancelBuildingUpgradeOrder, issueBuildingUpgradeOrder } from "../actions/building_upgrade_order"
+import { CancelBuildingUpgradeOrder, IssueBuildingUpgradeOrder } from "../state/building_upgrade_order"
 
 function valueCompressor(value: number) {
   if (value < 1000) return value
@@ -51,11 +52,6 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
     return lastOrder.buildingId == order.buildingId && lastOrder.level == order.level
   }
 
-  function getBuildingNextLevel(buildingId: string): number {
-    const orders = village().buildingUpgradeOrders.filter(o => o.buildingId == buildingId)
-    return field().buildings[buildingId] + orders.length + 1
-  }
-
   return (
     <div>
       <h2>Buildings</h2>
@@ -65,9 +61,9 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
             const building = store.world.buildings[buildingId]
             const maxLevel = building.cost.length
 
-            const nextLevel = () => getBuildingNextLevel(buildingId)
-            const cost = () => building.cost[nextLevel()-1]
-            const level = () => field().buildings[buildingId]
+            const nextLevel = createMemo(() => IssueBuildingUpgradeOrder.nextLevel(store.world, field().coords, buildingId))
+            const cost = createMemo(() => building.cost[nextLevel()-1])
+            const level = createMemo(() => field().buildings[buildingId])
 
             const description = () => `upgrade (lvl ${nextLevel()}, ${cost().time}s, ${cost().gold} gold)`
 
@@ -97,7 +93,7 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
             return (<li>
               <span>{building.name} (lvl {order.level}) - {order.timeLeft}s </span>
               <Show when={buildingUpgradeOrderCancelable(order)}>
-                <button onClick={() => cancelBuildingUpgradeOrder(field().coords, order)}>cancel</button>
+                <button onClick={() => cancelBuildingUpgradeOrder(field().coords, order.buildingId, order.level)}>cancel</button>
               </Show>
             </li>)
           }}
