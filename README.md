@@ -25,6 +25,7 @@ Players compete to conquer the 4 mighty temples.
 
 ## TODO
 - Validate conditions before executing actions
+- World - Troop movements - Set color if field is enemy or ally
 - World - Highlight selected field
 - Village - Transfer resources from other villages
 - Villages - Change village order

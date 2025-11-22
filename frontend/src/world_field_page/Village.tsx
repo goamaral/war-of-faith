@@ -2,12 +2,12 @@ import { createSignal, Show, For, Switch, Match, Accessor, Setter, createMemo, c
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import {
-  store, mulN, div, sub, add,
+  store, playerVillageFields,
   issueBuildingUpgradeOrder, cancelBuildingUpgradeOrder, 
   issueTroopTrainingOrder, cancelTroopTrainingOrder,
-  playerVillageFields,
 } from '../store'
 import { LEADER, newFieldTroops } from "../entities"
+import { add, div, mulN, sub } from "../helpers"
 
 function valueCompressor(value: number) {
   if (value < 1000) return value

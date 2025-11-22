@@ -6,8 +6,12 @@ import { useNavigate } from "@solidjs/router"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { serverCli } from './api'
 import {
-  newVillage, newWildField, newResources, LEADER, GOLD_MINE, carriableGoldPerUnit, countTroops, newFieldTroops, RAIDER } from './entities'
-import { combatLogger, endingLogger, movementLogger } from "./logger"
+  newVillage, newWildField, newFieldTroops,
+  GOLD_MINE, LEADER, RAIDER,
+} from './entities'
+import { combatLogger, endingLogger } from "./logger"
+import { add, calcDist, countTroops, encodeCoords, mulN, sub } from "./helpers"
+import { CARRIABLE_GOLD_PER_UNIT } from "./state_movement_orders"
 
 export const [store, setStore] = createStore({
   loaded: false,
@@ -26,7 +30,7 @@ window.resetStore = function() {
 }
 
 // Persistence
-function persistStore() {
+export function persistStore() {
   localStorage.setItem("store", JSON.stringify(store))
 }
 async function loadStore() {
@@ -116,25 +120,6 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 //       attacks: patch.attacks,
 //     }))
 
-// Movement orders
-export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
-  const id = crypto.randomUUID()
-  state_issueMovementOrder(id, sourceCoords, targetCoords, troops, gold)
-  // serverCli.issueMovementOrder({ id, sourceCoords, targetCoords, troops })
-  //   .catch(err => {
-  //     alert(`Failed to issue movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${err}`)
-  //     state_cancelMovementOrder(id)
-  //   })
-}
-export async function cancelMovementOrder(order: serverV1.MovementOrder) {
-  state_cancelMovementOrder(order.id)
-  // serverCli.cancelMovementOrder({ id: order.id })
-  //   .catch(err => {
-  //     alert(`Failed to cancel movement order (id: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${err}`)
-  //     state_issueMovementOrder(order.id, order.sourceCoords, order.targetCoords, order.troops)
-  //   })
-}
-
 // Building upgrade orders
 export function issueBuildingUpgradeOrder(coords: string, buildingId: string, level: number) {
   const order = state_issueBuildingUpgradeOrder(coords, buildingId, level)
@@ -169,57 +154,6 @@ export async function cancelTroopTrainingOrder(coords: string, order: serverV1.V
   //     alert(`Failed to cancel troop training order (troopId: ${order.troopId}, quantity: ${order.quantity}): ${err}`)
   //     state_issueTroopTrainingOrder(coords, order.troopId, order.quantity)
   //   })
-}
-
-// Helpers
-export function add<T extends Record<string, any>>(a: T, b: T): T {
-  const res = { ...a } as Record<string, any>
-  for (const [k, v] of Object.entries(b)) {
-    res[k] = typeof v == "number" ? res[k] + v : v
-  }
-  return res as T
-}
-export function sub<T extends Record<string, any>>(a: T, b: T): T {
-  const res = { ...a } as Record<string, any>
-  for (const [k, v] of Object.entries(b)) {
-    res[k] = typeof v == "number" ? res[k] - v : v
-  }
-  return res as T
-}
-export function mulN<T extends Record<string, any>>(a: T, n: number): T {
-  const res = {} as Record<string, any>
-  for (const [k, v] of Object.entries(a)) {
-    res[k] = typeof v == "number" ? v * n : v
-  }
-  return res as T
-}
-export function div<T extends Record<string, any>>(a: T, b: T, filter?: (k: string) => boolean): number {
-  let res = Infinity
-  for (const [k, v] of Object.entries(a)) {
-    if (typeof v != "number") continue
-    if (filter && !filter(k)) continue
-    res = Math.min(res, v / b[k])
-  }
-  return res
-}
-export function divN<T extends Record<string, any>>(a: T, n: number): T {
-  const res = {} as Record<string, any>
-  for (const [k, v] of Object.entries(a)) {
-    res[k] = typeof v == "number" ? v / n : v
-  }
-  return res as T
-}
-export function decodeCoords(coords: string) {
-  const [x, y] = coords.split('_').map(Number)
-  return { x, y }
-}
-export function encodeCoords(x: number, y: number) {
-  return `${x}_${y}`
-}
-export function calcDist(sourceCoords: string, targetCoords: string) {
-  const { x: srcX, y: srcY } = decodeCoords(sourceCoords)
-  const { x: trgX, y: trgY } = decodeCoords(targetCoords)
-  return Math.abs(srcX - trgX) + Math.abs(srcY - trgY)
 }
 
 const winConditionOwnershipAge = 1*60 // 5 min
@@ -385,7 +319,7 @@ function state_tick() {
 
             } else {
               // Pillage
-              const pillage = { gold: Math.min(targetField.resources!.gold, troopsLeft * carriableGoldPerUnit) } as serverV1.Resources
+              const pillage = { gold: Math.min(targetField.resources!.gold, troopsLeft * CARRIABLE_GOLD_PER_UNIT) } as serverV1.Resources
               setStore("world", "fields", targetCoords, "resources", r => sub(r!, pillage))
               newMovementOrders.push({
                 ...order,
@@ -424,18 +358,9 @@ function state_tick() {
 }
 
 // Movement orders
-function state_issueMovementOrder(id: string, sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
-  const dst = calcDist(sourceCoords, targetCoords)
-  const order = { id, sourceCoords, targetCoords, troops, resources: newResources({ gold }), timeLeft: dst, playerId: store.playerId } as serverV1.MovementOrder
-  batch(() => {
-    setStore("world", "fields", sourceCoords, "troops", r => sub(r!, troops))
-    setStore("world", "fields", sourceCoords, "resources", "gold", g => g - gold)
-    setStore("world", "movementOrders", orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
-  })
-  persistStore()
-  movementLogger(`Issued movement order (source: ${sourceCoords}, target: ${targetCoords})`)
-}
-function state_cancelMovementOrder(id: string) {
+
+
+export function state_cancelMovementOrder(id: string) {
   batch(() => {
     setStore("world", "movementOrders", orders => {
       const index = orders.findIndex(o => o.id == id)!

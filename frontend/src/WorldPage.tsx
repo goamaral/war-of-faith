@@ -1,22 +1,17 @@
-import type { JSX, ParentProps } from "solid-js"
+import type { JSX, ParentProps, Accessor, Setter } from "solid-js"
 
 import {
-  createSignal, Accessor, Setter,
+  createSignal, createEffect, createMemo, batch,
   Show, For, Switch, Match,
-  createEffect, onMount, onCleanup,
-  createMemo,
-  batch
 } from "solid-js"
 import { useNavigate, A } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
-import {
-  StoreLoader, store, decodeCoords,
-  issueMovementOrder, cancelMovementOrder,
-  playerFields,
-  calcDist,
-} from './store'
-import { countTroops, carriableGoldPerUnit, newFieldTroops, World_Field_KindToString, LEADER, RAIDER } from "./entities"
+import { StoreLoader, store, playerFields } from './store'
+import { newFieldTroops, World_Field_KindToString, LEADER, RAIDER } from "./entities"
+import { cancelMovementOrder, issueMovementOrder } from "./actions"
+import { countTroops, decodeCoords } from "./helpers"
+import { IssueMovementOrder } from "./state_movement_orders"
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -120,27 +115,28 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
   function Targatable() {
     const [selectedSourceCoords, setSelectedSourceCoords] = createSignal(sourceFields()[0].coords)
     createEffect(() => setSelectedSourceCoords(sourceFields()[0].coords))
-    const selectedField = () => store.world.fields[selectedSourceCoords()]
     
     const troops = Object.values(store.world.troops)
     const [selectedTroopQuantity, setSelectedTroopQuantity] = createSignal(newFieldTroops())
-
-    const maxGold = () => Math.min(selectedField().resources!.gold, countTroops(selectedTroopQuantity()) * carriableGoldPerUnit)
     const [selectedGold, setSelectedGold] = createSignal(0)
+
+    const maxGold = createMemo(() => IssueMovementOrder.maxGold(store.world, selectedSourceCoords(), selectedTroopQuantity()))
 
     // Prevent invalid inputs
     createEffect(() => {
       const _selectedGold = selectedGold()
+      const _selectedSourceCoords = selectedSourceCoords()
+      const _selectedTroopQuantity = selectedTroopQuantity()
+
       batch(() => {
+        const maxGold = IssueMovementOrder.maxGold(store.world, _selectedSourceCoords, _selectedTroopQuantity)
         if (_selectedGold < 0) return setSelectedGold(0)
-        if (_selectedGold > maxGold()) return setSelectedGold(maxGold())
+        if (_selectedGold > maxGold) return setSelectedGold(maxGold)
       })
     
-      const _selectedTroopQuantity = selectedTroopQuantity()
-      const _selectedField = selectedField()
       batch(() => {
         Object.entries(_selectedTroopQuantity).forEach(([troopId, quantity]) => {
-          const maxQuantity = _selectedField.troops[troopId]
+          const maxQuantity = IssueMovementOrder.maxTroopQuantity(store.world, _selectedSourceCoords, troopId)
           if (quantity < 0) return setSelectedTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
           if (quantity > maxQuantity) return setSelectedTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: maxQuantity }))
         })
@@ -159,7 +155,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
       <div>
         <For each={troops}>
           {t => {
-            const maxQuantity = () => selectedField().troops[t.id]
+            const maxQuantity = createMemo(() => IssueMovementOrder.maxTroopQuantity(store.world, selectedSourceCoords(), t.id))
 
             return <div>
               <span>{t.name} </span>

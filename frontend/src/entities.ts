@@ -5,8 +5,6 @@ import { store } from './store'
 export const LEADER = "leader" // TODO: Rename to KNIGHT
 export const RAIDER = "raider"
 
-export const carriableGoldPerUnit = 10
-
 export const HALL = "hall"
 export const GOLD_MINE = "gold-mine"
 
@@ -64,8 +62,4 @@ export function newFieldTroops(v: Partial<Record<string, number>> = {}) {
     troops[troopId] = v[troopId] || 0
   }
   return troops
-}
-
-export function countTroops(troops: Record<string, number>) {
-  return Object.values(troops).reduce((a, b) => a + b, 0)
 }
