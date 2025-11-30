@@ -1,24 +1,23 @@
+import type * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
+
 import { ok, err } from "neverthrow"
 
-import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
-import { calcDist, countTroops, sub } from '../helpers'
-import { newResources } from "../entities"
 import { movementLogger } from "../logger"
 import { Mutator } from "./mutator"
-
-export const CARRIABLE_GOLD_PER_UNIT = 10
+import { calcDist, countTroops, sub } from "./helpers"
+import { CARRIABLE_GOLD_PER_UNIT, newResources } from './config'
 
 export namespace IssueMovementOrder {
   export enum ErrorType {
-    INVALID_TROOP_QUANTITY,
-    INVALID_GOLD,
     INVALID_PLAYER,
+    INVALID_QUANTITY,
+    INVALID_GOLD,
   }
   export class Err extends Error {
     static typeToMsg: Record<ErrorType, string> = {
-      [ErrorType.INVALID_TROOP_QUANTITY]: "Invalid troop quantity",
-      [ErrorType.INVALID_GOLD]: "Invalid gold",
       [ErrorType.INVALID_PLAYER]: "Invalid player",
+      [ErrorType.INVALID_QUANTITY]: "Invalid quantity",
+      [ErrorType.INVALID_GOLD]: "Invalid gold",
     }
 
     constructor(public type: ErrorType) {
@@ -35,42 +34,40 @@ export namespace IssueMovementOrder {
   }
 
   interface Request {
-    id: string
+    orderId: string
     sourceCoords: string
     targetCoords: string
     troops: Record<string, number>
     gold: number
-    playerId: string
   }
 
-  export function call(world: serverV1.World, mut: Mutator, req: Request) {
+  export function call(world: serverV1.World, mut: Mutator, playerId: string, req: Request) {
+    if (playerId != world.fields[req.sourceCoords].playerId) return err(new Err(ErrorType.INVALID_PLAYER))
+
     for (const troopId in req.troops) {
       const quantity = req.troops[troopId]
-      if (quantity < 0) return err(new Err(ErrorType.INVALID_TROOP_QUANTITY))
-      if (quantity > maxTroopQuantity(world, req.sourceCoords, troopId)) return err(new Err(ErrorType.INVALID_TROOP_QUANTITY))
+      if (quantity < 0) return err(new Err(ErrorType.INVALID_QUANTITY))
+      if (quantity > maxTroopQuantity(world, req.sourceCoords, troopId)) return err(new Err(ErrorType.INVALID_QUANTITY))
     }
 
     if (req.gold < 0) return err(new Err(ErrorType.INVALID_GOLD))
     if (req.gold > maxGold(world, req.sourceCoords)) return err(new Err(ErrorType.INVALID_GOLD))
 
-    if (req.playerId != world.fields[req.sourceCoords].playerId) return err(new Err(ErrorType.INVALID_PLAYER))
-
-    // Apply
     const order = {
-      id: req.id,
+      id: req.orderId,
       sourceCoords: req.sourceCoords,
       targetCoords: req.targetCoords,
       troops: req.troops,
       resources: newResources({ gold: req.gold }),
       timeLeft: calcDist(req.sourceCoords, req.targetCoords),
-      playerId: req.playerId,
+      playerId,
     } as serverV1.MovementOrder
 
-    mut.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
-    mut.setFieldResources(req.sourceCoords, r => sub(r, order.resources!))
-    mut.setMovementOrders(orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
+    world = mut.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
+    world = mut.setFieldResources(req.sourceCoords, r => sub(r, order.resources!))
+    world = mut.setMovementOrders(orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
 
-    movementLogger(`Issued movement order (id: ${req.id}, source: ${req.sourceCoords}, target: ${req.targetCoords})`)
+    movementLogger(`Issued movement order (id: ${req.orderId}, source: ${req.sourceCoords}, target: ${req.targetCoords})`)
     return ok()
   }
 }
@@ -79,11 +76,13 @@ export namespace CancelMovementOrder {
   export enum ErrorType {
     ORDER_NOT_FOUND,
     ORDER_COMING_BACK,
+    INVALID_PLAYER,
   }
   export class Err extends Error {
     static typeToMsg: Record<ErrorType, string> = {
       [ErrorType.ORDER_NOT_FOUND]: "Order not found",
       [ErrorType.ORDER_COMING_BACK]: "Order coming back",
+      [ErrorType.INVALID_PLAYER]: "Invalid player",
     }
 
     constructor(public type: ErrorType) {
@@ -91,15 +90,16 @@ export namespace CancelMovementOrder {
     }
   }
 
-  export function call(world: serverV1.World, mut: Mutator, id: string) {
-    const index = world.movementOrders.findIndex(o => o.id == id)
+  export function call(world: serverV1.World, mut: Mutator, playerId: string, orderId: string) {
+    const index = world.movementOrders.findIndex(o => o.id == orderId)
     if (index == -1) return err(new Err(ErrorType.ORDER_NOT_FOUND))
 
     const order = world.movementOrders[index]
+    if (playerId != order.playerId) return err(new Err(ErrorType.INVALID_PLAYER))
+
     if (order.comeback) return err(new Err(ErrorType.ORDER_COMING_BACK))
 
-    // Apply
-    mut.setMovementOrders(orders => {
+    world = mut.setMovementOrders(orders => {
       orders[index] = {
         ...order,
         timeLeft: calcDist(order.sourceCoords, order.targetCoords) - order.timeLeft,

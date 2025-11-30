@@ -8,24 +8,23 @@ import { store, persistStore, mutator } from "../store"
 
 // Movement orders
 export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
-  const id = crypto.randomUUID()
-  const resIssueMovementOrder = batch(() => IssueMovementOrder.call(store.world, mutator, {
-    id,
+  const orderId = crypto.randomUUID()
+  const resIssueMovementOrder = batch(() => IssueMovementOrder.call(store.world, mutator, store.playerId, {
+    orderId,
     sourceCoords,
     targetCoords,
     troops, 
     gold,
-    playerId: store.playerId,
   }))
   if (resIssueMovementOrder.isErr()) {
     alert(`Failed to issue movement order (sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${resIssueMovementOrder.error}`)
     return
   }
 
-  // const resServerIssueMovementOrder = await ResultAsync.fromPromise(serverCli.issueMovementOrder({ id, sourceCoords, targetCoords, troops }), err => err)
+  // const resServerIssueMovementOrder = await ResultAsync.fromPromise(serverCli.issueMovementOrder({ orderId, sourceCoords, targetCoords, troops }), err => err)
   // if (resServerIssueMovementOrder.isErr()) {
-  //   alert(`Failed to issue movement order (id: ${id}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${resServerIssueMovementOrder.error}`)
-  //   batch(() => CancelMovementOrder.call(store.world, mutator, id))
+  //   alert(`Failed to issue movement order (orderId: ${orderId}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${resServerIssueMovementOrder.error}`)
+  //   batch(() => CancelMovementOrder.call(store.world, mutator, store.playerId, orderId))
   //   persistStore()
   //   return
   // }
@@ -34,22 +33,21 @@ export async function issueMovementOrder(sourceCoords: string, targetCoords: str
 }
 
 export async function cancelMovementOrder(order: serverV1.MovementOrder) {
-  const resCancelMovementOrder = batch(() => CancelMovementOrder.call(store.world, mutator, order.id))
+  const resCancelMovementOrder = batch(() => CancelMovementOrder.call(store.world, mutator, store.playerId, order.id))
   if (resCancelMovementOrder.isErr()) {
     alert(`Failed to cancel movement order (id: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${resCancelMovementOrder.error}`)
     return
   }
   
-  // const resServerCancelMovementOrder = await ResultAsync.fromPromise(serverCli.cancelMovementOrder({ id: order.id }), err => err)
+  // const resServerCancelMovementOrder = await ResultAsync.fromPromise(serverCli.cancelMovementOrder({ orderId: order.id }), err => err)
   // if (resServerCancelMovementOrder.isErr()) {
-  //   alert(`Failed to cancel movement order (id: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${resServerCancelMovementOrder.error}`)
-  //   batch(() => IssueMovementOrder.call(store.world, mutator, {
-  //     id: order.id,
+  //   alert(`Failed to cancel movement order (orderId: ${order.id}, sourceCoords: ${order.sourceCoords}, targetCoords: ${order.targetCoords}): ${resServerCancelMovementOrder.error}`)
+  //   batch(() => IssueMovementOrder.call(store.world, mutator, store.playerId, {
+  //     orderId: order.id,
   //     sourceCoords: order.sourceCoords,
   //     targetCoords: order.targetCoords,
   //     troops: order.troops,
   //     gold: order.resources!.gold,
-  //     playerId: order.playerId,
   //   }))
   //   persistStore()
   //   return

@@ -1,34 +1,17 @@
-import { createSignal, Show, For, Switch, Match, Accessor, Setter, createMemo, createEffect, batch } from "solid-js"
+import { createSignal, Show, For, Switch, Match, Accessor, createMemo, createEffect, batch } from "solid-js"
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
-import {
-  store, playerVillageFields,
-  issueTroopTrainingOrder, cancelTroopTrainingOrder,
-} from '../store'
-import { LEADER, newFieldTroops } from "../entities"
-import { add, div, mulN, sub } from "../helpers"
 import { cancelBuildingUpgradeOrder, issueBuildingUpgradeOrder } from "../actions/building_upgrade_order"
-import { CancelBuildingUpgradeOrder, IssueBuildingUpgradeOrder } from "../state/building_upgrade_order"
+import { cancelTrainingOrder, issueTrainingOrder } from "../actions/training_orders"
+import { IssueBuildingUpgradeOrder } from "../state/building_upgrade_order"
+import { IssueTrainingOrder } from "../state/training_orders"
+import { store } from '../store'
+import { fieldCanAfford, mulN } from "../state/helpers"
+import { newFieldTroops } from "../state/config"
 
 function valueCompressor(value: number) {
   if (value < 1000) return value
   return `${Math.floor(value / 100) / 10}K`
-}
-
-function trainableLeaders() {
-  const maxLeaders = playerVillageFields().length
-  const leaders = playerVillageFields().reduce((acc, f) => acc + f.troops[LEADER], 0)
-  const leadersInTraining = playerVillageFields()
-    .map(f => store.world.villages[f.coords].troopTrainingOrders)
-    .flat()
-    .filter(o => o.troopId == LEADER)
-    .reduce((acc, o) => acc + o.quantity, 0)
-  return maxLeaders - leaders - leadersInTraining
-}
-
-function canAfford(field: serverV1.World_Field, cost: serverV1.Resources) {
-  if (cost.gold > field.resources!.gold) return false
-  return true
 }
 
 export default function Village({ field }: { field: Accessor<serverV1.World_Field>}) {
@@ -56,14 +39,14 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
     <div>
       <h2>Buildings</h2>
       <ul>
-        <For each={Object.keys(field().buildings)}>
+        <For each={Object.keys(field().buildingLevels)}>
           {buildingId => {
             const building = store.world.buildings[buildingId]
             const maxLevel = building.cost.length
 
             const nextLevel = createMemo(() => IssueBuildingUpgradeOrder.nextLevel(store.world, field().coords, buildingId))
             const cost = createMemo(() => building.cost[nextLevel()-1])
-            const level = createMemo(() => field().buildings[buildingId])
+            const level = createMemo(() => field().buildingLevels[buildingId])
 
             const description = () => `upgrade (lvl ${nextLevel()}, ${cost().time}s, ${cost().gold} gold)`
 
@@ -73,7 +56,7 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
                 <Match when={nextLevel() > maxLevel}>
                   <span>max level</span>
                 </Match>
-                <Match when={!canAfford(field(), cost())}>
+                <Match when={!fieldCanAfford(field(), cost())}>
                   <button disabled={true}>{description()}</button>
                 </Match>
                 <Match when={true}>
@@ -104,38 +87,16 @@ function VillageBuildings({ field, village }: { field: Accessor<serverV1.World_F
 }
 
 function VillageTroops({ field, village }: { field: Accessor<serverV1.World_Field>, village: Accessor<serverV1.Village> }) {
-  const [gridTroopQuantity, setGridTroopQuantity] = createSignal(newFieldTroops())
-  const resourcesLeft = createMemo(() => {
-    let res = field().resources!
-    for (const troopId in store.world.troops) {
-      res = sub(res, mulN(store.world.troops[troopId].cost!, gridTroopQuantity()[troopId]))
-    }
-    res.time = 0
-    return res
-  })
-  const trainableTroopsMemo = createMemo(() => {
-    const _gridTroopQuantity = gridTroopQuantity()
-    const _resourcesLeft = resourcesLeft()
-
-    return (troopId: string) => {
-      const troop = store.world.troops[troopId]
-      const troopQuantityCost = mulN(troop.cost!, _gridTroopQuantity[troopId])
-      let trainable = Math.floor(div(add(_resourcesLeft, troopQuantityCost), troop.cost!, k => k != "time"))
-      if (troopId == LEADER) return Math.min(trainable, trainableLeaders())
-      return trainable
-    }
-  })
-  const trainableTroops = (troopId: string) => trainableTroopsMemo()(troopId)
+  const [troopQuantityPlan, setTroopQuantityPlan] = createSignal(newFieldTroops())
+  const trainableTroops = createMemo(() => IssueTrainingOrder.trainableTroops(store.world, store.playerId, field().coords, troopQuantityPlan()))
 
   // Prevent invalid inputs
   createEffect(() => {
-    const _gridTroopQuantity = gridTroopQuantity()
+    const _troopQuantityPlan = troopQuantityPlan()
     batch(() => {
-      Object.entries(_gridTroopQuantity).forEach(([troopId, quantity]) => {
-        if (quantity < 0) return setGridTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
-        if (quantity > trainableTroops(troopId)) {
-          return setGridTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: trainableTroops(troopId) }))
-        }
+      Object.entries(_troopQuantityPlan).forEach(([troopId, quantity]) => {
+        if (quantity < 0) return setTroopQuantityPlan(prev => ({ ...prev, [troopId]: 0 }))
+        if (quantity > trainableTroops()[troopId]) return setTroopQuantityPlan(prev => ({ ...prev, [troopId]: trainableTroops()[troopId] }))
       })
     })
   })
@@ -154,12 +115,12 @@ function VillageTroops({ field, village }: { field: Accessor<serverV1.World_Fiel
         <For each={Object.keys(store.world.troops)}>{(troopId) => {
           const troop = store.world.troops[troopId]
           const fieldQuantity = () => field().troops[troopId]
-          const fieldQuantityInTraining = createMemo(() => village().troopTrainingOrders.reduce((acc, order) => acc + (troopId == order.troopId ? order.quantity : 0), 0))
-          const cost = createMemo(() => mulN(troop.cost!, gridTroopQuantity()[troopId]))
+          const fieldQuantityInTraining = createMemo(() => village().trainingOrders.reduce((acc, order) => acc + (troopId == order.troopId ? order.quantity : 0), 0))
+          const cost = createMemo(() => mulN(troop.cost!, troopQuantityPlan()[troopId]))
           const description = () => `train (${cost().time}s, ${cost().gold} gold)`
           const train = (quantity: number) => {
-            issueTroopTrainingOrder(field().coords, troopId, quantity)
-            setGridTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: 0 }))
+            issueTrainingOrder(field().coords, troopId, quantity)
+            setTroopQuantityPlan(prev => ({ ...prev, [troopId]: 0 }))
           }
 
           return <>
@@ -172,21 +133,21 @@ function VillageTroops({ field, village }: { field: Accessor<serverV1.World_Fiel
                 <input
                   type="number"
                   min={0}
-                  max={trainableTroops(troopId)}
+                  max={trainableTroops()[troopId]}
                   class="input input-bordered input-sm flex-shrink w-full rounded-r-none border-r-0"
-                  value={gridTroopQuantity()[troopId]}
-                  onInput={e => setGridTroopQuantity((prev: Record<string, number>) => ({ ...prev, [troopId]: +e.currentTarget.value }))}
+                  value={troopQuantityPlan()[troopId]}
+                  onInput={e => setTroopQuantityPlan(prev => ({ ...prev, [troopId]: +e.currentTarget.value }))}
                   onKeyDown={(e) => {
-                    if (e.key == "Enter") return train(gridTroopQuantity()[troopId])
+                    if (e.key == "Enter") return train(troopQuantityPlan()[troopId])
                     if (e.key == "Escape") e.currentTarget.blur()
                   }}
                 />
                 <button
                   class="btn btn-outline btn-sm rounded-l-none flex-none w-1/3"
-                  disabled={trainableTroops(troopId) == 0}
-                  onClick={() => train(trainableTroops(troopId))}
+                  disabled={trainableTroops()[troopId] == 0}
+                  onClick={() => train(trainableTroops()[troopId])}
                 >
-                  {valueCompressor(trainableTroops(troopId))}
+                  {valueCompressor(trainableTroops()[troopId])}
                 </button>
               </div>
             </div>
@@ -194,8 +155,8 @@ function VillageTroops({ field, village }: { field: Accessor<serverV1.World_Fiel
             <div>
               <button
                 class="btn btn-outline btn-sm"
-                disabled={gridTroopQuantity()[troopId] == 0 || trainableTroops(troopId) == 0}
-                onClick={() => train(gridTroopQuantity()[troopId])}>
+                disabled={troopQuantityPlan()[troopId] == 0 || trainableTroops()[troopId] == 0}
+                onClick={() => train(troopQuantityPlan()[troopId])}>
                 {description()}
               </button>
             </div>
@@ -205,10 +166,10 @@ function VillageTroops({ field, village }: { field: Accessor<serverV1.World_Fiel
 
       <h4>Orders</h4>
       <ul>
-        <For each={village().troopTrainingOrders}>{order => {
+        <For each={village().trainingOrders}>{order => {
           const troop = store.world.troops[order.troopId]
           return <li>
-            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTroopTrainingOrder(field().coords, order)}>cancel</button>
+            {order.quantity} {troop.name} - {order.timeLeft}s <button onClick={() => cancelTrainingOrder(field().coords, order)}>cancel</button>
           </li>
         }}</For>
       </ul>

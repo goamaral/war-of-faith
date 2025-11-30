@@ -26,7 +26,7 @@ func (w *World) CreateVillage(coords string, playerId string) {
 		Coords:    coords,
 		Kind:      serverv1.World_Field_KIND_VILLAGE,
 		Resources: &serverv1.Resources{},
-		Buildings: map[string]uint32{
+		BuildingLevels: map[string]uint32{
 			Building_HALL:      1,
 			Building_GOLD_MINE: 1,
 		},
@@ -37,17 +37,17 @@ func (w *World) CreateVillage(coords string, playerId string) {
 		PlayerId: wrapperspb.String(playerId),
 	}
 	w.Villages[coords] = &serverv1.Village{}
-	if (len(w.Players[playerId].VillageKeyBindings) < 10) {
+	if len(w.Players[playerId].VillageKeyBindings) < 10 {
 		w.Players[playerId].VillageKeyBindings = append(w.Players[playerId].VillageKeyBindings, coords)
 	}
 }
 
 func (w *World) CreateTemple(coords string) {
 	w.Fields[coords] = &serverv1.World_Field{
-		Coords:    coords,
-		Kind:      serverv1.World_Field_KIND_TEMPLE,
-		Resources: &serverv1.Resources{},
-		Buildings: map[string]uint32{},
+		Coords:         coords,
+		Kind:           serverv1.World_Field_KIND_TEMPLE,
+		Resources:      &serverv1.Resources{},
+		BuildingLevels: map[string]uint32{},
 		Troops: map[string]uint32{
 			Troop_LEADER: 0,
 			Troop_RAIDER: 0,

@@ -7,11 +7,12 @@ import {
 import { useNavigate, A } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
-import { StoreLoader, store, playerFields } from './store'
-import { newFieldTroops, World_Field_KindToString, LEADER, RAIDER } from "./entities"
 import { cancelMovementOrder, issueMovementOrder } from "./actions/movement_orders"
-import { countTroops, decodeCoords } from "./helpers"
 import { IssueMovementOrder } from "./state/movement_orders"
+import { StoreLoader, store } from './store'
+import { countTroops, decodeCoords, playerFields } from "./state/helpers"
+import { LEADER, newFieldTroops, RAIDER, World_Field_KindToString } from "./state/config"
+
 
 export default function WorldPage() {
   return <StoreLoader>
@@ -107,7 +108,7 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
 
   const sourceFields = createMemo(() => {
     if (targetField() == undefined) return []
-    const fields = playerFields(f => f.coords != targetField()?.coords)
+    const fields = playerFields(store.world, store.playerId, f => f.coords != targetField()?.coords)
     const troopScore = (f: serverV1.World_Field) => 100 * f.troops[LEADER] + f.troops[RAIDER]
     return fields.sort((a, b) => troopScore(b) - troopScore(a))
   })

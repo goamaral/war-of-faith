@@ -4,7 +4,7 @@ import { useParams } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import Village from "./world_field_page/Village"
-import { World_Field_KindToString } from "./entities"
+import { World_Field_KindToString } from "./state/config"
 
 export default function WorldFieldPage() {
   const params = useParams() as { coords: string }

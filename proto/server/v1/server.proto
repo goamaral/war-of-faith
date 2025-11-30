@@ -21,7 +21,7 @@ message World {
     string coords = 1;
     Kind kind = 2; // Affected by player pov
     Resources resources = 3; // Affected by player pov
-    map<string, uint32> buildings = 4; // key: building_id, Affected by player pov
+    map<string, uint32> building_levels = 4; // key: building_id, Affected by player pov
     map<string, uint32> troops = 5; // key: troop_id, Affected by player pov
     google.protobuf.StringValue player_id = 6; // Affected by player pov
 
@@ -64,12 +64,12 @@ message Resources {
 }
 
 message Temple {
-  uint32 ownership_age = 1;
+  uint32 ownership_age_secs = 1;
 }
 
 message Village {
   repeated BuildingUpgradeOrder building_upgrade_orders = 1;
-  repeated TroopTrainingOrder troop_training_orders = 2;
+  repeated TrainingOrder training_orders = 2;
 
   message BuildingUpgradeOrder {
     uint32 level = 1;
@@ -77,16 +77,17 @@ message Village {
     uint32 time_left = 3;
   }
 
-  message TroopTrainingOrder {
-    string troop_id = 1;
-    uint32 quantity = 2;
-    uint32 time_left = 3;
+  message TrainingOrder {
+    string id = 1;
+    string troop_id = 2;
+    uint32 quantity = 3;
+    uint32 time_left = 4;
   }
 }
 
 message Player {
   string id = 1;
-  repeated string village_key_bindings = 2; // order: key_binding (1..0), value: village_coords
+  repeated string village_key_bindings = 2; // order: key_binding (1..0), value: coords
 }
 
 /* WORLD */
@@ -103,7 +104,7 @@ message SubscribeToWorldResponse {
 
   message Patch {
     map<string, World.Field> fields = 6; // key: coords
-    map<string, Village> villages = 7; // key: village_coords, Affected by player pov
+    map<string, Village> villages = 7; // key: coords, Affected by player pov
     map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
     repeated MovementOrder movement_orders = 9; // Affected by player pov
   }
@@ -111,7 +112,7 @@ message SubscribeToWorldResponse {
 
 // IssueMovementOrder
 message IssueMovementOrderRequest {
-  string id = 1;
+  string order_id = 1;
   string source_coords = 2;
   string target_coords = 3;
   map<string, uint32> troops = 4; // <troop_id, quantity>
@@ -121,14 +122,14 @@ message IssueMovementOrderResponse {}
 
 // CancelMovementOrder
 message CancelMovementOrderRequest {
-  string id = 1;
+  string order_id = 1;
 }
 message CancelMovementOrderResponse {}
 
 /* VILLAGES */
 // IssueBuildingUpgradeOrder
 message IssueBuildingUpgradeOrderRequest {
-  string village_coords = 1;
+  string coords = 1;
   string building_id = 2;
   uint32 level = 3;
 }
@@ -136,7 +137,7 @@ message IssueBuildingUpgradeOrderResponse {}
 
 // CancelBuildingUpgradeOrder
 message CancelBuildingUpgradeOrderRequest {
-  string village_coords = 1;
+  string coords = 1;
   string building_id = 2;
   uint32 level = 3;
 }
@@ -144,19 +145,19 @@ message CancelBuildingUpgradeOrderResponse {}
 
 // IssueTrainingOrder
 message IssueTrainingOrderRequest {
-  string village_coords = 1;
-  string troop_id = 2;
-  uint32 quantity = 3;
+  string order_id = 1;
+  string coords = 2;
+  string troop_id = 3;
+  uint32 quantity = 4;
 }
 message IssueTrainingOrderResponse {}
 
-// CancelTroopTrainingOrder
-message CancelTroopTrainingOrderRequest {
-  string village_coords = 1;
-  string troop_id = 2;
-  uint32 quantity = 3;
+// CancelTrainingOrder
+message CancelTrainingOrderRequest {
+  string coords = 1;
+  string order_id = 2;
 }
-message CancelTroopTrainingOrderResponse {}
+message CancelTrainingOrderResponse {}
 
 service Service {
   /* WORLD */
@@ -169,5 +170,5 @@ service Service {
   rpc IssueBuildingUpgradeOrder(IssueBuildingUpgradeOrderRequest) returns (IssueBuildingUpgradeOrderResponse);
   rpc CancelBuildingUpgradeOrder(CancelBuildingUpgradeOrderRequest) returns (CancelBuildingUpgradeOrderResponse);
   rpc IssueTrainingOrder(IssueTrainingOrderRequest) returns (IssueTrainingOrderResponse);
-  rpc CancelTroopTrainingOrder(CancelTroopTrainingOrderRequest) returns (CancelTroopTrainingOrderResponse);
+  rpc CancelTrainingOrder(CancelTrainingOrderRequest) returns (CancelTrainingOrderResponse);
 }

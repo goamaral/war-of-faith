@@ -1,4 +1,16 @@
-/* Troops */
+import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
+
+export function playerFields(world: serverV1.World, playerId: string, filter?: (f: serverV1.World_Field) => boolean) {
+  return Object.values(world.fields).filter(f => f.playerId == playerId && (!filter || filter(f)))
+}
+export function playerVillageFields( world: serverV1.World, playerId: string, filter?: (f: serverV1.World_Field) => boolean) {
+  return playerFields(world, playerId, filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
+}
+
+export function fieldCanAfford(field: serverV1.World_Field, cost: serverV1.Resources) {
+  return cost.gold <= field.resources!.gold
+}
+
 export function countTroops(troops: Record<string, number>) {
   return Object.values(troops).reduce((a, b) => a + b, 0)
 }

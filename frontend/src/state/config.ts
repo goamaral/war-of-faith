@@ -1,12 +1,16 @@
-import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
+import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 
-import { store } from './store'
+export const CARRIABLE_GOLD_PER_UNIT = 10
 
 export const LEADER = "leader" // TODO: Rename to KNIGHT
 export const RAIDER = "raider"
+export const TROOP_IDS = [LEADER, RAIDER]
 
 export const HALL = "hall"
 export const GOLD_MINE = "gold-mine"
+export const BUILDING_IDS = [HALL, GOLD_MINE]
+
+export const WIN_CONDITION_OWNERSHIP_AGE_SECS = 1*60 // 5 min
 
 export function World_Field_KindToString(entityKind: serverV1.World_Field_Kind): string {
   switch (entityKind) {
@@ -29,11 +33,11 @@ export function newVillage(v: Partial<serverV1.Village> = {}) {
   } as serverV1.Village
 }
 
-export function newWildField(coords: string, v: Partial<serverV1.World_Field> = {}, buildingIds: string[] = Object.keys(store.world.buildings)) {
+export function newWildField(coords: string, v: Partial<serverV1.World_Field> = {}) {
   return {
     coords,
     kind: serverV1.World_Field_Kind.WILD,
-    buildings: newFieldBuildings({ [HALL]: 1 }, buildingIds),
+    buildingLevels: newFieldBuildingLevels({ [HALL]: 1 }),
     troops: newFieldTroops(),
     resources: newResources(),
     ...v,
@@ -48,17 +52,17 @@ export function newResources(v: Partial<serverV1.Resources> = {}) {
   } as serverV1.Resources
 }
 
-function newFieldBuildings(v: Partial<Record<string, number>> = {}, buildingIds: string[] = Object.keys(store.world.buildings)) {
-  const buildings = {} as Record<string, number>
-  for (const buildingId of buildingIds) {
-    buildings[buildingId] = v[buildingId] || 0
+function newFieldBuildingLevels(v: Partial<Record<string, number>> = {}) {
+  const lvls = {} as Record<string, number>
+  for (const buildingId of BUILDING_IDS) {
+    lvls[buildingId] = v[buildingId] || 0
   }
-  return buildings
+  return lvls
 }
 
 export function newFieldTroops(v: Partial<Record<string, number>> = {}) {
   const troops = {} as Record<string, number>
-  for (const troopId in store.world.troops) {
+  for (const troopId of TROOP_IDS) {
     troops[troopId] = v[troopId] || 0
   }
   return troops

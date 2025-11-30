@@ -53,9 +53,9 @@ const (
 	// ServiceIssueTrainingOrderProcedure is the fully-qualified name of the Service's
 	// IssueTrainingOrder RPC.
 	ServiceIssueTrainingOrderProcedure = "/server.v1.Service/IssueTrainingOrder"
-	// ServiceCancelTroopTrainingOrderProcedure is the fully-qualified name of the Service's
-	// CancelTroopTrainingOrder RPC.
-	ServiceCancelTroopTrainingOrderProcedure = "/server.v1.Service/CancelTroopTrainingOrder"
+	// ServiceCancelTrainingOrderProcedure is the fully-qualified name of the Service's
+	// CancelTrainingOrder RPC.
+	ServiceCancelTrainingOrderProcedure = "/server.v1.Service/CancelTrainingOrder"
 )
 
 // ServiceClient is a client for the server.v1.Service service.
@@ -69,7 +69,7 @@ type ServiceClient interface {
 	IssueBuildingUpgradeOrder(context.Context, *connect.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[v1.IssueBuildingUpgradeOrderResponse], error)
 	CancelBuildingUpgradeOrder(context.Context, *connect.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect.Response[v1.CancelBuildingUpgradeOrderResponse], error)
 	IssueTrainingOrder(context.Context, *connect.Request[v1.IssueTrainingOrderRequest]) (*connect.Response[v1.IssueTrainingOrderResponse], error)
-	CancelTroopTrainingOrder(context.Context, *connect.Request[v1.CancelTroopTrainingOrderRequest]) (*connect.Response[v1.CancelTroopTrainingOrderResponse], error)
+	CancelTrainingOrder(context.Context, *connect.Request[v1.CancelTrainingOrderRequest]) (*connect.Response[v1.CancelTrainingOrderResponse], error)
 }
 
 // NewServiceClient constructs a client for the server.v1.Service service. By default, it uses the
@@ -125,10 +125,10 @@ func NewServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...con
 			connect.WithSchema(serviceMethods.ByName("IssueTrainingOrder")),
 			connect.WithClientOptions(opts...),
 		),
-		cancelTroopTrainingOrder: connect.NewClient[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse](
+		cancelTrainingOrder: connect.NewClient[v1.CancelTrainingOrderRequest, v1.CancelTrainingOrderResponse](
 			httpClient,
-			baseURL+ServiceCancelTroopTrainingOrderProcedure,
-			connect.WithSchema(serviceMethods.ByName("CancelTroopTrainingOrder")),
+			baseURL+ServiceCancelTrainingOrderProcedure,
+			connect.WithSchema(serviceMethods.ByName("CancelTrainingOrder")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -143,7 +143,7 @@ type serviceClient struct {
 	issueBuildingUpgradeOrder  *connect.Client[v1.IssueBuildingUpgradeOrderRequest, v1.IssueBuildingUpgradeOrderResponse]
 	cancelBuildingUpgradeOrder *connect.Client[v1.CancelBuildingUpgradeOrderRequest, v1.CancelBuildingUpgradeOrderResponse]
 	issueTrainingOrder         *connect.Client[v1.IssueTrainingOrderRequest, v1.IssueTrainingOrderResponse]
-	cancelTroopTrainingOrder   *connect.Client[v1.CancelTroopTrainingOrderRequest, v1.CancelTroopTrainingOrderResponse]
+	cancelTrainingOrder        *connect.Client[v1.CancelTrainingOrderRequest, v1.CancelTrainingOrderResponse]
 }
 
 // GetWorld calls server.v1.Service.GetWorld.
@@ -181,9 +181,9 @@ func (c *serviceClient) IssueTrainingOrder(ctx context.Context, req *connect.Req
 	return c.issueTrainingOrder.CallUnary(ctx, req)
 }
 
-// CancelTroopTrainingOrder calls server.v1.Service.CancelTroopTrainingOrder.
-func (c *serviceClient) CancelTroopTrainingOrder(ctx context.Context, req *connect.Request[v1.CancelTroopTrainingOrderRequest]) (*connect.Response[v1.CancelTroopTrainingOrderResponse], error) {
-	return c.cancelTroopTrainingOrder.CallUnary(ctx, req)
+// CancelTrainingOrder calls server.v1.Service.CancelTrainingOrder.
+func (c *serviceClient) CancelTrainingOrder(ctx context.Context, req *connect.Request[v1.CancelTrainingOrderRequest]) (*connect.Response[v1.CancelTrainingOrderResponse], error) {
+	return c.cancelTrainingOrder.CallUnary(ctx, req)
 }
 
 // ServiceHandler is an implementation of the server.v1.Service service.
@@ -197,7 +197,7 @@ type ServiceHandler interface {
 	IssueBuildingUpgradeOrder(context.Context, *connect.Request[v1.IssueBuildingUpgradeOrderRequest]) (*connect.Response[v1.IssueBuildingUpgradeOrderResponse], error)
 	CancelBuildingUpgradeOrder(context.Context, *connect.Request[v1.CancelBuildingUpgradeOrderRequest]) (*connect.Response[v1.CancelBuildingUpgradeOrderResponse], error)
 	IssueTrainingOrder(context.Context, *connect.Request[v1.IssueTrainingOrderRequest]) (*connect.Response[v1.IssueTrainingOrderResponse], error)
-	CancelTroopTrainingOrder(context.Context, *connect.Request[v1.CancelTroopTrainingOrderRequest]) (*connect.Response[v1.CancelTroopTrainingOrderResponse], error)
+	CancelTrainingOrder(context.Context, *connect.Request[v1.CancelTrainingOrderRequest]) (*connect.Response[v1.CancelTrainingOrderResponse], error)
 }
 
 // NewServiceHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -249,10 +249,10 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect.HandlerOption) (strin
 		connect.WithSchema(serviceMethods.ByName("IssueTrainingOrder")),
 		connect.WithHandlerOptions(opts...),
 	)
-	serviceCancelTroopTrainingOrderHandler := connect.NewUnaryHandler(
-		ServiceCancelTroopTrainingOrderProcedure,
-		svc.CancelTroopTrainingOrder,
-		connect.WithSchema(serviceMethods.ByName("CancelTroopTrainingOrder")),
+	serviceCancelTrainingOrderHandler := connect.NewUnaryHandler(
+		ServiceCancelTrainingOrderProcedure,
+		svc.CancelTrainingOrder,
+		connect.WithSchema(serviceMethods.ByName("CancelTrainingOrder")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.v1.Service/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -271,8 +271,8 @@ func NewServiceHandler(svc ServiceHandler, opts ...connect.HandlerOption) (strin
 			serviceCancelBuildingUpgradeOrderHandler.ServeHTTP(w, r)
 		case ServiceIssueTrainingOrderProcedure:
 			serviceIssueTrainingOrderHandler.ServeHTTP(w, r)
-		case ServiceCancelTroopTrainingOrderProcedure:
-			serviceCancelTroopTrainingOrderHandler.ServeHTTP(w, r)
+		case ServiceCancelTrainingOrderProcedure:
+			serviceCancelTrainingOrderHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -310,6 +310,6 @@ func (UnimplementedServiceHandler) IssueTrainingOrder(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.v1.Service.IssueTrainingOrder is not implemented"))
 }
 
-func (UnimplementedServiceHandler) CancelTroopTrainingOrder(context.Context, *connect.Request[v1.CancelTroopTrainingOrderRequest]) (*connect.Response[v1.CancelTroopTrainingOrderResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.v1.Service.CancelTroopTrainingOrder is not implemented"))
+func (UnimplementedServiceHandler) CancelTrainingOrder(context.Context, *connect.Request[v1.CancelTrainingOrderRequest]) (*connect.Response[v1.CancelTrainingOrderResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.v1.Service.CancelTrainingOrder is not implemented"))
 }
