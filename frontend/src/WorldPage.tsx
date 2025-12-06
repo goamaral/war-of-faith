@@ -54,14 +54,14 @@ function World() {
   return (<div class="flex">
     <div style={gridStyle}>
       <For each={cells()}>
-        {(field) => <Field field={field} setField={setTargetField} />}
+        {(field) => <Field field={field} setField={setTargetField} highlight={() => targetField()?.coords === field.coords} />}
       </For>
     </div>
-    <FieldInfo targetField={targetField} />
+    <FieldInfo field={targetField} />
   </div>)
 }
 
-function Field({ field, setField }: { field: serverV1.World_Field, setField: Setter<serverV1.World_Field | undefined> }) {
+function Field({ field, setField, highlight }: { field: serverV1.World_Field, setField: Setter<serverV1.World_Field | undefined>, highlight: Accessor<boolean> }) {
   const navigate = useNavigate()
 
   function kindStyle(): JSX.CSSProperties {
@@ -84,9 +84,10 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   // TODO: Convert to tailwind
   const fieldStyle = () => ({
     'position': 'relative',
+    'cursor': 'pointer',
     'border-top': '1px solid black',
     'border-left': '1px solid black',
-    'cursor': 'pointer',
+    "box-shadow": highlight() ? "blue inset 0px 0px 0px 2px" : "none",
     ...kindStyle(),
   } as JSX.CSSProperties)
 
@@ -95,20 +96,20 @@ function Field({ field, setField }: { field: serverV1.World_Field, setField: Set
   )
 }
 
-function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field | undefined> }) {
+function FieldInfo({ field }: { field: Accessor<serverV1.World_Field | undefined> }) {
   function Wrapper({ children }: ParentProps<{}>) {
-    const targetCoords = () => decodeCoords(targetField()!.coords)
+    const targetCoords = () => decodeCoords(field()!.coords)
     
     return <div>
-      <h2>{World_Field_KindToString(targetField()!.kind)}</h2>
+      <h2>{World_Field_KindToString(field()!.kind)}</h2>
       <p><span>Coords</span> {targetCoords().x},{targetCoords().y}</p>
       {children}
     </div>
   }
 
   const sourceFields = createMemo(() => {
-    if (targetField() == undefined) return []
-    const fields = playerFields(store.world, store.playerId, f => f.coords != targetField()?.coords)
+    if (field() == undefined) return []
+    const fields = playerFields(store.world, store.playerId, f => f.coords != field()?.coords)
     const troopScore = (f: serverV1.World_Field) => 100 * f.troops[LEADER] + f.troops[RAIDER]
     return fields.sort((a, b) => troopScore(b) - troopScore(a))
   })
@@ -183,23 +184,23 @@ function FieldInfo({ targetField }: { targetField: Accessor<serverV1.World_Field
 
       <button
         onClick={() => {
-          issueMovementOrder(selectedSourceCoords(), targetField()!.coords, selectedTroopQuantity(), selectedGold())
+          issueMovementOrder(selectedSourceCoords(), field()!.coords, selectedTroopQuantity(), selectedGold())
           setSelectedTroopQuantity(newFieldTroops())
           setSelectedGold(0)
         }}
         disabled={countTroops(selectedTroopQuantity()) == 0}
       >
-        {(targetField()!.playerId != store.playerId ) ? "Attack" : "Send"}
+        {(field()!.playerId != store.playerId ) ? "Attack" : "Send"}
       </button>
     </div>
   }
 
   return <>
     <Switch>
-      <Match when={targetField() == undefined}>
+      <Match when={field() == undefined}>
         <div><h2>No field selected</h2></div>
       </Match>
-      <Match when={targetField()?.kind == serverV1.World_Field_Kind.FOG}>
+      <Match when={field()?.kind == serverV1.World_Field_Kind.FOG}>
         <Wrapper />
       </Match>
       <Match when={true}>
