@@ -10,31 +10,61 @@ import { tick } from "./state/tick"
 import { encodeCoords } from "./state/helpers"
 import { newWildField } from "./state/config"
 
+type State = serverV1.World
+
 export const [store, setStore] = createStore({
   loaded: false,
-  world: {} as serverV1.World,
   playerId: "",
+  states: [] as State[],
+  world: {} as serverV1.World,
 })
+
+let paused = false
+
+function deepClone(obj: any) {
+  return JSON.parse(JSON.stringify(obj))
+}
 
 declare global {
   interface Window {
-    resetStore: () => void
+    resetState: () => void
+    rollbackState: (tick: number) => void
   }
 }
-window.resetStore = function() {
-  localStorage.removeItem("store")
+window.resetState = function() {
+  localStorage.removeItem("state_history")
   location.reload()
+}
+window.rollbackState = function(tick: number, reload = false) {
+  if (tick <= 1) return
+
+  paused = true
+  setStore(store => {
+    return {
+      ...store,
+      states: store.states.slice(0, tick),
+      world: deepClone(store.states[tick-1]),
+    }
+  })
+  saveState()
+  paused = false
 }
 
 // Persistence
-export function persistStore() {
-  localStorage.setItem("store", JSON.stringify(store))
+export function saveState() {
+  localStorage.setItem("state_history", JSON.stringify(store.states))
 }
 async function loadStore() {
-  const persistedStore = localStorage.getItem("store")
-  if (persistedStore) {
-    const store = JSON.parse(persistedStore)
-    setStore(store)
+  const statesJson = localStorage.getItem("state_history")
+  if (statesJson) {
+    const states = JSON.parse(statesJson)
+    const latestState = states[states.length - 1]
+    setStore({
+      loaded: true,
+      playerId: "1",
+      states,
+      world: deepClone(latestState),
+    })
 
   } else {
     const { world } = await serverCli.getWorld({})
@@ -47,9 +77,13 @@ async function loadStore() {
       }
     }
 
-    const store = { loaded: true, world, playerId: "1" }
-    setStore(store)
-    localStorage.setItem("store", JSON.stringify(store))
+    setStore({
+      loaded: true,
+      playerId: "1",
+      states: [deepClone(world!)],
+      world: world!,
+    })
+    localStorage.setItem("state_history", JSON.stringify(store.states))
   }
 }
 
@@ -57,6 +91,7 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
   const navigate = useNavigate()
   const handleKeyDown = (e: KeyboardEvent) => {
     if (document.activeElement?.tagName === 'INPUT') return
+    if (e.key === 'p') { paused = true; return }
     if (e.key === 'w') return navigate('/world')
     if (e.key === 'v') return navigate('/villages')
     const villageNumber = Number.parseInt(e.key)
@@ -85,8 +120,15 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
       // subscribeToWorld()
 
       intervalId = setInterval(function() {
+        if (paused) return
         const ended = batch(() => tick(store.world, mutator))
-        ended ? clearInterval(intervalId) : persistStore()
+        if (ended) {
+          clearInterval(intervalId)
+          window.resetState()
+        } else {
+          setStore("states", states => [...states, deepClone(store.world)])
+          saveState()
+        }
       }, 1000)
       document.addEventListener('keydown', handleKeyDown)
     }

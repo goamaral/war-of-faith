@@ -30,7 +30,6 @@ function checkWinCondition(world: serverV1.World) {
   if (!winner) return false
   const ok = window.confirm("Player " + winner + " won. Reset the game?")
   if (ok) {
-    window.resetStore()
     return true
   }
 
