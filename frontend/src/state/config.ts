@@ -25,8 +25,17 @@ export function World_Field_KindToString(entityKind: serverV1.World_Field_Kind):
   }
 }
 
+export function newWorldHistory(v: Partial<serverV1.WorldHistory> = {}) {
+  return {
+    $typeName: "server.v1.WorldHistory",
+    worlds: [],
+    ...v,
+  } as serverV1.WorldHistory
+}
+
 export function newVillage(v: Partial<serverV1.Village> = {}) {
   return {
+    $typeName: "server.v1.Village",
     buildingUpgradeOrders: [],
     troopTrainingOrders: [],
     ...v,
@@ -35,6 +44,7 @@ export function newVillage(v: Partial<serverV1.Village> = {}) {
 
 export function newWildField(coords: string, v: Partial<serverV1.World_Field> = {}) {
   return {
+    $typeName: "server.v1.World.Field",
     coords,
     kind: serverV1.World_Field_Kind.WILD,
     buildingLevels: newFieldBuildingLevels({ [HALL]: 1 }),
@@ -46,6 +56,7 @@ export function newWildField(coords: string, v: Partial<serverV1.World_Field> = 
 
 export function newResources(v: Partial<serverV1.Resources> = {}) {
   return {
+    $typeName: "server.v1.Resources",
     gold: 0,
     time: 0,
     ...v,

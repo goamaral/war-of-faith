@@ -3,7 +3,7 @@ import { batch } from "solid-js"
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { serverCli } from "../api"
-import { store, saveState, mutator } from "../store"
+import { store, mutator } from "../store"
 import { IssueTrainingOrder, CancelTrainingOrder } from "../state/training_orders"
 
 export async function issueTrainingOrder(coords: string, troopId: string, quantity: number) {
@@ -23,11 +23,8 @@ export async function issueTrainingOrder(coords: string, troopId: string, quanti
   // if (resServerIssueTrainingOrder.isErr()) {
   //   alert(`Failed to issue troop training order (troopId: ${troopId}, quantity: ${quantity}): ${resServerIssueTrainingOrder.error}`)
   //   batch(() => CancelTrainingOrder.call(store.world, mutator, store.playerId, coords, orderId))
-  //   saveState()
   //   return
   // }
-
-  saveState()
 }
 
 export async function cancelTrainingOrder(coords: string, order: serverV1.Village_TrainingOrder) {
@@ -41,9 +38,6 @@ export async function cancelTrainingOrder(coords: string, order: serverV1.Villag
   // if (resServerIssueTrainingOrder.isErr()) {
   //   alert(`Failed to cancel training order (coords: ${coords}, orderId: ${order.id}): ${resServerIssueTrainingOrder.error}`)
   //   batch(() => IssueTrainingOrder.call(store.world, mutator, store.playerId, { ...order, coords, orderId: order.id }))
-  //   saveState()
   //   return
   // }
-
-  saveState()
 }

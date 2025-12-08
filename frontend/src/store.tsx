@@ -2,24 +2,41 @@ import type { JSX } from "solid-js"
 import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
 import { useNavigate } from "@solidjs/router"
+import { toBinary, fromBinary } from "@bufbuild/protobuf"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import type { Mutator } from "./state/mutator"
 import { serverCli } from './api'
 import { tick } from "./state/tick"
 import { encodeCoords } from "./state/helpers"
-import { newWildField } from "./state/config"
+import { newWildField, newWorldHistory } from "./state/config"
+
+const STATE_TRUNCATION_SIZE = 60
+
+let paused = false
 
 type State = serverV1.World
+let states = [] as State[]
+let _statesLocked = false
+function mutStates(fn: () => void) {
+  console.assert(!_statesLocked)
+  _statesLocked = true
+
+  try {
+    fn()
+  } catch (error) {
+    throw error
+  } finally {
+    _statesLocked = false
+  }
+}
 
 export const [store, setStore] = createStore({
   loaded: false,
   playerId: "",
-  states: [] as State[],
   world: {} as serverV1.World,
 })
 
-let paused = false
 
 function deepClone(obj: any) {
   return JSON.parse(JSON.stringify(obj))
@@ -27,42 +44,70 @@ function deepClone(obj: any) {
 
 declare global {
   interface Window {
+    getStates: () => State[]
     resetState: () => void
     rollbackState: (tick: number) => void
   }
 }
+window.getStates = () => states
 window.resetState = function() {
-  localStorage.removeItem("state_history")
+  localStorage.clear()
   location.reload()
 }
-window.rollbackState = function(tick: number, reload = false) {
+window.rollbackState = async function(tick: number) {
   if (tick <= 1) return
 
-  paused = true
-  setStore(store => {
-    return {
-      ...store,
-      states: store.states.slice(0, tick),
-      world: deepClone(store.states[tick-1]),
+  mutStates(() => {
+    if (tick < states[0].tick) {
+      alert("TODO: decompress states")
+    } else {
+      states = states.slice(0, tick)
     }
+    
+    setStore("world", deepClone(states[tick-1]))
+    asyncSaveState()
   })
-  saveState()
-  paused = false
 }
 
 // Persistence
-export function saveState() {
-  localStorage.setItem("state_history", JSON.stringify(store.states))
+export function asyncSaveState() {
+  setTimeout(() => {
+    try {
+      mutStates(() => {
+        const localStorageSize = KBSizeOf(Object.values(localStorage))
+        console.log(`localStorage size: ${localStorageSize}KB tick: ${states[states.length-1].tick}`)
+
+        if (localStorageSize > 1024) { // 1MB
+          if (states.length < STATE_TRUNCATION_SIZE) return alert("TODO: State truncation is not enough")
+
+          states = states.slice(states.length - STATE_TRUNCATION_SIZE)
+          console.log(`Truncated states ticks: (first: ${states[0].tick}, last: ${states[states.length-1].tick})`)
+        }
+
+        const bytes = toBinary(serverV1.WorldHistorySchema, newWorldHistory({ worlds: states }))
+        let bytesString = '';
+        for (let i = 0; i < bytes.length; i++) {
+          bytesString += String.fromCharCode(bytes[i]);
+        }
+        localStorage.setItem("states", btoa(bytesString))
+      })
+    } catch (error) {
+      console.error(error)
+      alert(error)
+    }
+  }, 0)
+
+  return true
 }
 async function loadStore() {
-  const statesJson = localStorage.getItem("state_history")
-  if (statesJson) {
-    const states = JSON.parse(statesJson)
+  const statesB64 = localStorage.getItem("states")
+  if (statesB64) {
+    const bytes = Uint8Array.from(atob(statesB64), c => c.charCodeAt(0))
+    states = fromBinary(serverV1.WorldHistorySchema, bytes).worlds
     const latestState = states[states.length - 1]
     setStore({
       loaded: true,
       playerId: "1",
-      states,
       world: deepClone(latestState),
     })
 
@@ -77,14 +122,17 @@ async function loadStore() {
       }
     }
 
+    states = [deepClone({ ...world })]
     setStore({
       loaded: true,
       playerId: "1",
-      states: [deepClone(world!)],
       world: world!,
     })
-    localStorage.setItem("state_history", JSON.stringify(store.states))
+    asyncSaveState()
   }
+}
+function KBSizeOf(blobParts: BlobPart[]) {
+  return (new Blob(blobParts).size / 1024)
 }
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
@@ -119,16 +167,32 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
       // }
       // subscribeToWorld()
 
+      let stateLag = 0
       intervalId = setInterval(function() {
-        if (paused) return
-        const ended = batch(() => tick(store.world, mutator))
-        if (ended) {
+        function end() {
           clearInterval(intervalId)
           window.resetState()
-        } else {
-          setStore("states", states => [...states, deepClone(store.world)])
-          saveState()
         }
+
+        if (_statesLocked || paused) {
+          stateLag++
+          return
+        }
+
+        mutStates(() => {
+          while (stateLag > 0) {
+            const ended = batch(() => tick(store.world, mutator))
+            if (ended) return end()
+            stateLag--
+          }
+
+          const ended = batch(() => tick(store.world, mutator))
+          if (ended) return end()
+
+          states.push(deepClone(store.world))
+        })
+
+        asyncSaveState()
       }, 1000)
       document.addEventListener('keydown', handleKeyDown)
     }
@@ -155,6 +219,7 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 //     }))
 
 export const mutator: Mutator = {
+  setTick: (set) => { setStore("world", "tick", set); return store.world },
   setMovementOrders: (set) => { setStore("world", "movementOrders", set); return store.world },
 
   setField: (coords, set) => { setStore("world", "fields", coords, set); return store.world },

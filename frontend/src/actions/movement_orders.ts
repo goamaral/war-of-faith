@@ -4,7 +4,7 @@ import { batch } from "solid-js"
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { IssueMovementOrder, CancelMovementOrder } from "../state/movement_orders"
 import { serverCli } from "../api"
-import { store, saveState, mutator } from "../store"
+import { store, mutator } from "../store"
 
 // Movement orders
 export async function issueMovementOrder(sourceCoords: string, targetCoords: string, troops: Record<string, number>, gold: number) {
@@ -25,11 +25,8 @@ export async function issueMovementOrder(sourceCoords: string, targetCoords: str
   // if (resServerIssueMovementOrder.isErr()) {
   //   alert(`Failed to issue movement order (orderId: ${orderId}, sourceCoords: ${sourceCoords}, targetCoords: ${targetCoords}): ${resServerIssueMovementOrder.error}`)
   //   batch(() => CancelMovementOrder.call(store.world, mutator, store.playerId, orderId))
-  //   saveState()
   //   return
   // }
-
-  saveState()
 }
 
 export async function cancelMovementOrder(order: serverV1.MovementOrder) {
@@ -49,9 +46,6 @@ export async function cancelMovementOrder(order: serverV1.MovementOrder) {
   //     troops: order.troops,
   //     gold: order.resources!.gold,
   //   }))
-  //   saveState()
   //   return
   // }
-
-  saveState()
 }

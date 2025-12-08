@@ -3,6 +3,7 @@ import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 type Setter<T> = (t: T) => T
 
 export interface Mutator {
+  setTick: (set: Setter<number>) => serverV1.World
   setMovementOrders: (set: Setter<serverV1.MovementOrder[]>) => serverV1.World
 
   setField: (coords: string, set: Setter<serverV1.World_Field>) => serverV1.World

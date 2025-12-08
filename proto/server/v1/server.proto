@@ -7,15 +7,16 @@ option go_package = "war-of-faith/pkg/protobuf/server/v1;serverv1";
 import "google/protobuf/wrappers.proto";
 
 message World {
-  uint32 width = 1;
-  uint32 height = 2;
-  map<string, Building> buildings = 3; // key: building_id
-  map<string, Troop> troops = 4; // key: troop_id
-  map<string, Player> players = 5; // key: player_id
-  map<string, World.Field> fields = 6; // key: coords
-  map<string, Village> villages = 7; // key: village_coords, Affected by player pov
-  map<string, Temple> temples = 8; // key: temple_coords, Affected by player pov
-  repeated MovementOrder movement_orders = 9; // Affected by player pov
+  uint32 tick = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  map<string, Building> buildings = 4; // key: building_id
+  map<string, Troop> troops = 5; // key: troop_id
+  map<string, Player> players = 6; // key: player_id
+  map<string, World.Field> fields = 7; // key: coords
+  map<string, Village> villages = 8; // key: village_coords, Affected by player pov
+  map<string, Temple> temples = 9; // key: temple_coords, Affected by player pov
+  repeated MovementOrder movement_orders = 10; // Affected by player pov
 
   message Field {
     string coords = 1;
@@ -33,6 +34,9 @@ message World {
       KIND_TEMPLE = 3;
     }
   }
+}
+message WorldHistory {
+  repeated World worlds = 1;
 }
 
 message Building {

@@ -204,6 +204,7 @@ export function tick(world: serverV1.World, mut: Mutator) {
     }
   })
   world = mut.setMovementOrders(() => newMovementOrders)
+  world = mut.setTick(t => t + 1)
 
   return false
 }

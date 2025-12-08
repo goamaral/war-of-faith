@@ -77,15 +77,16 @@ func (World_Field_Kind) EnumDescriptor() ([]byte, []int) {
 
 type World struct {
 	state          protoimpl.MessageState  `protogen:"open.v1"`
-	Width          uint32                  `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`
-	Height         uint32                  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
-	Buildings      map[string]*Building    `protobuf:"bytes,3,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: building_id
-	Troops         map[string]*Troop       `protobuf:"bytes,4,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: troop_id
-	Players        map[string]*Player      `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: player_id
-	Fields         map[string]*World_Field `protobuf:"bytes,6,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: coords
-	Villages       map[string]*Village     `protobuf:"bytes,7,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: village_coords, Affected by player pov
-	Temples        map[string]*Temple      `protobuf:"bytes,8,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: temple_coords, Affected by player pov
-	MovementOrders []*MovementOrder        `protobuf:"bytes,9,rep,name=movement_orders,json=movementOrders,proto3" json:"movement_orders,omitempty"`                                           // Affected by player pov
+	Tick           uint32                  `protobuf:"varint,1,opt,name=tick,proto3" json:"tick,omitempty"`
+	Width          uint32                  `protobuf:"varint,2,opt,name=width,proto3" json:"width,omitempty"`
+	Height         uint32                  `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`
+	Buildings      map[string]*Building    `protobuf:"bytes,4,rep,name=buildings,proto3" json:"buildings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // key: building_id
+	Troops         map[string]*Troop       `protobuf:"bytes,5,rep,name=troops,proto3" json:"troops,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: troop_id
+	Players        map[string]*Player      `protobuf:"bytes,6,rep,name=players,proto3" json:"players,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: player_id
+	Fields         map[string]*World_Field `protobuf:"bytes,7,rep,name=fields,proto3" json:"fields,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // key: coords
+	Villages       map[string]*Village     `protobuf:"bytes,8,rep,name=villages,proto3" json:"villages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`   // key: village_coords, Affected by player pov
+	Temples        map[string]*Temple      `protobuf:"bytes,9,rep,name=temples,proto3" json:"temples,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`     // key: temple_coords, Affected by player pov
+	MovementOrders []*MovementOrder        `protobuf:"bytes,10,rep,name=movement_orders,json=movementOrders,proto3" json:"movement_orders,omitempty"`                                          // Affected by player pov
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -118,6 +119,13 @@ func (x *World) ProtoReflect() protoreflect.Message {
 // Deprecated: Use World.ProtoReflect.Descriptor instead.
 func (*World) Descriptor() ([]byte, []int) {
 	return file_server_v1_server_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *World) GetTick() uint32 {
+	if x != nil {
+		return x.Tick
+	}
+	return 0
 }
 
 func (x *World) GetWidth() uint32 {
@@ -183,6 +191,50 @@ func (x *World) GetMovementOrders() []*MovementOrder {
 	return nil
 }
 
+type WorldHistory struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Worlds        []*World               `protobuf:"bytes,1,rep,name=worlds,proto3" json:"worlds,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WorldHistory) Reset() {
+	*x = WorldHistory{}
+	mi := &file_server_v1_server_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WorldHistory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorldHistory) ProtoMessage() {}
+
+func (x *WorldHistory) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_server_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorldHistory.ProtoReflect.Descriptor instead.
+func (*WorldHistory) Descriptor() ([]byte, []int) {
+	return file_server_v1_server_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *WorldHistory) GetWorlds() []*World {
+	if x != nil {
+		return x.Worlds
+	}
+	return nil
+}
+
 type Building struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -194,7 +246,7 @@ type Building struct {
 
 func (x *Building) Reset() {
 	*x = Building{}
-	mi := &file_server_v1_server_proto_msgTypes[1]
+	mi := &file_server_v1_server_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -206,7 +258,7 @@ func (x *Building) String() string {
 func (*Building) ProtoMessage() {}
 
 func (x *Building) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[1]
+	mi := &file_server_v1_server_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,7 +271,7 @@ func (x *Building) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Building.ProtoReflect.Descriptor instead.
 func (*Building) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{1}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Building) GetId() string {
@@ -254,7 +306,7 @@ type Troop struct {
 
 func (x *Troop) Reset() {
 	*x = Troop{}
-	mi := &file_server_v1_server_proto_msgTypes[2]
+	mi := &file_server_v1_server_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -266,7 +318,7 @@ func (x *Troop) String() string {
 func (*Troop) ProtoMessage() {}
 
 func (x *Troop) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[2]
+	mi := &file_server_v1_server_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +331,7 @@ func (x *Troop) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Troop.ProtoReflect.Descriptor instead.
 func (*Troop) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{2}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Troop) GetId() string {
@@ -319,7 +371,7 @@ type MovementOrder struct {
 
 func (x *MovementOrder) Reset() {
 	*x = MovementOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[3]
+	mi := &file_server_v1_server_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +383,7 @@ func (x *MovementOrder) String() string {
 func (*MovementOrder) ProtoMessage() {}
 
 func (x *MovementOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[3]
+	mi := &file_server_v1_server_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +396,7 @@ func (x *MovementOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MovementOrder.ProtoReflect.Descriptor instead.
 func (*MovementOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{3}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *MovementOrder) GetId() string {
@@ -413,7 +465,7 @@ type Resources struct {
 
 func (x *Resources) Reset() {
 	*x = Resources{}
-	mi := &file_server_v1_server_proto_msgTypes[4]
+	mi := &file_server_v1_server_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -425,7 +477,7 @@ func (x *Resources) String() string {
 func (*Resources) ProtoMessage() {}
 
 func (x *Resources) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[4]
+	mi := &file_server_v1_server_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -438,7 +490,7 @@ func (x *Resources) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Resources.ProtoReflect.Descriptor instead.
 func (*Resources) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{4}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Resources) GetGold() uint32 {
@@ -464,7 +516,7 @@ type Temple struct {
 
 func (x *Temple) Reset() {
 	*x = Temple{}
-	mi := &file_server_v1_server_proto_msgTypes[5]
+	mi := &file_server_v1_server_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -476,7 +528,7 @@ func (x *Temple) String() string {
 func (*Temple) ProtoMessage() {}
 
 func (x *Temple) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[5]
+	mi := &file_server_v1_server_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -489,7 +541,7 @@ func (x *Temple) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Temple.ProtoReflect.Descriptor instead.
 func (*Temple) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{5}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Temple) GetOwnershipAgeSecs() uint32 {
@@ -509,7 +561,7 @@ type Village struct {
 
 func (x *Village) Reset() {
 	*x = Village{}
-	mi := &file_server_v1_server_proto_msgTypes[6]
+	mi := &file_server_v1_server_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -521,7 +573,7 @@ func (x *Village) String() string {
 func (*Village) ProtoMessage() {}
 
 func (x *Village) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[6]
+	mi := &file_server_v1_server_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -534,7 +586,7 @@ func (x *Village) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Village.ProtoReflect.Descriptor instead.
 func (*Village) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Village) GetBuildingUpgradeOrders() []*Village_BuildingUpgradeOrder {
@@ -561,7 +613,7 @@ type Player struct {
 
 func (x *Player) Reset() {
 	*x = Player{}
-	mi := &file_server_v1_server_proto_msgTypes[7]
+	mi := &file_server_v1_server_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -573,7 +625,7 @@ func (x *Player) String() string {
 func (*Player) ProtoMessage() {}
 
 func (x *Player) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[7]
+	mi := &file_server_v1_server_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -586,7 +638,7 @@ func (x *Player) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Player.ProtoReflect.Descriptor instead.
 func (*Player) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{7}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Player) GetId() string {
@@ -612,7 +664,7 @@ type GetWorldRequest struct {
 
 func (x *GetWorldRequest) Reset() {
 	*x = GetWorldRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[8]
+	mi := &file_server_v1_server_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -624,7 +676,7 @@ func (x *GetWorldRequest) String() string {
 func (*GetWorldRequest) ProtoMessage() {}
 
 func (x *GetWorldRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[8]
+	mi := &file_server_v1_server_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -637,7 +689,7 @@ func (x *GetWorldRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorldRequest.ProtoReflect.Descriptor instead.
 func (*GetWorldRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{8}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{9}
 }
 
 type GetWorldResponse struct {
@@ -649,7 +701,7 @@ type GetWorldResponse struct {
 
 func (x *GetWorldResponse) Reset() {
 	*x = GetWorldResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[9]
+	mi := &file_server_v1_server_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -661,7 +713,7 @@ func (x *GetWorldResponse) String() string {
 func (*GetWorldResponse) ProtoMessage() {}
 
 func (x *GetWorldResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[9]
+	mi := &file_server_v1_server_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -674,7 +726,7 @@ func (x *GetWorldResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorldResponse.ProtoReflect.Descriptor instead.
 func (*GetWorldResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{9}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetWorldResponse) GetWorld() *World {
@@ -693,7 +745,7 @@ type SubscribeToWorldRequest struct {
 
 func (x *SubscribeToWorldRequest) Reset() {
 	*x = SubscribeToWorldRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[10]
+	mi := &file_server_v1_server_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -705,7 +757,7 @@ func (x *SubscribeToWorldRequest) String() string {
 func (*SubscribeToWorldRequest) ProtoMessage() {}
 
 func (x *SubscribeToWorldRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[10]
+	mi := &file_server_v1_server_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -718,7 +770,7 @@ func (x *SubscribeToWorldRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeToWorldRequest.ProtoReflect.Descriptor instead.
 func (*SubscribeToWorldRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{10}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{11}
 }
 
 type SubscribeToWorldResponse struct {
@@ -730,7 +782,7 @@ type SubscribeToWorldResponse struct {
 
 func (x *SubscribeToWorldResponse) Reset() {
 	*x = SubscribeToWorldResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[11]
+	mi := &file_server_v1_server_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -742,7 +794,7 @@ func (x *SubscribeToWorldResponse) String() string {
 func (*SubscribeToWorldResponse) ProtoMessage() {}
 
 func (x *SubscribeToWorldResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[11]
+	mi := &file_server_v1_server_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -755,7 +807,7 @@ func (x *SubscribeToWorldResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeToWorldResponse.ProtoReflect.Descriptor instead.
 func (*SubscribeToWorldResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{11}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SubscribeToWorldResponse) GetPatch() *SubscribeToWorldResponse_Patch {
@@ -779,7 +831,7 @@ type IssueMovementOrderRequest struct {
 
 func (x *IssueMovementOrderRequest) Reset() {
 	*x = IssueMovementOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[12]
+	mi := &file_server_v1_server_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -791,7 +843,7 @@ func (x *IssueMovementOrderRequest) String() string {
 func (*IssueMovementOrderRequest) ProtoMessage() {}
 
 func (x *IssueMovementOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[12]
+	mi := &file_server_v1_server_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -804,7 +856,7 @@ func (x *IssueMovementOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueMovementOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueMovementOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{12}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *IssueMovementOrderRequest) GetOrderId() string {
@@ -850,7 +902,7 @@ type IssueMovementOrderResponse struct {
 
 func (x *IssueMovementOrderResponse) Reset() {
 	*x = IssueMovementOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[13]
+	mi := &file_server_v1_server_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +914,7 @@ func (x *IssueMovementOrderResponse) String() string {
 func (*IssueMovementOrderResponse) ProtoMessage() {}
 
 func (x *IssueMovementOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[13]
+	mi := &file_server_v1_server_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +927,7 @@ func (x *IssueMovementOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueMovementOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueMovementOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{13}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{14}
 }
 
 // CancelMovementOrder
@@ -888,7 +940,7 @@ type CancelMovementOrderRequest struct {
 
 func (x *CancelMovementOrderRequest) Reset() {
 	*x = CancelMovementOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[14]
+	mi := &file_server_v1_server_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -900,7 +952,7 @@ func (x *CancelMovementOrderRequest) String() string {
 func (*CancelMovementOrderRequest) ProtoMessage() {}
 
 func (x *CancelMovementOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[14]
+	mi := &file_server_v1_server_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -913,7 +965,7 @@ func (x *CancelMovementOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelMovementOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelMovementOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{14}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CancelMovementOrderRequest) GetOrderId() string {
@@ -931,7 +983,7 @@ type CancelMovementOrderResponse struct {
 
 func (x *CancelMovementOrderResponse) Reset() {
 	*x = CancelMovementOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[15]
+	mi := &file_server_v1_server_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -943,7 +995,7 @@ func (x *CancelMovementOrderResponse) String() string {
 func (*CancelMovementOrderResponse) ProtoMessage() {}
 
 func (x *CancelMovementOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[15]
+	mi := &file_server_v1_server_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -956,7 +1008,7 @@ func (x *CancelMovementOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelMovementOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelMovementOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{15}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{16}
 }
 
 // IssueBuildingUpgradeOrder
@@ -971,7 +1023,7 @@ type IssueBuildingUpgradeOrderRequest struct {
 
 func (x *IssueBuildingUpgradeOrderRequest) Reset() {
 	*x = IssueBuildingUpgradeOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[16]
+	mi := &file_server_v1_server_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -983,7 +1035,7 @@ func (x *IssueBuildingUpgradeOrderRequest) String() string {
 func (*IssueBuildingUpgradeOrderRequest) ProtoMessage() {}
 
 func (x *IssueBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[16]
+	mi := &file_server_v1_server_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -996,7 +1048,7 @@ func (x *IssueBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueBuildingUpgradeOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueBuildingUpgradeOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{16}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *IssueBuildingUpgradeOrderRequest) GetCoords() string {
@@ -1028,7 +1080,7 @@ type IssueBuildingUpgradeOrderResponse struct {
 
 func (x *IssueBuildingUpgradeOrderResponse) Reset() {
 	*x = IssueBuildingUpgradeOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[17]
+	mi := &file_server_v1_server_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1040,7 +1092,7 @@ func (x *IssueBuildingUpgradeOrderResponse) String() string {
 func (*IssueBuildingUpgradeOrderResponse) ProtoMessage() {}
 
 func (x *IssueBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[17]
+	mi := &file_server_v1_server_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1053,7 +1105,7 @@ func (x *IssueBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use IssueBuildingUpgradeOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueBuildingUpgradeOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{17}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{18}
 }
 
 // CancelBuildingUpgradeOrder
@@ -1068,7 +1120,7 @@ type CancelBuildingUpgradeOrderRequest struct {
 
 func (x *CancelBuildingUpgradeOrderRequest) Reset() {
 	*x = CancelBuildingUpgradeOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[18]
+	mi := &file_server_v1_server_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1080,7 +1132,7 @@ func (x *CancelBuildingUpgradeOrderRequest) String() string {
 func (*CancelBuildingUpgradeOrderRequest) ProtoMessage() {}
 
 func (x *CancelBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[18]
+	mi := &file_server_v1_server_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1093,7 +1145,7 @@ func (x *CancelBuildingUpgradeOrderRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use CancelBuildingUpgradeOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelBuildingUpgradeOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{18}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CancelBuildingUpgradeOrderRequest) GetCoords() string {
@@ -1125,7 +1177,7 @@ type CancelBuildingUpgradeOrderResponse struct {
 
 func (x *CancelBuildingUpgradeOrderResponse) Reset() {
 	*x = CancelBuildingUpgradeOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[19]
+	mi := &file_server_v1_server_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1137,7 +1189,7 @@ func (x *CancelBuildingUpgradeOrderResponse) String() string {
 func (*CancelBuildingUpgradeOrderResponse) ProtoMessage() {}
 
 func (x *CancelBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[19]
+	mi := &file_server_v1_server_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1150,7 +1202,7 @@ func (x *CancelBuildingUpgradeOrderResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use CancelBuildingUpgradeOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelBuildingUpgradeOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{19}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{20}
 }
 
 // IssueTrainingOrder
@@ -1166,7 +1218,7 @@ type IssueTrainingOrderRequest struct {
 
 func (x *IssueTrainingOrderRequest) Reset() {
 	*x = IssueTrainingOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[20]
+	mi := &file_server_v1_server_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1178,7 +1230,7 @@ func (x *IssueTrainingOrderRequest) String() string {
 func (*IssueTrainingOrderRequest) ProtoMessage() {}
 
 func (x *IssueTrainingOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[20]
+	mi := &file_server_v1_server_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1191,7 +1243,7 @@ func (x *IssueTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueTrainingOrderRequest.ProtoReflect.Descriptor instead.
 func (*IssueTrainingOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{20}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *IssueTrainingOrderRequest) GetOrderId() string {
@@ -1230,7 +1282,7 @@ type IssueTrainingOrderResponse struct {
 
 func (x *IssueTrainingOrderResponse) Reset() {
 	*x = IssueTrainingOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[21]
+	mi := &file_server_v1_server_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1242,7 +1294,7 @@ func (x *IssueTrainingOrderResponse) String() string {
 func (*IssueTrainingOrderResponse) ProtoMessage() {}
 
 func (x *IssueTrainingOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[21]
+	mi := &file_server_v1_server_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1255,7 +1307,7 @@ func (x *IssueTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueTrainingOrderResponse.ProtoReflect.Descriptor instead.
 func (*IssueTrainingOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{21}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{22}
 }
 
 // CancelTrainingOrder
@@ -1269,7 +1321,7 @@ type CancelTrainingOrderRequest struct {
 
 func (x *CancelTrainingOrderRequest) Reset() {
 	*x = CancelTrainingOrderRequest{}
-	mi := &file_server_v1_server_proto_msgTypes[22]
+	mi := &file_server_v1_server_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1281,7 +1333,7 @@ func (x *CancelTrainingOrderRequest) String() string {
 func (*CancelTrainingOrderRequest) ProtoMessage() {}
 
 func (x *CancelTrainingOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[22]
+	mi := &file_server_v1_server_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1294,7 +1346,7 @@ func (x *CancelTrainingOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelTrainingOrderRequest.ProtoReflect.Descriptor instead.
 func (*CancelTrainingOrderRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{22}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CancelTrainingOrderRequest) GetCoords() string {
@@ -1319,7 +1371,7 @@ type CancelTrainingOrderResponse struct {
 
 func (x *CancelTrainingOrderResponse) Reset() {
 	*x = CancelTrainingOrderResponse{}
-	mi := &file_server_v1_server_proto_msgTypes[23]
+	mi := &file_server_v1_server_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1331,7 +1383,7 @@ func (x *CancelTrainingOrderResponse) String() string {
 func (*CancelTrainingOrderResponse) ProtoMessage() {}
 
 func (x *CancelTrainingOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[23]
+	mi := &file_server_v1_server_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1344,7 +1396,7 @@ func (x *CancelTrainingOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelTrainingOrderResponse.ProtoReflect.Descriptor instead.
 func (*CancelTrainingOrderResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{23}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{24}
 }
 
 type World_Field struct {
@@ -1361,7 +1413,7 @@ type World_Field struct {
 
 func (x *World_Field) Reset() {
 	*x = World_Field{}
-	mi := &file_server_v1_server_proto_msgTypes[30]
+	mi := &file_server_v1_server_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1373,7 +1425,7 @@ func (x *World_Field) String() string {
 func (*World_Field) ProtoMessage() {}
 
 func (x *World_Field) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[30]
+	mi := &file_server_v1_server_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1442,7 +1494,7 @@ type Village_BuildingUpgradeOrder struct {
 
 func (x *Village_BuildingUpgradeOrder) Reset() {
 	*x = Village_BuildingUpgradeOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[34]
+	mi := &file_server_v1_server_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1454,7 +1506,7 @@ func (x *Village_BuildingUpgradeOrder) String() string {
 func (*Village_BuildingUpgradeOrder) ProtoMessage() {}
 
 func (x *Village_BuildingUpgradeOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[34]
+	mi := &file_server_v1_server_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1467,7 +1519,7 @@ func (x *Village_BuildingUpgradeOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Village_BuildingUpgradeOrder.ProtoReflect.Descriptor instead.
 func (*Village_BuildingUpgradeOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 0}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{7, 0}
 }
 
 func (x *Village_BuildingUpgradeOrder) GetLevel() uint32 {
@@ -1503,7 +1555,7 @@ type Village_TrainingOrder struct {
 
 func (x *Village_TrainingOrder) Reset() {
 	*x = Village_TrainingOrder{}
-	mi := &file_server_v1_server_proto_msgTypes[35]
+	mi := &file_server_v1_server_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1515,7 +1567,7 @@ func (x *Village_TrainingOrder) String() string {
 func (*Village_TrainingOrder) ProtoMessage() {}
 
 func (x *Village_TrainingOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[35]
+	mi := &file_server_v1_server_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1528,7 +1580,7 @@ func (x *Village_TrainingOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Village_TrainingOrder.ProtoReflect.Descriptor instead.
 func (*Village_TrainingOrder) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{6, 1}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{7, 1}
 }
 
 func (x *Village_TrainingOrder) GetId() string {
@@ -1571,7 +1623,7 @@ type SubscribeToWorldResponse_Patch struct {
 
 func (x *SubscribeToWorldResponse_Patch) Reset() {
 	*x = SubscribeToWorldResponse_Patch{}
-	mi := &file_server_v1_server_proto_msgTypes[36]
+	mi := &file_server_v1_server_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1583,7 +1635,7 @@ func (x *SubscribeToWorldResponse_Patch) String() string {
 func (*SubscribeToWorldResponse_Patch) ProtoMessage() {}
 
 func (x *SubscribeToWorldResponse_Patch) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_server_proto_msgTypes[36]
+	mi := &file_server_v1_server_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1596,7 +1648,7 @@ func (x *SubscribeToWorldResponse_Patch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeToWorldResponse_Patch.ProtoReflect.Descriptor instead.
 func (*SubscribeToWorldResponse_Patch) Descriptor() ([]byte, []int) {
-	return file_server_v1_server_proto_rawDescGZIP(), []int{11, 0}
+	return file_server_v1_server_proto_rawDescGZIP(), []int{12, 0}
 }
 
 func (x *SubscribeToWorldResponse_Patch) GetFields() map[string]*World_Field {
@@ -1631,17 +1683,19 @@ var File_server_v1_server_proto protoreflect.FileDescriptor
 
 const file_server_v1_server_proto_rawDesc = "" +
 	"\n" +
-	"\x16server/v1/server.proto\x12\tserver.v1\x1a\x1egoogle/protobuf/wrappers.proto\"\xcc\v\n" +
-	"\x05World\x12\x14\n" +
-	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\x12=\n" +
-	"\tbuildings\x18\x03 \x03(\v2\x1f.server.v1.World.BuildingsEntryR\tbuildings\x124\n" +
-	"\x06troops\x18\x04 \x03(\v2\x1c.server.v1.World.TroopsEntryR\x06troops\x127\n" +
-	"\aplayers\x18\x05 \x03(\v2\x1d.server.v1.World.PlayersEntryR\aplayers\x124\n" +
-	"\x06fields\x18\x06 \x03(\v2\x1c.server.v1.World.FieldsEntryR\x06fields\x12:\n" +
-	"\bvillages\x18\a \x03(\v2\x1e.server.v1.World.VillagesEntryR\bvillages\x127\n" +
-	"\atemples\x18\b \x03(\v2\x1d.server.v1.World.TemplesEntryR\atemples\x12A\n" +
-	"\x0fmovement_orders\x18\t \x03(\v2\x18.server.v1.MovementOrderR\x0emovementOrders\x1aQ\n" +
+	"\x16server/v1/server.proto\x12\tserver.v1\x1a\x1egoogle/protobuf/wrappers.proto\"\xe0\v\n" +
+	"\x05World\x12\x12\n" +
+	"\x04tick\x18\x01 \x01(\rR\x04tick\x12\x14\n" +
+	"\x05width\x18\x02 \x01(\rR\x05width\x12\x16\n" +
+	"\x06height\x18\x03 \x01(\rR\x06height\x12=\n" +
+	"\tbuildings\x18\x04 \x03(\v2\x1f.server.v1.World.BuildingsEntryR\tbuildings\x124\n" +
+	"\x06troops\x18\x05 \x03(\v2\x1c.server.v1.World.TroopsEntryR\x06troops\x127\n" +
+	"\aplayers\x18\x06 \x03(\v2\x1d.server.v1.World.PlayersEntryR\aplayers\x124\n" +
+	"\x06fields\x18\a \x03(\v2\x1c.server.v1.World.FieldsEntryR\x06fields\x12:\n" +
+	"\bvillages\x18\b \x03(\v2\x1e.server.v1.World.VillagesEntryR\bvillages\x127\n" +
+	"\atemples\x18\t \x03(\v2\x1d.server.v1.World.TemplesEntryR\atemples\x12A\n" +
+	"\x0fmovement_orders\x18\n" +
+	" \x03(\v2\x18.server.v1.MovementOrderR\x0emovementOrders\x1aQ\n" +
 	"\x0eBuildingsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
 	"\x05value\x18\x02 \x01(\v2\x13.server.v1.BuildingR\x05value:\x028\x01\x1aK\n" +
@@ -1677,7 +1731,9 @@ const file_server_v1_server_proto_rawDesc = "" +
 	"\bKIND_FOG\x10\x00\x12\r\n" +
 	"\tKIND_WILD\x10\x01\x12\x10\n" +
 	"\fKIND_VILLAGE\x10\x02\x12\x0f\n" +
-	"\vKIND_TEMPLE\x10\x03\"X\n" +
+	"\vKIND_TEMPLE\x10\x03\"8\n" +
+	"\fWorldHistory\x12(\n" +
+	"\x06worlds\x18\x01 \x03(\v2\x10.server.v1.WorldR\x06worlds\"X\n" +
 	"\bBuilding\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12(\n" +
@@ -1797,109 +1853,111 @@ func file_server_v1_server_proto_rawDescGZIP() []byte {
 }
 
 var file_server_v1_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_server_v1_server_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_server_v1_server_proto_goTypes = []any{
 	(World_Field_Kind)(0),                      // 0: server.v1.World.Field.Kind
 	(*World)(nil),                              // 1: server.v1.World
-	(*Building)(nil),                           // 2: server.v1.Building
-	(*Troop)(nil),                              // 3: server.v1.Troop
-	(*MovementOrder)(nil),                      // 4: server.v1.MovementOrder
-	(*Resources)(nil),                          // 5: server.v1.Resources
-	(*Temple)(nil),                             // 6: server.v1.Temple
-	(*Village)(nil),                            // 7: server.v1.Village
-	(*Player)(nil),                             // 8: server.v1.Player
-	(*GetWorldRequest)(nil),                    // 9: server.v1.GetWorldRequest
-	(*GetWorldResponse)(nil),                   // 10: server.v1.GetWorldResponse
-	(*SubscribeToWorldRequest)(nil),            // 11: server.v1.SubscribeToWorldRequest
-	(*SubscribeToWorldResponse)(nil),           // 12: server.v1.SubscribeToWorldResponse
-	(*IssueMovementOrderRequest)(nil),          // 13: server.v1.IssueMovementOrderRequest
-	(*IssueMovementOrderResponse)(nil),         // 14: server.v1.IssueMovementOrderResponse
-	(*CancelMovementOrderRequest)(nil),         // 15: server.v1.CancelMovementOrderRequest
-	(*CancelMovementOrderResponse)(nil),        // 16: server.v1.CancelMovementOrderResponse
-	(*IssueBuildingUpgradeOrderRequest)(nil),   // 17: server.v1.IssueBuildingUpgradeOrderRequest
-	(*IssueBuildingUpgradeOrderResponse)(nil),  // 18: server.v1.IssueBuildingUpgradeOrderResponse
-	(*CancelBuildingUpgradeOrderRequest)(nil),  // 19: server.v1.CancelBuildingUpgradeOrderRequest
-	(*CancelBuildingUpgradeOrderResponse)(nil), // 20: server.v1.CancelBuildingUpgradeOrderResponse
-	(*IssueTrainingOrderRequest)(nil),          // 21: server.v1.IssueTrainingOrderRequest
-	(*IssueTrainingOrderResponse)(nil),         // 22: server.v1.IssueTrainingOrderResponse
-	(*CancelTrainingOrderRequest)(nil),         // 23: server.v1.CancelTrainingOrderRequest
-	(*CancelTrainingOrderResponse)(nil),        // 24: server.v1.CancelTrainingOrderResponse
-	nil,                                        // 25: server.v1.World.BuildingsEntry
-	nil,                                        // 26: server.v1.World.TroopsEntry
-	nil,                                        // 27: server.v1.World.PlayersEntry
-	nil,                                        // 28: server.v1.World.FieldsEntry
-	nil,                                        // 29: server.v1.World.VillagesEntry
-	nil,                                        // 30: server.v1.World.TemplesEntry
-	(*World_Field)(nil),                        // 31: server.v1.World.Field
-	nil,                                        // 32: server.v1.World.Field.BuildingLevelsEntry
-	nil,                                        // 33: server.v1.World.Field.TroopsEntry
-	nil,                                        // 34: server.v1.MovementOrder.TroopsEntry
-	(*Village_BuildingUpgradeOrder)(nil),       // 35: server.v1.Village.BuildingUpgradeOrder
-	(*Village_TrainingOrder)(nil),              // 36: server.v1.Village.TrainingOrder
-	(*SubscribeToWorldResponse_Patch)(nil),     // 37: server.v1.SubscribeToWorldResponse.Patch
-	nil,                                        // 38: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
-	nil,                                        // 39: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
-	nil,                                        // 40: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
-	nil,                                        // 41: server.v1.IssueMovementOrderRequest.TroopsEntry
-	(*wrapperspb.StringValue)(nil),             // 42: google.protobuf.StringValue
+	(*WorldHistory)(nil),                       // 2: server.v1.WorldHistory
+	(*Building)(nil),                           // 3: server.v1.Building
+	(*Troop)(nil),                              // 4: server.v1.Troop
+	(*MovementOrder)(nil),                      // 5: server.v1.MovementOrder
+	(*Resources)(nil),                          // 6: server.v1.Resources
+	(*Temple)(nil),                             // 7: server.v1.Temple
+	(*Village)(nil),                            // 8: server.v1.Village
+	(*Player)(nil),                             // 9: server.v1.Player
+	(*GetWorldRequest)(nil),                    // 10: server.v1.GetWorldRequest
+	(*GetWorldResponse)(nil),                   // 11: server.v1.GetWorldResponse
+	(*SubscribeToWorldRequest)(nil),            // 12: server.v1.SubscribeToWorldRequest
+	(*SubscribeToWorldResponse)(nil),           // 13: server.v1.SubscribeToWorldResponse
+	(*IssueMovementOrderRequest)(nil),          // 14: server.v1.IssueMovementOrderRequest
+	(*IssueMovementOrderResponse)(nil),         // 15: server.v1.IssueMovementOrderResponse
+	(*CancelMovementOrderRequest)(nil),         // 16: server.v1.CancelMovementOrderRequest
+	(*CancelMovementOrderResponse)(nil),        // 17: server.v1.CancelMovementOrderResponse
+	(*IssueBuildingUpgradeOrderRequest)(nil),   // 18: server.v1.IssueBuildingUpgradeOrderRequest
+	(*IssueBuildingUpgradeOrderResponse)(nil),  // 19: server.v1.IssueBuildingUpgradeOrderResponse
+	(*CancelBuildingUpgradeOrderRequest)(nil),  // 20: server.v1.CancelBuildingUpgradeOrderRequest
+	(*CancelBuildingUpgradeOrderResponse)(nil), // 21: server.v1.CancelBuildingUpgradeOrderResponse
+	(*IssueTrainingOrderRequest)(nil),          // 22: server.v1.IssueTrainingOrderRequest
+	(*IssueTrainingOrderResponse)(nil),         // 23: server.v1.IssueTrainingOrderResponse
+	(*CancelTrainingOrderRequest)(nil),         // 24: server.v1.CancelTrainingOrderRequest
+	(*CancelTrainingOrderResponse)(nil),        // 25: server.v1.CancelTrainingOrderResponse
+	nil,                                        // 26: server.v1.World.BuildingsEntry
+	nil,                                        // 27: server.v1.World.TroopsEntry
+	nil,                                        // 28: server.v1.World.PlayersEntry
+	nil,                                        // 29: server.v1.World.FieldsEntry
+	nil,                                        // 30: server.v1.World.VillagesEntry
+	nil,                                        // 31: server.v1.World.TemplesEntry
+	(*World_Field)(nil),                        // 32: server.v1.World.Field
+	nil,                                        // 33: server.v1.World.Field.BuildingLevelsEntry
+	nil,                                        // 34: server.v1.World.Field.TroopsEntry
+	nil,                                        // 35: server.v1.MovementOrder.TroopsEntry
+	(*Village_BuildingUpgradeOrder)(nil),       // 36: server.v1.Village.BuildingUpgradeOrder
+	(*Village_TrainingOrder)(nil),              // 37: server.v1.Village.TrainingOrder
+	(*SubscribeToWorldResponse_Patch)(nil),     // 38: server.v1.SubscribeToWorldResponse.Patch
+	nil,                                        // 39: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	nil,                                        // 40: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	nil,                                        // 41: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	nil,                                        // 42: server.v1.IssueMovementOrderRequest.TroopsEntry
+	(*wrapperspb.StringValue)(nil),             // 43: google.protobuf.StringValue
 }
 var file_server_v1_server_proto_depIdxs = []int32{
-	25, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
-	26, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
-	27, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
-	28, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
-	29, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
-	30, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
-	4,  // 6: server.v1.World.movement_orders:type_name -> server.v1.MovementOrder
-	5,  // 7: server.v1.Building.cost:type_name -> server.v1.Resources
-	5,  // 8: server.v1.Troop.cost:type_name -> server.v1.Resources
-	34, // 9: server.v1.MovementOrder.troops:type_name -> server.v1.MovementOrder.TroopsEntry
-	5,  // 10: server.v1.MovementOrder.resources:type_name -> server.v1.Resources
-	35, // 11: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
-	36, // 12: server.v1.Village.training_orders:type_name -> server.v1.Village.TrainingOrder
-	1,  // 13: server.v1.GetWorldResponse.world:type_name -> server.v1.World
-	37, // 14: server.v1.SubscribeToWorldResponse.patch:type_name -> server.v1.SubscribeToWorldResponse.Patch
-	41, // 15: server.v1.IssueMovementOrderRequest.troops:type_name -> server.v1.IssueMovementOrderRequest.TroopsEntry
-	5,  // 16: server.v1.IssueMovementOrderRequest.resources:type_name -> server.v1.Resources
-	2,  // 17: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
-	3,  // 18: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
-	8,  // 19: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
-	31, // 20: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
-	7,  // 21: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
-	6,  // 22: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
-	0,  // 23: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
-	5,  // 24: server.v1.World.Field.resources:type_name -> server.v1.Resources
-	32, // 25: server.v1.World.Field.building_levels:type_name -> server.v1.World.Field.BuildingLevelsEntry
-	33, // 26: server.v1.World.Field.troops:type_name -> server.v1.World.Field.TroopsEntry
-	42, // 27: server.v1.World.Field.player_id:type_name -> google.protobuf.StringValue
-	38, // 28: server.v1.SubscribeToWorldResponse.Patch.fields:type_name -> server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
-	39, // 29: server.v1.SubscribeToWorldResponse.Patch.villages:type_name -> server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
-	40, // 30: server.v1.SubscribeToWorldResponse.Patch.temples:type_name -> server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
-	4,  // 31: server.v1.SubscribeToWorldResponse.Patch.movement_orders:type_name -> server.v1.MovementOrder
-	31, // 32: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry.value:type_name -> server.v1.World.Field
-	7,  // 33: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry.value:type_name -> server.v1.Village
-	6,  // 34: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry.value:type_name -> server.v1.Temple
-	9,  // 35: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
-	11, // 36: server.v1.Service.SubscribeToWorld:input_type -> server.v1.SubscribeToWorldRequest
-	13, // 37: server.v1.Service.IssueMovementOrder:input_type -> server.v1.IssueMovementOrderRequest
-	15, // 38: server.v1.Service.CancelMovementOrder:input_type -> server.v1.CancelMovementOrderRequest
-	17, // 39: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
-	19, // 40: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
-	21, // 41: server.v1.Service.IssueTrainingOrder:input_type -> server.v1.IssueTrainingOrderRequest
-	23, // 42: server.v1.Service.CancelTrainingOrder:input_type -> server.v1.CancelTrainingOrderRequest
-	10, // 43: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
-	12, // 44: server.v1.Service.SubscribeToWorld:output_type -> server.v1.SubscribeToWorldResponse
-	14, // 45: server.v1.Service.IssueMovementOrder:output_type -> server.v1.IssueMovementOrderResponse
-	16, // 46: server.v1.Service.CancelMovementOrder:output_type -> server.v1.CancelMovementOrderResponse
-	18, // 47: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
-	20, // 48: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
-	22, // 49: server.v1.Service.IssueTrainingOrder:output_type -> server.v1.IssueTrainingOrderResponse
-	24, // 50: server.v1.Service.CancelTrainingOrder:output_type -> server.v1.CancelTrainingOrderResponse
-	43, // [43:51] is the sub-list for method output_type
-	35, // [35:43] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	26, // 0: server.v1.World.buildings:type_name -> server.v1.World.BuildingsEntry
+	27, // 1: server.v1.World.troops:type_name -> server.v1.World.TroopsEntry
+	28, // 2: server.v1.World.players:type_name -> server.v1.World.PlayersEntry
+	29, // 3: server.v1.World.fields:type_name -> server.v1.World.FieldsEntry
+	30, // 4: server.v1.World.villages:type_name -> server.v1.World.VillagesEntry
+	31, // 5: server.v1.World.temples:type_name -> server.v1.World.TemplesEntry
+	5,  // 6: server.v1.World.movement_orders:type_name -> server.v1.MovementOrder
+	1,  // 7: server.v1.WorldHistory.worlds:type_name -> server.v1.World
+	6,  // 8: server.v1.Building.cost:type_name -> server.v1.Resources
+	6,  // 9: server.v1.Troop.cost:type_name -> server.v1.Resources
+	35, // 10: server.v1.MovementOrder.troops:type_name -> server.v1.MovementOrder.TroopsEntry
+	6,  // 11: server.v1.MovementOrder.resources:type_name -> server.v1.Resources
+	36, // 12: server.v1.Village.building_upgrade_orders:type_name -> server.v1.Village.BuildingUpgradeOrder
+	37, // 13: server.v1.Village.training_orders:type_name -> server.v1.Village.TrainingOrder
+	1,  // 14: server.v1.GetWorldResponse.world:type_name -> server.v1.World
+	38, // 15: server.v1.SubscribeToWorldResponse.patch:type_name -> server.v1.SubscribeToWorldResponse.Patch
+	42, // 16: server.v1.IssueMovementOrderRequest.troops:type_name -> server.v1.IssueMovementOrderRequest.TroopsEntry
+	6,  // 17: server.v1.IssueMovementOrderRequest.resources:type_name -> server.v1.Resources
+	3,  // 18: server.v1.World.BuildingsEntry.value:type_name -> server.v1.Building
+	4,  // 19: server.v1.World.TroopsEntry.value:type_name -> server.v1.Troop
+	9,  // 20: server.v1.World.PlayersEntry.value:type_name -> server.v1.Player
+	32, // 21: server.v1.World.FieldsEntry.value:type_name -> server.v1.World.Field
+	8,  // 22: server.v1.World.VillagesEntry.value:type_name -> server.v1.Village
+	7,  // 23: server.v1.World.TemplesEntry.value:type_name -> server.v1.Temple
+	0,  // 24: server.v1.World.Field.kind:type_name -> server.v1.World.Field.Kind
+	6,  // 25: server.v1.World.Field.resources:type_name -> server.v1.Resources
+	33, // 26: server.v1.World.Field.building_levels:type_name -> server.v1.World.Field.BuildingLevelsEntry
+	34, // 27: server.v1.World.Field.troops:type_name -> server.v1.World.Field.TroopsEntry
+	43, // 28: server.v1.World.Field.player_id:type_name -> google.protobuf.StringValue
+	39, // 29: server.v1.SubscribeToWorldResponse.Patch.fields:type_name -> server.v1.SubscribeToWorldResponse.Patch.FieldsEntry
+	40, // 30: server.v1.SubscribeToWorldResponse.Patch.villages:type_name -> server.v1.SubscribeToWorldResponse.Patch.VillagesEntry
+	41, // 31: server.v1.SubscribeToWorldResponse.Patch.temples:type_name -> server.v1.SubscribeToWorldResponse.Patch.TemplesEntry
+	5,  // 32: server.v1.SubscribeToWorldResponse.Patch.movement_orders:type_name -> server.v1.MovementOrder
+	32, // 33: server.v1.SubscribeToWorldResponse.Patch.FieldsEntry.value:type_name -> server.v1.World.Field
+	8,  // 34: server.v1.SubscribeToWorldResponse.Patch.VillagesEntry.value:type_name -> server.v1.Village
+	7,  // 35: server.v1.SubscribeToWorldResponse.Patch.TemplesEntry.value:type_name -> server.v1.Temple
+	10, // 36: server.v1.Service.GetWorld:input_type -> server.v1.GetWorldRequest
+	12, // 37: server.v1.Service.SubscribeToWorld:input_type -> server.v1.SubscribeToWorldRequest
+	14, // 38: server.v1.Service.IssueMovementOrder:input_type -> server.v1.IssueMovementOrderRequest
+	16, // 39: server.v1.Service.CancelMovementOrder:input_type -> server.v1.CancelMovementOrderRequest
+	18, // 40: server.v1.Service.IssueBuildingUpgradeOrder:input_type -> server.v1.IssueBuildingUpgradeOrderRequest
+	20, // 41: server.v1.Service.CancelBuildingUpgradeOrder:input_type -> server.v1.CancelBuildingUpgradeOrderRequest
+	22, // 42: server.v1.Service.IssueTrainingOrder:input_type -> server.v1.IssueTrainingOrderRequest
+	24, // 43: server.v1.Service.CancelTrainingOrder:input_type -> server.v1.CancelTrainingOrderRequest
+	11, // 44: server.v1.Service.GetWorld:output_type -> server.v1.GetWorldResponse
+	13, // 45: server.v1.Service.SubscribeToWorld:output_type -> server.v1.SubscribeToWorldResponse
+	15, // 46: server.v1.Service.IssueMovementOrder:output_type -> server.v1.IssueMovementOrderResponse
+	17, // 47: server.v1.Service.CancelMovementOrder:output_type -> server.v1.CancelMovementOrderResponse
+	19, // 48: server.v1.Service.IssueBuildingUpgradeOrder:output_type -> server.v1.IssueBuildingUpgradeOrderResponse
+	21, // 49: server.v1.Service.CancelBuildingUpgradeOrder:output_type -> server.v1.CancelBuildingUpgradeOrderResponse
+	23, // 50: server.v1.Service.IssueTrainingOrder:output_type -> server.v1.IssueTrainingOrderResponse
+	25, // 51: server.v1.Service.CancelTrainingOrder:output_type -> server.v1.CancelTrainingOrderResponse
+	44, // [44:52] is the sub-list for method output_type
+	36, // [36:44] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_server_v1_server_proto_init() }
@@ -1913,7 +1971,7 @@ func file_server_v1_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_v1_server_proto_rawDesc), len(file_server_v1_server_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   41,
+			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

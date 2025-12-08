@@ -5,6 +5,7 @@ import serverv1 "war-of-faith/pkg/protobuf/server/v1"
 func NewWorld(patchChan chan *serverv1.SubscribeToWorldResponse_Patch) *World {
 	world := &World{
 		World: &serverv1.World{
+			Tick:   0,
 			Width:  10,
 			Height: 10,
 			Buildings: map[string]*serverv1.Building{
