@@ -3,6 +3,7 @@ import { ok, err } from "neverthrow"
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { Mutator } from './mutator'
 import { add, fieldCanAfford, sub } from "./helpers"
+import { newVillage_BuildingUpgradeOrder } from "./config"
 
 export namespace IssueBuildingUpgradeOrder {
   export enum ErrorType {
@@ -49,7 +50,7 @@ export namespace IssueBuildingUpgradeOrder {
     const cost = building.cost[req.level-1]
     if (!fieldCanAfford(field, building.cost[req.level-1])) return err(new Err(ErrorType.NOT_ENOUGH_GOLD))
 
-    const order = { level: req.level, buildingId: req.buildingId, timeLeft: cost.time } as serverV1.Village_BuildingUpgradeOrder
+    const order = newVillage_BuildingUpgradeOrder({ level: req.level, buildingId: req.buildingId, timeLeft: cost.time })
     world = mut.setVillageBuildingUpgradeOrders(req.coords, orders => [...orders, order].sort((a, b) => a.timeLeft - b.timeLeft))
     world = mut.setFieldResources(req.coords, r => sub(r!, cost))
 

@@ -3,6 +3,10 @@ function newLogger(enabled: boolean, category: string) {
   return (...args: any[]) => console.debug(`[${category}]`, ...args)
 }
 
+export function assert(condition: boolean, message: string) {
+  if (!condition) throw new Error(`Assertion failed: ${message}`)
+}
+
 const COMBAT_LOGGER_ENABLED = true
 export const combatLogger = newLogger(COMBAT_LOGGER_ENABLED, "COMBAT")
 

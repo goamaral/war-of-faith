@@ -3,7 +3,7 @@ import { ok, err } from "neverthrow"
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { Mutator } from "./mutator"
 import { add, div, fieldCanAfford, mulN, playerVillageFields, sub } from "./helpers"
-import { LEADER, TROOP_IDS } from "./config"
+import { LEADER, newResources, newVillage_TrainingOrder, TROOP_IDS } from "./config"
 
 export namespace IssueTrainingOrder {
   export enum ErrorType {
@@ -64,15 +64,15 @@ export namespace IssueTrainingOrder {
     const field = world.fields[req.coords]
     if (field == undefined) return err(new Err(ErrorType.FIELD_NOT_FOUND))
     if (field.playerId != playerId) return err(new Err(ErrorType.INVALID_PLAYER))
-      
+
     const troop = world.troops[req.troopId]
-    const cost = mulN(troop.cost!, req.quantity) as serverV1.Resources
+    const cost = newResources(mulN(troop.cost!, req.quantity))
     if (!fieldCanAfford(field, cost)) return err(new Err(ErrorType.NOT_ENOUGH_GOLD))
 
     const maxQuantity = trainableTroops(world, playerId, req.coords, { [req.troopId]: req.quantity })[req.troopId]
     if (req.quantity > maxQuantity) return err(new Err(ErrorType.INVALID_QUANTITY))
 
-    const order = { id: req.orderId, quantity: req.quantity, troopId: req.troopId, timeLeft: cost.time } as serverV1.Village_TrainingOrder
+    const order = newVillage_TrainingOrder({ id: req.orderId, quantity: req.quantity, troopId: req.troopId, timeLeft: cost.time })
     world = mut.setVillageTrainingOrders(req.coords, orders => [...orders, order])
     world = mut.setFieldResources(req.coords, r => sub(r!, cost))
 

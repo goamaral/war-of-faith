@@ -10,7 +10,7 @@ import { serverCli } from './api'
 import { transition } from "./state/transition"
 import { encodeCoords } from "./state/helpers"
 import { newWildField, newWorldHistory } from "./state/config"
-import { storeLogger } from "./logger"
+import { assert, storeLogger } from "./logger"
 
 const STATE_TRUNCATION_SIZE = 60
 const STATE_LOCAL_STORAGE_KB_SIZE_LIMIT = 1024 // 1MB
@@ -21,7 +21,7 @@ type State = serverV1.World
 let states = [] as State[]
 let _statesLocked = false
 function mutStates(fn: () => void) {
-  console.assert(!_statesLocked)
+  assert(!_statesLocked, "States lock is free")
   _statesLocked = true
 
   try {
@@ -57,10 +57,10 @@ window.resetState = function() {
   location.reload()
 }
 window.rollbackState = function(tick: number) {
-  if (tick <= 1) return
+  assert(tick >= states[0].tick, `Rollback tick gte min (${states[0].tick})`)
+  assert(tick <= states[states.length-1].tick, `Rollback tick lte max (${states[states.length-1].tick})`)
   
   mutStates(() => {
-    console.assert(tick < states[0].tick, `Can only rollback up to ${STATE_TRUNCATION_SIZE} ticks`)
     states = states.slice(0, tick)
     setStore("world", deepClone(states[tick-1]))
     asyncSaveState()
@@ -76,7 +76,7 @@ export function asyncSaveState() {
         storeLogger(`localStorage size: ${localStorageKBSize}KB tick: ${states[states.length-1].tick}`)
 
         if (localStorageKBSize > STATE_LOCAL_STORAGE_KB_SIZE_LIMIT) {
-          console.assert(states.length < STATE_TRUNCATION_SIZE, "Truncated states too big to fit localStorage restrictions")
+          assert(states.length < STATE_TRUNCATION_SIZE, "Truncated states fit localStorage restrictions")
 
           states = states.slice(states.length - STATE_TRUNCATION_SIZE)
           storeLogger(`Truncated states ticks: (first: ${states[0].tick}, last: ${states[states.length-1].tick})`)
@@ -176,6 +176,7 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
           return
         }
 
+        let ended = false
         mutStates(() => {
           while (stateLag > 0) {
             const ended = batch(() => transition(store.world, mutator))
@@ -183,12 +184,11 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
             stateLag--
           }
 
-          const ended = batch(() => transition(store.world, mutator))
-          if (ended) return end()
-
+          ended = batch(() => transition(store.world, mutator))
           states.push(deepClone(store.world))
         })
 
+        if (ended) return end()
         asyncSaveState()
       }, 1000)
       document.addEventListener('keydown', handleKeyDown)

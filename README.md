@@ -24,6 +24,7 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
+- Not assigning new villages to key bindings
 - Village - Transfer resources from other villages
 - Villages - Change village order
 - Add stats to troops (defense, attack, capacity)

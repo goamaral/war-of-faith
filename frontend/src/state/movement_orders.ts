@@ -5,7 +5,7 @@ import { ok, err } from "neverthrow"
 import { movementLogger } from "../logger"
 import { Mutator } from "./mutator"
 import { calcDist, countTroops, sub } from "./helpers"
-import { CARRIABLE_GOLD_PER_UNIT, newResources } from './config'
+import { CARRIABLE_GOLD_PER_UNIT, newMovementOrder, newResources } from './config'
 
 export namespace IssueMovementOrder {
   export enum ErrorType {
@@ -53,7 +53,7 @@ export namespace IssueMovementOrder {
     if (req.gold < 0) return err(new Err(ErrorType.INVALID_GOLD))
     if (req.gold > maxGold(world, req.sourceCoords)) return err(new Err(ErrorType.INVALID_GOLD))
 
-    const order = {
+    const order = newMovementOrder({
       id: req.orderId,
       sourceCoords: req.sourceCoords,
       targetCoords: req.targetCoords,
@@ -61,7 +61,7 @@ export namespace IssueMovementOrder {
       resources: newResources({ gold: req.gold }),
       timeLeft: calcDist(req.sourceCoords, req.targetCoords),
       playerId,
-    } as serverV1.MovementOrder
+    })
 
     world = mut.setFieldTroops(req.sourceCoords, troops => sub(troops, req.troops))
     world = mut.setFieldResources(req.sourceCoords, r => sub(r, order.resources!))

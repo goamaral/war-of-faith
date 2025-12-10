@@ -171,7 +171,7 @@ export function transition(world: serverV1.World, mut: Mutator) {
 
           } else {
             // Pillage
-            const pillage = { gold: Math.min(targetField.resources!.gold, troopsLeft * CARRIABLE_GOLD_PER_UNIT) } as serverV1.Resources
+            const pillage = newResources({ gold: Math.min(targetField.resources!.gold, troopsLeft * CARRIABLE_GOLD_PER_UNIT) })
             world = mut.setFieldResources(targetCoords, r => sub(r!, pillage))
             newMovementOrders.push({
               ...order,

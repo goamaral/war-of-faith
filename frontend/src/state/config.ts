@@ -37,7 +37,7 @@ export function newVillage(v: Partial<serverV1.Village> = {}) {
   return {
     $typeName: "server.v1.Village",
     buildingUpgradeOrders: [],
-    troopTrainingOrders: [],
+    trainingOrders: [],
     ...v,
   } as serverV1.Village
 }
@@ -77,4 +77,25 @@ export function newFieldTroops(v: Partial<Record<string, number>> = {}) {
     troops[troopId] = v[troopId] || 0
   }
   return troops
+}
+
+export function newMovementOrder(v: Partial<serverV1.MovementOrder> = {}) {
+  return {
+    $typeName: "server.v1.MovementOrder",
+    ...v,
+  } as serverV1.MovementOrder
+}
+
+export function newVillage_TrainingOrder(v: Partial<serverV1.Village_TrainingOrder> = {}) {
+  return {
+    $typeName: "server.v1.Village.TrainingOrder",
+    ...v,
+  } as serverV1.Village_TrainingOrder
+}
+
+export function newVillage_BuildingUpgradeOrder(v: Partial<serverV1.Village_BuildingUpgradeOrder> = {}) {
+  return {
+    $typeName: "server.v1.Village.BuildingUpgradeOrder",
+    ...v,
+  } as serverV1.Village_BuildingUpgradeOrder
 }
