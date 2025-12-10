@@ -36,7 +36,7 @@ function checkWinCondition(world: serverV1.World) {
   return false
 }
 
-export function tick(world: serverV1.World, mut: Mutator) {
+export function transition(world: serverV1.World, mut: Mutator) {
   /* Temples */
   Object.keys(world.temples).forEach(coords => world = mut.setTemple(coords, t => ({ ...t, ownershipAgeSecs: t.ownershipAgeSecs + 1 })))
 

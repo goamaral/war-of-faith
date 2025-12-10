@@ -11,3 +11,6 @@ export const movementLogger = newLogger(MOVEMENT_LOGGER_ENABLED, "MOVEMENT")
 
 const ENDING_LOGGER_ENABLED = true
 export const endingLogger = newLogger(ENDING_LOGGER_ENABLED, "ENDING")
+
+const STORE_LOGGER_ENABLED = true
+export const storeLogger = newLogger(STORE_LOGGER_ENABLED, "STORE")

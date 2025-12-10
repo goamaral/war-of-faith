@@ -7,11 +7,13 @@ import { toBinary, fromBinary } from "@bufbuild/protobuf"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import type { Mutator } from "./state/mutator"
 import { serverCli } from './api'
-import { tick } from "./state/tick"
+import { transition } from "./state/transition"
 import { encodeCoords } from "./state/helpers"
 import { newWildField, newWorldHistory } from "./state/config"
+import { storeLogger } from "./logger"
 
 const STATE_TRUNCATION_SIZE = 60
+const STATE_LOCAL_STORAGE_KB_SIZE_LIMIT = 1024 // 1MB
 
 let paused = false
 
@@ -54,16 +56,12 @@ window.resetState = function() {
   localStorage.clear()
   location.reload()
 }
-window.rollbackState = async function(tick: number) {
+window.rollbackState = function(tick: number) {
   if (tick <= 1) return
-
+  
   mutStates(() => {
-    if (tick < states[0].tick) {
-      alert("TODO: decompress states")
-    } else {
-      states = states.slice(0, tick)
-    }
-    
+    console.assert(tick < states[0].tick, `Can only rollback up to ${STATE_TRUNCATION_SIZE} ticks`)
+    states = states.slice(0, tick)
     setStore("world", deepClone(states[tick-1]))
     asyncSaveState()
   })
@@ -74,18 +72,18 @@ export function asyncSaveState() {
   setTimeout(() => {
     try {
       mutStates(() => {
-        const localStorageSize = KBSizeOf(Object.values(localStorage))
-        console.log(`localStorage size: ${localStorageSize}KB tick: ${states[states.length-1].tick}`)
+        const localStorageKBSize = KBSizeOf(Object.values(localStorage))
+        storeLogger(`localStorage size: ${localStorageKBSize}KB tick: ${states[states.length-1].tick}`)
 
-        if (localStorageSize > 1024) { // 1MB
-          if (states.length < STATE_TRUNCATION_SIZE) return alert("TODO: State truncation is not enough")
+        if (localStorageKBSize > STATE_LOCAL_STORAGE_KB_SIZE_LIMIT) {
+          console.assert(states.length < STATE_TRUNCATION_SIZE, "Truncated states too big to fit localStorage restrictions")
 
           states = states.slice(states.length - STATE_TRUNCATION_SIZE)
-          console.log(`Truncated states ticks: (first: ${states[0].tick}, last: ${states[states.length-1].tick})`)
+          storeLogger(`Truncated states ticks: (first: ${states[0].tick}, last: ${states[states.length-1].tick})`)
         }
 
         const bytes = toBinary(serverV1.WorldHistorySchema, newWorldHistory({ worlds: states }))
-        let bytesString = '';
+        let bytesString = ''
         for (let i = 0; i < bytes.length; i++) {
           bytesString += String.fromCharCode(bytes[i]);
         }
@@ -93,7 +91,6 @@ export function asyncSaveState() {
       })
     } catch (error) {
       console.error(error)
-      alert(error)
     }
   }, 0)
 
@@ -181,12 +178,12 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
 
         mutStates(() => {
           while (stateLag > 0) {
-            const ended = batch(() => tick(store.world, mutator))
+            const ended = batch(() => transition(store.world, mutator))
             if (ended) return end()
             stateLag--
           }
 
-          const ended = batch(() => tick(store.world, mutator))
+          const ended = batch(() => transition(store.world, mutator))
           if (ended) return end()
 
           states.push(deepClone(store.world))
