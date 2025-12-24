@@ -11,8 +11,9 @@ import { transition } from "./state/transition"
 import { encodeCoords } from "./state/helpers"
 import { newWildField, newWorldHistory } from "./state/config"
 import { assert, storeLogger } from "./logger"
+import { External } from "./state/external"
 
-const STATE_TRUNCATION_SIZE = 60
+const STATE_TRUNCATION_SIZE = 90 // 3 min
 const STATE_LOCAL_STORAGE_KB_SIZE_LIMIT = 1024 // 1MB
 
 let paused = false
@@ -38,7 +39,6 @@ export const [store, setStore] = createStore({
   playerId: "",
   world: {} as serverV1.World,
 })
-
 
 function deepClone(obj: any) {
   return JSON.parse(JSON.stringify(obj))
@@ -73,10 +73,10 @@ export function asyncSaveState() {
     try {
       mutStates(() => {
         const localStorageKBSize = KBSizeOf(Object.values(localStorage))
-        storeLogger(`localStorage size: ${localStorageKBSize}KB tick: ${states[states.length-1].tick}`)
+        storeLogger(`localStorage size: ${localStorageKBSize}KB tick: ${states[states.length-1].tick} count: ${states.length}`)
 
         if (localStorageKBSize > STATE_LOCAL_STORAGE_KB_SIZE_LIMIT) {
-          assert(states.length < STATE_TRUNCATION_SIZE, "Truncated states fit localStorage restrictions")
+          assert(states.length > STATE_TRUNCATION_SIZE, "Truncated states fit localStorage restrictions")
 
           states = states.slice(states.length - STATE_TRUNCATION_SIZE)
           storeLogger(`Truncated states ticks: (first: ${states[0].tick}, last: ${states[states.length-1].tick})`)
@@ -179,12 +179,12 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
         let ended = false
         mutStates(() => {
           while (stateLag > 0) {
-            const ended = batch(() => transition(store.world, mutator))
+            const ended = batch(() => transition(store.world, mutator, stateExt))
             if (ended) return end()
             stateLag--
           }
 
-          ended = batch(() => transition(store.world, mutator))
+          ended = batch(() => transition(store.world, mutator, stateExt))
           states.push(deepClone(store.world))
         })
 
@@ -224,11 +224,15 @@ export const mutator: Mutator = {
   setFieldResources: (coords, set) => { setStore("world", "fields", coords, "resources", r => set(r!)); return store.world },
   setFieldBuidingLevels: (coords, set) => { setStore("world", "fields", coords, "buildingLevels", set); return store.world },
 
-  setPlayerVillageKeyBindings: (coords, set) => { setStore("world", "players", coords, "villageKeyBindings", set); return store.world },
+  setPlayerVillageKeyBindings: (playerId, set) => { setStore("world", "players", playerId, "villageKeyBindings", set); return store.world },
 
   setVillage: (coords, set) => { setStore("world", "villages", coords, set); return store.world },
   setVillageBuildingUpgradeOrders: (coords, set) => { setStore("world", "villages", coords, "buildingUpgradeOrders", set); return store.world },
   setVillageTrainingOrders: (coords, set) => { setStore("world", "villages", coords, "trainingOrders", set); return store.world },
 
   setTemple: (coords, set) => { setStore("world", "temples", coords, set); return store.world },
+}
+
+const stateExt: External = {
+  deepClone,
 }

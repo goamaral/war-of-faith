@@ -11,7 +11,7 @@ export interface Mutator {
   setFieldResources: (coords: string, set: Setter<serverV1.Resources>) => serverV1.World
   setFieldBuidingLevels: (coords: string, set: Setter<Record<string, number>>) => serverV1.World
 
-  setPlayerVillageKeyBindings: (coords: string, set: Setter<string[]>) => serverV1.World
+  setPlayerVillageKeyBindings: (playerId: string, set: Setter<string[]>) => serverV1.World
 
   setVillage: (coords: string, set: Setter<serverV1.Village>) => serverV1.World
   setVillageBuildingUpgradeOrders: (coords: string, set: Setter<serverV1.Village_BuildingUpgradeOrder[]>) => serverV1.World

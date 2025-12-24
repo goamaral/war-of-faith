@@ -2,6 +2,7 @@ import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 
 import { combatLogger, endingLogger } from '../logger'
 import { CARRIABLE_GOLD_PER_UNIT, GOLD_MINE, LEADER, newFieldTroops, newResources, newVillage, RAIDER, WIN_CONDITION_OWNERSHIP_AGE_SECS } from './config'
+import { External } from './external'
 import { add, calcDist, countTroops, sub } from './helpers'
 import { Mutator } from "./mutator"
 
@@ -17,7 +18,7 @@ function checkWinCondition(world: serverV1.World) {
   endingLogger(`Player ${winner} controls all temples`)
 
   let timeLeft = 0
-  for (const [coords, temple] of Object.entries(world.temples)) {
+  for (const [_coords, temple] of Object.entries(world.temples)) {
     if (temple.ownershipAgeSecs < WIN_CONDITION_OWNERSHIP_AGE_SECS) {
       timeLeft = Math.max(timeLeft, WIN_CONDITION_OWNERSHIP_AGE_SECS - temple.ownershipAgeSecs)
     }
@@ -36,7 +37,7 @@ function checkWinCondition(world: serverV1.World) {
   return false
 }
 
-export function transition(world: serverV1.World, mut: Mutator) {
+export function transition(world: serverV1.World, mut: Mutator, ext: External) {
   /* Temples */
   Object.keys(world.temples).forEach(coords => world = mut.setTemple(coords, t => ({ ...t, ownershipAgeSecs: t.ownershipAgeSecs + 1 })))
 
@@ -94,7 +95,7 @@ export function transition(world: serverV1.World, mut: Mutator) {
     const targetCoords = order.comeback ? order.sourceCoords : order.targetCoords
     const timeLeft = order.timeLeft - 1
     if (timeLeft == 0) {
-      const targetField = world.fields[targetCoords]
+      const targetField = ext.deepClone(world.fields[targetCoords])
       if (targetField.playerId != order.playerId) {
         // Combat
         const attackerTroops = newFieldTroops(order.troops)

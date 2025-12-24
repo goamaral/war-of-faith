@@ -29,7 +29,7 @@ export namespace IssueMovementOrder {
     return world.fields[coords].troops[troopId] || 0
   }
 
-  export function maxGold(world: serverV1.World, coords: string, troopQuantity: Record<string, number> = {}) {
+  export function maxGold(world: serverV1.World, coords: string, troopQuantity: Record<string, number>) {
     return Math.min(world.fields[coords].resources!.gold, countTroops(troopQuantity) * CARRIABLE_GOLD_PER_UNIT)
   }
 
@@ -51,7 +51,7 @@ export namespace IssueMovementOrder {
     }
 
     if (req.gold < 0) return err(new Err(ErrorType.INVALID_GOLD))
-    if (req.gold > maxGold(world, req.sourceCoords)) return err(new Err(ErrorType.INVALID_GOLD))
+    if (req.gold > maxGold(world, req.sourceCoords, req.troops)) return err(new Err(ErrorType.INVALID_GOLD))
 
     const order = newMovementOrder({
       id: req.orderId,
