@@ -17,6 +17,7 @@ const STATE_TRUNCATION_SIZE = 90 // 3 min
 const STATE_LOCAL_STORAGE_KB_SIZE_LIMIT = 1024 // 1MB
 
 let paused = false
+export function togglePaused() { paused = !paused }
 
 type State = serverV1.World
 let states = [] as State[]
@@ -133,20 +134,6 @@ function KBSizeOf(blobParts: BlobPart[]) {
 }
 
 export function StoreLoader({ children }: { children: () => JSX.Element }) {
-  const navigate = useNavigate()
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (document.activeElement?.tagName === 'INPUT') return
-    if (e.key === 'p') { paused = true; return }
-    if (e.key === 'w') return navigate('/world')
-    if (e.key === 'v') return navigate('/villages')
-    const villageNumber = Number.parseInt(e.key)
-    if (Number.isInteger(villageNumber)) {
-      const villageIndex = (villageNumber == 0 ? 10 : villageNumber)-1
-      const villageCoords = store.world.players[store.playerId].villageKeyBindings[villageIndex]
-      if (villageCoords) return navigate(`/world/${villageCoords}`)
-    }
-  }
-
   onMount(() => {
     let intervalId = undefined as undefined | number
     async function setup() {
@@ -191,12 +178,10 @@ export function StoreLoader({ children }: { children: () => JSX.Element }) {
         if (ended) return end()
         asyncSaveState()
       }, 1000)
-      document.addEventListener('keydown', handleKeyDown)
     }
     setup()
 
     onCleanup(() => clearInterval(intervalId))
-    onCleanup(() => document.removeEventListener('keydown', handleKeyDown))
   })
 
   return <Show when={store.loaded} fallback={<p>Loading...</p>} keyed>

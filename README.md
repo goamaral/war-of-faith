@@ -24,12 +24,16 @@ Players compete to conquer the 4 mighty temples.
 - Leader timeout - If a village is left without a leader enough time, troops/milicia will rebel
 
 ## TODO
-- Villages - Change village order (show key bindings at the top of every page)
-- AI
 - Create fake server on client side with initial state (makes game deployable)
+- World - Focus field select on field select
+- Village - Unfocus troop input on submit
+- World - Highlight most recently used village
+- World - Change higlighted village with arrow keys
+- AI
 - Reveal fog fields on movement
 - Add stats to troops (defense, attack, capacity)
 - Building effects
 - Temple effect
+- Change key bindings
 - Server simulation
 - Player 2

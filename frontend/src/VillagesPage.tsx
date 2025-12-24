@@ -1,12 +1,13 @@
 import { For } from 'solid-js'
 import { A } from "@solidjs/router"
 
-import { store, StoreLoader } from './store'
+import { store } from './store'
 import { playerVillageFields } from './state/helpers'
+import GamePageWrapper from './GamePageWrapper'
 
 export default function VillagesPage() {
-  return <StoreLoader>
-    {() =>
+  return <GamePageWrapper>
+    {() => (
       <div>
         <h1>Villages</h1>
         <ul>
@@ -15,6 +16,6 @@ export default function VillagesPage() {
           </For>
         </ul>
       </div>
-    }
-  </StoreLoader>
+    )}
+  </GamePageWrapper>
 }

@@ -9,21 +9,22 @@ import { useNavigate, A } from "@solidjs/router"
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import { cancelMovementOrder, issueMovementOrder } from "./actions/movement_orders"
 import { IssueMovementOrder } from "./state/movement_orders"
-import { StoreLoader, store } from './store'
+import { store } from './store'
 import { countTroops, decodeCoords, playerFields } from "./state/helpers"
 import { LEADER, newFieldTroops, RAIDER, World_Field_KindToString } from "./state/config"
+import GamePageWrapper from './GamePageWrapper'
 
 
 export default function WorldPage() {
-  return <StoreLoader>
-    {() =>
+  return <GamePageWrapper>
+    {() => (
       <div>
         <h1>World Map</h1>
         <World />
         <Movements />
       </div>
-    }
-  </StoreLoader>
+    )}
+  </GamePageWrapper>
 }
 
 function World() {

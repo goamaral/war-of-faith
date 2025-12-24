@@ -1,15 +1,16 @@
 import { Accessor, For, Match, Switch, Show, onMount, onCleanup, createMemo } from "solid-js"
-import { store, StoreLoader } from "./store"
+import { store } from "./store"
 import { useParams } from "@solidjs/router"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
 import Village from "./world_field_page/Village"
 import { World_Field_KindToString } from "./state/config"
+import GamePageWrapper from './GamePageWrapper'
 
 export default function WorldFieldPage() {
   const params = useParams() as { coords: string }
 
-  return <StoreLoader>
+  return <GamePageWrapper>
     {() => {
       const field = () => store.world.fields[params.coords]!
 
@@ -27,7 +28,7 @@ export default function WorldFieldPage() {
         </Switch>
       </div>
     }}
-  </StoreLoader>
+  </GamePageWrapper>
 }
 
 function Temple({ field }: { field: Accessor<serverV1.World_Field> }) {
