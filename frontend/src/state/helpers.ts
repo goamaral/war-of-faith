@@ -7,6 +7,10 @@ export function playerVillageFields( world: serverV1.World, playerId: string, fi
   return playerFields(world, playerId, filter).filter(f => f.kind == serverV1.World_Field_Kind.VILLAGE)
 }
 
+export function playerMovementOrders( world: serverV1.World, playerId: string) {
+  return world.movementOrders.filter(f => f.playerId == playerId)
+}
+
 export function fieldCanAfford(field: serverV1.World_Field, cost: serverV1.Resources) {
   return cost.gold <= field.resources!.gold
 }

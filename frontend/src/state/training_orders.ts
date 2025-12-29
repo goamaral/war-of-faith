@@ -2,7 +2,7 @@ import { ok, err } from "neverthrow"
 
 import * as serverV1 from '../../lib/protobuf/server/v1/server_pb'
 import { Mutator } from "./mutator"
-import { add, div, fieldCanAfford, mulN, playerVillageFields, sub } from "./helpers"
+import { add, div, fieldCanAfford, mulN, playerMovementOrders, playerVillageFields, sub } from "./helpers"
 import { LEADER, newResources, newVillage_TrainingOrder, TROOP_IDS } from "./config"
 
 export namespace IssueTrainingOrder {
@@ -33,7 +33,9 @@ export namespace IssueTrainingOrder {
       .flat()
       .filter(o => o.troopId == LEADER)
       .reduce((acc, o) => acc + o.quantity, 0)
-    return maxLeaders - leaders - leadersInTraining
+    const leadersTravelling = playerMovementOrders(world, playerId)
+      .reduce((acc, o) => acc + o.troops[LEADER], 0)
+    return maxLeaders - leaders - leadersInTraining - leadersTravelling
   }
 
   export function trainableTroops(world: serverV1.World, playerId: string, villageCoords: string, troopQuantityPlan: Record<string, number>) {

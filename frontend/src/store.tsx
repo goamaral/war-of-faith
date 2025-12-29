@@ -1,7 +1,6 @@
 import type { JSX } from "solid-js"
 import { createStore } from "solid-js/store"
 import { batch, onCleanup, onMount, Show } from "solid-js"
-import { useNavigate } from "@solidjs/router"
 import { toBinary, fromBinary } from "@bufbuild/protobuf"
 
 import * as serverV1 from '../lib/protobuf/server/v1/server_pb'
@@ -55,7 +54,7 @@ declare global {
 window.getStates = () => states
 window.resetState = function() {
   localStorage.clear()
-  location.reload()
+  location.replace("/world")
 }
 window.rollbackState = function(tick: number) {
   assert(tick >= states[0].tick, `Rollback tick gte min (${states[0].tick})`)

@@ -1,3 +1,7 @@
 *.sqlite3*
 dev/tmp/
 secrets/
+
+node_modules/
+
+*.env
